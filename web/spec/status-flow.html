@@ -1,0 +1,166 @@
+<!doctype html><html lang=zh-CN><head><meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1">
+<title>VisaOps · 状态流转与验收清单</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#F2F4F7;color:#0F172A;font:14px/1.7 -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",system-ui,sans-serif}
+.top{background:#fff;border-bottom:1px solid #E5E7EB;position:sticky;top:0;z-index:20}
+.in{width:1200px;max-width:calc(100% - 32px);margin:0 auto}
+.top .in{display:flex;align-items:center;gap:18px;height:60px}
+.top b{font-size:16px}.top s{text-decoration:none;color:#94A3B8;font-size:12.5px}
+.top nav{margin-left:auto;display:flex;gap:4px}
+.top nav a{font-size:13px;color:#475569;text-decoration:none;padding:6px 12px;border-radius:7px}
+.top nav a:hover{background:#F1F5F9;color:#0F172A}
+h1{font-size:28px;margin:34px 0 10px;letter-spacing:-.6px}
+.lead{color:#475569;margin:0 0 6px;max-width:940px}
+section{margin:46px 0}
+h2{font-size:19px;margin:0 0 8px;padding-bottom:10px;border-bottom:2px solid #0F172A;display:inline-block}
+h3{font-size:15px;margin:26px 0 10px}
+table{width:100%;border-collapse:collapse;background:#fff;border:1px solid #E5E7EB;border-radius:10px;overflow:hidden;font-size:13px;margin:10px 0}
+th{background:#F8FAFC;text-align:left;padding:10px 12px;font-weight:600;color:#334155;border-bottom:1px solid #E5E7EB;white-space:nowrap}
+td{padding:9px 12px;border-bottom:1px solid #F1F5F9;vertical-align:top}
+tr:last-child td{border-bottom:0}
+td.k{font-weight:600;white-space:nowrap}
+code{background:#F1F5F9;border-radius:4px;padding:1px 6px;font-size:12px;font-family:ui-monospace,Menlo,monospace}
+.n{color:#CBD5E1}
+.note{background:#fff;border:1px solid #E5E7EB;border-left:3px solid #EA580C;border-radius:0 10px 10px 0;padding:13px 16px;margin:14px 0;font-size:13.5px;color:#334155}
+.note b{color:#C2410C}
+.flow{background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:20px;margin:16px 0;overflow-x:auto}
+.lane{display:flex;align-items:center;gap:0;margin:0 0 8px;min-width:1050px}
+.lane .nm{width:120px;flex:none;font-size:12px;font-weight:700;color:#64748B;letter-spacing:.5px}
+.st{flex:1;text-align:center;padding:9px 4px;border-radius:8px;font-size:12px;font-weight:600;
+  background:#F1F5F9;color:#475569;margin-right:26px;position:relative}
+.st:last-child{margin-right:0}
+.st::after{content:"→";position:absolute;right:-19px;top:50%;transform:translateY(-50%);color:#CBD5E1;font-weight:400}
+.st:last-child::after{display:none}
+.st.on{background:#0F172A;color:#fff}
+.st.g{background:#FEF3C7;color:#92400E}
+.st.b{background:#DCFCE7;color:#166534}
+.gate{margin:14px 0 6px;padding:11px 14px;background:#FFF7ED;border:1px dashed #FDBA74;border-radius:9px;font-size:13px;color:#9A3412}
+.gate b{color:#C2410C}
+footer{margin:60px 0 40px;padding-top:20px;border-top:1px solid #E2E8F0;font-size:12.5px;color:#94A3B8}
+</style></head><body>
+<div class=top><div class=in><b>VisaOps</b><s>状态流转与验收清单</s>
+<nav><a href="#flow">流转规则</a><a href="#acc">验收清单</a><a href="orders-fields.html">← 字段规格</a></nav>
+</div></div>
+<div class=in>
+<h1>状态流转与验收清单</h1>
+<div class="card" style="border-color:#FBD5D2;background:#FFFCFC">
+<h3>四端全量自查（2026-08-31）</h3>
+<div class="pad">
+<p>唐美芳：「ubk/uom/csp/悠哉小程序整体都要检查」。逐端扫了页签、列表、详情、首页统计与文案常量，
+共找到 <b>7 处</b>把三条线混在一起的地方，全部已改：</p>
+<table class="tb"><thead><tr><th>#</th><th>位置</th><th>原来的问题</th><th>改成</th></tr></thead><tbody>
+<tr><td>1</td><td>CSP 订单页签</td><td>待支付 / <b>待财务放行</b> / <b>待收材料</b> / <b>办理中</b> / <b>已出签待返还</b> / 已完成 / 退款取消——8 格混了三条线</td><td>只放订单状态 5 个值；办签进度与资金闸门改成可叠加的筛选项</td></tr>
+<tr><td>2</td><td>UBK 订单页签</td><td>待收材料 / 办理中 / 已递交待出结果 / 已出结果 与订单状态并排</td><td>同上</td></tr>
+<tr><td>3</td><td>UOM 订单页签</td><td>混入「待放行」「办理中」，且「退款/取消」两状态并成一格，连 5 个都数不齐</td><td>同上，5 个状态各占一格</td></tr>
+<tr><td>4</td><td>C 端订单页签</td><td>第三格写「办理中」但判的是 <code>status==='paid'</code></td><td>改叫「已付款」；办理状态改挂在订单卡右上</td></tr>
+<tr><td>5</td><td>列表「办签」格</td><td><code>olProg()</code> 把办签人的 state 当进度显示，格子里出现<b>「已退款」</b>——那是订单状态线上的词</td><td>退出的人显示「已退出」；未付款/已取消的单整格给「—」</td></tr>
+<tr><td>6</td><td>CSP 首页统计</td><td>「办理中订单」实际算的是 <code>status==='paid'</code></td><td>拆成「已付款订单」与「办签办理中」两个格子</td></tr>
+<tr><td>7</td><td>CRM 签证结果列</td><td>没出结果时显示「办理中」，把办理状态塞进了结果列</td><td>改成「未出结果」</td></tr>
+</tbody></table>
+<p style="margin-top:10px">另修一处不一致：C 端把 <code>created</code> 叫<b>「待支付」</b>，其余四端叫<b>「待付款」</b>——
+同一个状态两个名字，销售在 CSP 说「待付款」、客人在小程序看到「待支付」，对账时会当成两回事。已统一为<b>待付款</b>。</p>
+<p>验收方法：任意一端的订单列表，页签只应出现<b>全部 / 待付款 / 已付款 / 已完成 / 已退款 / 已取消</b>；
+「办理状态」「办签进度」只出现在筛选项与列表行内，不出现在页签上。</p>
+</div></div>
+
+<p class=lead><b>2026-08-31 再改</b>：三条线在<b>页面上</b>也彻底分开了。唐美芳：「订单管理的状态流转还是有问题，之前不是说就5个么，你怎么还是把订单状态与签证办理状态混在一起了」。
+四端（UOM / CSP / UBK / C 端）的订单列表<b>页签一律只放订单状态那 5 个值</b>；
+原来混在页签里的「待财务放行」「待收材料」「办理中」「已出签待返还」全部降级成<b>可叠加的筛选项</b>——
+它们与订单状态并不互斥，一张「已付款」的单同时就是「待收材料」，做成并排页签会让每个页签都查不全。
+列表里「办签」那一格也只放办签进度：退出的人显示「已退出」而不是「已退款」，
+未付款与已取消的订单整格给「—」（还没进入办签流程）。</p>
+<p class=lead><b>2026-08-31 改</b>：订单状态去掉了「办理中」（唐美芳：「订单状态里很少有办理中这种中间态的」），
+回到 5 个值只管钱；「办理中」改成由办签人进度<b>派生</b>的办理状态，不落库不用人维护；
+资金闸门降级成<b>风险提示标签</b>（只在待放行时出现，带问号说明），不再当状态线展示。<br><br>
+各状态线互不替代，靠三个<b>闸门</b>联动。下方每个状态都配了真实 demo 数据的订单号 / 单据号，可以直接照着点进系统验收。</p>
+
+<section id=flow>
+<h2>一、三条主线怎么联动</h2>
+
+<div class=flow>
+<div class=lane><div class=nm>① 订单状态</div>
+<div class="st on">待付款</div><div class="st on">已付款</div><div class="st on">已付款</div><div class="st b">已完成</div></div>
+<div class=lane><div class=nm>② 办理状态<br><em style="font-style:normal;font-size:10px;color:#94A3B8">派生，不落库</em></div>
+<div class="st">未开始</div><div class="st">未开始</div><div class="st on">办理中</div><div class="st b">已完成</div></div>
+<div class=lane><div class=nm>③ 办签进度</div>
+<div class="st">锁定 P1</div><div class="st">锁定 P1</div><div class="st on">P1 → P9 推进</div><div class="st b">全员 P10</div></div>
+<div class=lane><div class=nm>⚠ 风险提示</div>
+<div class="st">—</div><div class="st g">待放行 ?</div><div class="st">—</div><div class="st">—</div></div>
+</div>
+
+<div class=gate><b>闸门 1 · 付款</b>：客户或门店付款 → 自动生成收款单 <code>SK/S…</code>，订单进「已付款」。<b>此时办签进度仍锁在 P1</b>，专员看不到这张单。</div>
+<div class=gate><b>闸门 2 · 财务放行</b>（唯一的关键闸门）：财务审核收款单并确认放行 → <code>gate=1</code> → 系统立即生成签证工单、按套餐时效设 SLA、对供应商挂应付。订单状态<b>仍是「已付款」</b>，办理状态转「办理中」，办签进度这才允许从 P1 往下走。<b>放行不可撤销。</b></div>
+<div class=gate><b>闸门 3 · 全员交付</b>：订单下<b>所有</b>办签人都走到 P10「已交付客户」→ 订单才转「已完成」。只要有一人没到，<b>订单停在「已付款」</b>，办理状态显示「办理中」。<i>（原文这里写的是「订单停在办理中」——「办理中」不是订单状态，2026-08-31 改。）</i></div>
+
+<h3>办签进度十步（每个办签人独立走，同一订单可以各在各的节点）</h3>
+<div class=flow><div class=lane style="min-width:1150px"><div class=nm>P1 → P10</div>
+<div class=st>P1 待收材料</div><div class=st>P2 材料审核中</div><div class=st>P3 材料齐备</div><div class=st>P4 表单填写</div><div class=st>P5 待预约</div>
+</div><div class=lane style="min-width:1150px"><div class=nm></div>
+<div class=st>P6 已预约</div><div class=st>P7 已递交/面签</div><div class=st>P8 行政审查</div><div class=st>P9 已出结果</div><div class="st b">P10 已交付</div>
+</div></div>
+
+<h3>分支：拒签与退款</h3>
+<table>
+<tr><th style="width:180px">场景</th><th>流转</th></tr>
+<tr><td class=k>拒签（P9 出结果为拒签）</td><td>办签人 <code>state=refunded</code>，订单转「已退款」。<b>已递交使领馆的签证费不可退，只退服务费</b>——非「拒签退款保障」套餐的具体退款比例还等你给口径，现在按全额服务费退算。</td></tr>
+<tr><td class=k>放行前取消</td><td>订单转「已取消」，收款单原路退回，办签进度停在 P1，不产生工单，不对供应商挂应付。</td></tr>
+<tr><td class=k>放行后取消</td><td>必须走退款单：发起 → 主管审批 → 财务出账。工单同步关闭，已产生的供应商应付按实际进度结算。</td></tr>
+<tr><td class=k>客户改期</td><td>走转款单：原单款项转入新单，<b>财务审核通过前钱冻结在原单，两边都不能用</b>。</td></tr>
+</table>
+<div class=note><b>刚修掉一处真实矛盾：</b>原来有 3 张订单资金<b>未放行</b>（<code>VS-26080001</code> / <code>VS-26080002</code> / <code>VS-26080016</code>），
+办签人却已经推进到 P4「表单填写中」——违反了闸门 2 的规则，验收时会看到自相矛盾的状态。已全部锁回 P1。</div>
+</section>
+
+<section id=acc>
+<h2>二、验收清单 · 每个状态都有 demo 数据</h2>
+<p class=lead>账号密码统一 <code>888888</code>。订单类用 <code>op1</code>（UOM 专员）或 <code>sales</code>（CSP 门店）登录，单据类用 <code>fin</code>（财务）。</p>
+
+<h3>2.1 订单状态 <span class=n>UOM 订单列表 / CSP 我的订单</span></h3>
+<table><tr><th style="width:110px">值</th><th style="width:110px">名称</th><th style="width:60px">条数</th><th>demo 数据</th></tr>
+<tr><td class=k><code>created</code></td><td class=k>待付款</td><td style='text-align:center'>5</td><td><code>VS-26080001</code> · C · ¥1,980 · 1人 · 闸门 未放行<br><code>VS-26080016</code> · CSP · ¥1,980 · 1人 · 销售 王磊 · 闸门 未放行</td></tr>
+<tr><td class=k><code>paid</code></td><td class=k>已付款</td><td style='text-align:center'>3</td><td><code>VS-26080002</code> · C · ¥2,480 · 1人 · 闸门 未放行<br><code>VS-26080017</code> · CSP · ¥2,480 · 1人 · 销售 王磊 · 闸门 未放行</td></tr>
+<tr><td class=k><code>processing</code></td><td class=k>办理中</td><td style='text-align:center'>31</td><td><code>VS-26080003</code> · C · ¥1,980 · 1人 · 闸门 已放行<br><code>VS-26080004</code> · C · ¥1,980 · 1人 · 闸门 已放行</td></tr>
+<tr><td class=k><code>done</code></td><td class=k>已完成</td><td style='text-align:center'>3</td><td><code>VS-26080012</code> · C · ¥2,480 · 1人 · 闸门 已放行<br><code>VS-26080027</code> · CSP · ¥2,480 · 1人 · 销售 王磊 · 闸门 已放行</td></tr>
+<tr><td class=k><code>cancelled</code></td><td class=k>已取消</td><td style='text-align:center'>3</td><td><code>VS-26080015</code> · C · ¥1,980 · 1人 · 闸门 未放行<br><code>VS-26080030</code> · CSP · ¥1,980 · 1人 · 销售 王磊 · 闸门 未放行</td></tr>
+<tr><td class=k><code>refunded</code></td><td class=k>已退款</td><td style='text-align:center'>3</td><td><code>VS-26080014</code> · C · ¥2,880 · 1人 · 闸门 已放行<br><code>VS-26080029</code> · CSP · ¥2,880 · 1人 · 销售 王磊 · 闸门 已放行</td></tr>
+</table>
+
+<h3>2.2 办签进度 <span class=n>UOM 工单台 / 订单详情办签人卡</span></h3>
+<table><tr><th style="width:110px">值</th><th style="width:110px">名称</th><th style="width:60px">人数</th><th>demo 数据</th></tr>
+<tr><td class=k><code>P1</code></td><td class=k>待收材料</td><td style='text-align:center'>17</td><td>周文彦 @ <code>VS-26080001</code><br>李佳宁 @ <code>VS-26080002</code></td></tr>
+<tr><td class=k><code>P2</code></td><td class=k>材料审核中</td><td style='text-align:center'>2</td><td>张思远 @ <code>VS-26080003</code><br>袁若彤 @ <code>VS-26080018</code></td></tr>
+<tr><td class=k><code>P3</code></td><td class=k>材料已齐备</td><td style='text-align:center'>2</td><td>石家和 @ <code>VS-26080020</code><br>封长风 @ <code>VS-26080035</code></td></tr>
+<tr><td class=k><code>P4</code></td><td class=k>表单填写中</td><td style='text-align:center'>5</td><td>孙婉如 @ <code>VS-26080004</code><br>徐家俊 @ <code>VS-26080005</code></td></tr>
+<tr><td class=k><code>P5</code></td><td class=k>待预约面签</td><td style='text-align:center'>3</td><td>汪敏行 @ <code>VS-26080007</code><br>简怀瑾 @ <code>VS-26080022</code></td></tr>
+<tr><td class=k><code>P6</code></td><td class=k>已预约待面签</td><td style='text-align:center'>3</td><td>谢承宇 @ <code>VS-26080008</code><br>路知远 @ <code>VS-26080023</code></td></tr>
+<tr><td class=k><code>P7</code></td><td class=k>已递交/已面签</td><td style='text-align:center'>3</td><td>钟灵毓 @ <code>VS-26080009</code><br>毕舒南 @ <code>VS-26080024</code></td></tr>
+<tr><td class=k><code>P8</code></td><td class=k>行政审查中</td><td style='text-align:center'>3</td><td>陆怀安 @ <code>VS-26080010</code><br>翁云舟 @ <code>VS-26080025</code></td></tr>
+<tr><td class=k><code>P9</code></td><td class=k>已出结果</td><td style='text-align:center'>9</td><td>沈知白 @ <code>VS-26080011</code><br>褚南星 @ <code>VS-26080013</code></td></tr>
+<tr><td class=k><code>P10</code></td><td class=k>已交付客户</td><td style='text-align:center'>3</td><td>何听澜 @ <code>VS-26080012</code><br>施砚白 @ <code>VS-26080027</code></td></tr>
+</table>
+
+<h3>2.3 收款单审核状态 <span class=n>fin › 收款管理</span></h3>
+<table><tr><th style="width:110px">值</th><th style="width:130px">页签</th><th style="width:60px">条数</th><th>demo 数据</th></tr>
+<tr><td class=k><code>wait</code></td><td class=k>待审核</td><td style='text-align:center'>3</td><td><code>S2608210001</code> · 银行/汇款 · 收¥2,480<br><code>S2608220015</code> · 银行/汇款 · 收¥2,480</td></tr>
+<tr><td class=k><code>pass</code></td><td class=k>已审核</td><td style='text-align:center'>32</td><td><code>S2608190005</code> · 银行/汇款 · 收¥1,980<br><code>S2607310006</code> · 银行/汇款 · 收¥1,980</td></tr>
+<tr><td class=k><code>pass</code></td><td class=k>待生成凭证</td><td style='text-align:center'>3</td><td><code>S2608190002</code> · 银行/汇款 · 收¥1,980<br><code>S2607290003</code> · 银行/汇款 · 收¥1,980</td></tr>
+<tr><td class=k><code>error</code></td><td class=k>有误</td><td style='text-align:center'>2</td><td><code>S2607100041</code> · 银行/汇款 · 收¥2,880 到账¥2,878<br><code>S2608170043</code> · 银行/汇款 · 收¥3,960 到账¥3,958</td></tr>
+</table>
+
+<h3>2.4 退款单状态 <span class=n>fin › 退款管理</span></h3>
+<table><tr><th style="width:110px">值</th><th style="width:140px">名称</th><th style="width:60px">条数</th><th>demo 数据</th></tr>
+<tr><td class=k><code>applying</code></td><td class=k>待主管审批</td><td style='text-align:center'>3</td><td><code>RF-26080001</code> · ¥1,640 · 拒签，按拒签退款保障申请退款<br><code>RF-26080003</code> · ¥1,640 · 拒签，按拒签退款保障申请退款</td></tr>
+<tr><td class=k><code>l1</code></td><td class=k>主管已批待出账</td><td style='text-align:center'>1</td><td><code>T260831000101</code> · ¥1,160 · 客户改期后取消行程</td></tr>
+<tr><td class=k><code>done</code></td><td class=k>已出账</td><td style='text-align:center'>3</td><td><code>RF-26080002</code> · ¥1,160 · 拒签退款保障套餐，申请退还服务费<br><code>RF-26080004</code> · ¥1,160 · 拒签退款保障套餐，申请退还服务费</td></tr>
+<tr><td class=k><code>reject</code></td><td class=k>已驳回</td><td style='text-align:center'>1</td><td><code>T260831000102</code> · ¥1,160 · 客户重复提交，与 T260828000137</td></tr>
+</table>
+
+<div class=note><b>转款不做。</b>唐美芳 2026-08-31 定：<b>签证订单不支持转款</b>，订单间转款单已撤销（表和 demo 数据都删了）。
+UOM 菜单里原来那个「转款管理」不是转款，是<b>应付供应商结算</b>（收款放行时按结算价挂账，之后按月付给供应商），
+为免混淆已改名<b>「供应商结算」</b>，功能保留不动。</div>
+</section>
+
+<footer>VisaOps · 状态流转与验收清单 · 2026-08-31 · 数据来自演示库实际记录，非手工编造</footer>
+</div></body></html>

@@ -1,0 +1,356 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>VisaOps · 订单与资金字段规格（UOM / CSP 分视角）</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#F2F4F7;color:#0F172A;
+  font:14px/1.7 -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",system-ui,sans-serif}
+.top{background:#fff;border-bottom:1px solid #E5E7EB;position:sticky;top:0;z-index:20}
+.in{width:1200px;max-width:calc(100% - 32px);margin:0 auto}
+.top .in{display:flex;align-items:center;gap:18px;height:60px}
+.top b{font-size:16px}
+.top s{text-decoration:none;color:#94A3B8;font-size:12.5px}
+.top nav{margin-left:auto;display:flex;gap:4px}
+.top nav a{font-size:13px;color:#475569;text-decoration:none;padding:6px 12px;border-radius:7px}
+.top nav a:hover{background:#F1F5F9;color:#0F172A}
+h1{font-size:28px;margin:34px 0 10px;letter-spacing:-.6px}
+.lead{color:#475569;margin:0 0 6px;max-width:900px}
+section{margin:44px 0}
+h2{font-size:19px;margin:0 0 6px;padding-bottom:10px;border-bottom:2px solid #0F172A;display:inline-block}
+h3{font-size:15px;margin:26px 0 10px;color:#0F172A}
+h3 em{font-style:normal;font-size:12px;font-weight:400;color:#94A3B8;margin-left:8px}
+.note{background:#fff;border:1px solid #E5E7EB;border-left:3px solid #EA580C;
+  border-radius:0 10px 10px 0;padding:13px 16px;margin:14px 0;font-size:13.5px;color:#334155}
+.note b{color:#C2410C}
+table{width:100%;border-collapse:collapse;background:#fff;border:1px solid #E5E7EB;
+  border-radius:10px;overflow:hidden;font-size:13px;margin:10px 0 4px}
+th{background:#F8FAFC;text-align:left;padding:10px 12px;font-weight:600;color:#334155;
+  border-bottom:1px solid #E5E7EB;white-space:nowrap}
+td{padding:9px 12px;border-bottom:1px solid #F1F5F9;vertical-align:top}
+tr:last-child td{border-bottom:0}
+td.k{font-weight:600;white-space:nowrap}
+code{background:#F1F5F9;border-radius:4px;padding:1px 6px;font-size:12px;
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+.y{color:#16A34A;font-weight:600}
+.n{color:#CBD5E1}
+.h{color:#EA580C;font-weight:600}
+.seg{background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:16px 18px;margin:12px 0}
+.seg h4{margin:0 0 4px;font-size:14px}
+.seg h4 span{display:inline-block;background:#0F172A;color:#fff;border-radius:5px;
+  padding:1px 7px;font-size:11px;margin-right:8px;vertical-align:1px}
+.seg p{margin:0 0 10px;font-size:12.5px;color:#64748B}
+.mock{background:#fff;border:1px solid #E5E7EB;border-radius:12px;overflow:hidden;margin:14px 0}
+.mock .sum{display:flex;flex-wrap:wrap;gap:0 26px;padding:12px 16px;background:#FAFBFC;
+  border-bottom:1px solid #E5E7EB;font-size:12.5px}
+.mock .sum i{font-style:normal;color:#64748B}
+.mock .sum u{text-decoration:none;font-weight:700;margin-left:5px}
+.mock .l1{display:flex;flex-wrap:wrap;gap:0 22px;padding:11px 16px;background:#F8FAFC;
+  border-bottom:1px solid #EEF2F6;font-size:12.5px;color:#475569}
+.mock .l1 u{text-decoration:none;color:#0F172A;font-weight:600}
+.mock .l2{display:grid;gap:0 18px;padding:14px 16px;font-size:12.5px}
+.mock .l2>div>i{display:block;font-style:normal;color:#94A3B8;font-size:11px;
+  letter-spacing:.4px;margin-bottom:5px}
+.mock .l2 u{text-decoration:none;display:block;color:#334155}
+.mock .l2 u b{color:#0F172A}
+.mock .l3{display:flex;gap:8px;justify-content:flex-end;padding:11px 16px;
+  border-top:1px solid #F1F5F9;background:#FCFDFE}
+.mock .l3 span{border:1px solid #E2E8F0;border-radius:7px;padding:4px 12px;font-size:12px;color:#475569}
+.mock .l3 span.p{background:#EA580C;border-color:#EA580C;color:#fff}
+.tag{display:inline-block;border-radius:5px;padding:1px 8px;font-size:11.5px;font-weight:600}
+.t1{background:#FEF3C7;color:#92400E}.t2{background:#DCFCE7;color:#166534}
+.t3{background:#FEE2E2;color:#991B1B}.t4{background:#E0E7FF;color:#3730A3}
+.diff{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:14px 0}
+.diff>div{background:#fff;border:1px solid #E5E7EB;border-radius:10px;padding:14px 16px}
+.diff h5{margin:0 0 8px;font-size:13px;color:#64748B}
+.diff ul{margin:0;padding-left:18px;font-size:13px;color:#334155}
+.diff li{margin:4px 0}
+footer{margin:60px 0 40px;padding-top:20px;border-top:1px solid #E2E8F0;
+  font-size:12.5px;color:#94A3B8}
+@media(max-width:900px){.diff{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="top"><div class="in">
+  <b>VisaOps</b><s>订单与资金字段规格</s>
+  <nav>
+    <a href="#frame">信息骨架</a><a href="#uom">UOM 订单</a><a href="#csp">CSP 订单</a>
+    <a href="#status">状态口径</a><a href="#fin">财务三单</a><a href="#perm">权限矩阵</a>
+  </nav>
+</div></div>
+
+<div class="in">
+
+<h1>订单与资金字段规格</h1>
+<p class="lead">按众信现有系统的结构重新梳理：订单列表沿用<b>飞猪销售管理</b>那套「汇总条 + 订单元信息行 + 分段主体 + 操作行」的四层骨架；
+收款 / 退款 / 转款三张财务单沿用<b>众信财务管理 · 业务资金管理</b>的字段与审核页签。
+UOM 与 CSP 保持两套视图，差异只在<b>可见字段</b>与<b>可执行动作</b>，底层是同一张订单。</p>
+
+<!-- ============ 信息骨架 ============ -->
+<section id="frame">
+<h2>一、信息骨架：一张订单四层</h2>
+<p class="lead">现在的列表是「一行七列」，金额、状态、进度挤在同一水平线上，看不出主次。
+改成四层后，订单级元信息（谁卖的、什么时候、哪个渠道）单独占一条，业务主体按语义分段，操作独占一行。</p>
+
+<div class="seg">
+<h4><span>L0</span>汇总条 · 当前筛选结果的合计</h4>
+<p>横排一条，不再用六张大 KPI 卡（占掉将近一屏，翻订单要滚两次）。口径＝当前筛选条件命中的全部订单，不是当前页。</p>
+</div>
+<div class="seg">
+<h4><span>L1</span>订单元信息行 · 这张单的身份</h4>
+<p>订单号、下单时间、销售渠道、销售公司、<b>销售人员</b>、建单人、查看详情。飞猪把保险状态 / 合同状态也放在这层——签证业务对应的是<b>合同状态</b>与<b>资料收件状态</b>。</p>
+</div>
+<div class="seg">
+<h4><span>L2</span>业务主体 · 分段展示</h4>
+<p>客户、产品、金额（应收 / 实收 / 结算毛利三段）、状态各占一段，段内纵向排列「标签 + 值」，段间靠留白分隔而不是竖线。</p>
+</div>
+<div class="seg">
+<h4><span>L3</span>操作行 · 右对齐独占一行</h4>
+<p>按订单当前状态只给可执行的动作，不可执行的不显示（不用置灰堆一排）。主操作一个，橙色实心。</p>
+</div>
+</section>
+
+<!-- ============ UOM ============ -->
+<section id="uom">
+<h2>二、UOM 运营平台 · 订单列表</h2>
+<p class="lead">使用人：签证操作专员、签证主管、财务、平台配置管理员。看<b>全网所有渠道</b>的单，看得到成本与毛利，是唯一能改价、派单、放行资金的地方。</p>
+
+<div class="mock">
+  <div class="sum">
+    <i>成交额<u>¥107,438</u></i><i>应收<u>¥107,438</u></i><i>已确认实收<u>¥85,140</u></i>
+    <i>客户欠款<u style="color:#DC2626">¥22,298</u></i><i>已退款<u>¥1,160</u></i>
+    <i>待付供应商<u>¥75,800</u></i><i>毛利<u>¥16,078</u></i><i>订单<u>48</u></i><i>人数<u>63</u></i>
+  </div>
+  <div class="l1">
+    <i>订单号 <u>VS-26080050</u></i><i>下单 <u>2026-08-27 13:07</u></i>
+    <i>渠道 <u>门店 CSP</u></i><i>销售公司 <u>众信旅游国贸门店</u></i>
+    <i>销售 <u>王磊</u></i><i>建单 <u>王磊</u></i>
+    <i>合同 <span class="tag t1">未签约</span></i><i style="margin-left:auto"><u style="color:#EA580C">查看详情 ›</u></i>
+  </div>
+  <div class="l2" style="grid-template-columns:1.1fr 1.3fr .8fr .8fr 1fr .9fr">
+    <div><i>客户与机构</i><u><b>众信旅游国贸门店</b></u><u>李佳宁 · 138****3333</u><u>2 人 · 出行 2026-11-20</u></div>
+    <div><i>产品与供应商</i><u><b>北京送签-日本个人单次旅游签证</b></u><u>普通办理</u><u>优耐德</u></div>
+    <div><i>应收</i><u>成交额 <b>¥998</b></u><u>人均 ¥499</u><u>已开票 ¥0</u></div>
+    <div><i>实收与欠款</i><u>已收 ¥0</u><u style="color:#DC2626">欠款 <b>¥998</b></u><u>已退 ¥0</u></div>
+    <div><i>结算与毛利</i><u>结算额 ¥760</u><u>待付供应商 ¥760</u><u>毛利 <b>¥238</b> · 23.8%</u></div>
+    <div><i>状态</i><u>订单 <span class="tag t1">待付款</span></u><u>资金 <span class="tag t3">未放行</span></u><u>办签 <span class="tag t4">2 人待收材料</span></u></div>
+  </div>
+  <div class="l3"><span>金额明细</span><span>调整成交价</span><span>调整结算价</span><span>派单</span><span class="p">确认收款</span></div>
+</div>
+
+<table>
+<tr><th style="width:130px">段</th><th style="width:150px">字段</th><th>口径 / 取值</th><th style="width:210px">与现状的差异</th></tr>
+<tr><td class="k" rowspan="8">L1 元信息</td><td class="k">订单号</td><td><code>VS-26080050</code>，点击进详情</td><td>现在埋在第一列里，改为独占一行</td></tr>
+<tr><td class="k">下单时间</td><td>精确到分</td><td>—</td></tr>
+<tr><td class="k">销售渠道</td><td>直客 C 端 / 门店 CSP / 同业 B 端</td><td>—</td></tr>
+<tr><td class="k">销售公司</td><td>下单门店或同业社的全称</td><td class="h">新增（现在只有机构简称）</td></tr>
+<tr><td class="k">销售人员</td><td>该单归属销售，非建单人时两者都显示</td><td class="h">新增（现在只在右下角小字显示建单人）</td></tr>
+<tr><td class="k">建单人</td><td>实际录单的人，代客下单时与销售不同</td><td>从右下角小字提到 L1</td></tr>
+<tr><td class="k">合同状态</td><td>未签约 / 已签约 / 免签约（直客小额）</td><td class="h">新增，对应飞猪的「订单合同状态」</td></tr>
+<tr><td class="k">资料收件状态</td><td>未收件 / 部分收件 / 已收齐</td><td class="h">新增，替代飞猪的「保险状态」位</td></tr>
+
+<tr><td class="k" rowspan="4">客户与机构</td><td class="k">机构名称</td><td>直客显示「直客」，B 端显示同业社名</td><td>—</td></tr>
+<tr><td class="k">联系人 / 手机</td><td>脱敏显示，搜索仍可全匹配</td><td>—</td></tr>
+<tr><td class="k">人数</td><td>成人 + 儿童，分开计数</td><td class="h">现在只有总数，需拆成人/儿童</td></tr>
+<tr><td class="k">出行日期</td><td>预计出行日，用于排期紧急度</td><td>—</td></tr>
+
+<tr><td class="k" rowspan="4">产品与供应商</td><td class="k">产品名称</td><td>「送签地 + 国家 + 签证类型」全称</td><td>—</td></tr>
+<tr><td class="k">套餐</td><td>普通办理 / 拒签退款保障 / 加急等</td><td>—</td></tr>
+<tr><td class="k">供应商</td><td>该单实际供货方</td><td>—</td></tr>
+<tr><td class="k">送签地</td><td>北京 / 上海 / 广州 领区</td><td class="h">新增，同国家不同领区材料与时效不同</td></tr>
+
+<tr><td class="k" rowspan="3">应收</td><td class="k">成交额</td><td>客户实际应付总额＝套餐零售价 × 人数 ± 调价</td><td>沿用</td></tr>
+<tr><td class="k">人均</td><td>成交额 ÷ 人数，自动算</td><td>沿用</td></tr>
+<tr><td class="k">已开票</td><td>累计开票金额</td><td class="h">新增</td></tr>
+
+<tr><td class="k" rowspan="3">实收与欠款</td><td class="k">已收</td><td><b>财务已确认放行</b>的收款合计，未放行不计入</td><td>沿用</td></tr>
+<tr><td class="k">欠款</td><td>成交额 − 已收 + 已退，&gt;0 标红</td><td>沿用</td></tr>
+<tr><td class="k">已退款</td><td>累计已出账退款</td><td class="h">新增（现在只在退款单里看得到）</td></tr>
+
+<tr><td class="k" rowspan="4">结算与毛利</td><td class="k">结算额</td><td>该付供应商的成本合计</td><td>沿用</td></tr>
+<tr><td class="k">待付供应商</td><td>结算额 − 已付，月度结算前一直挂账</td><td>沿用</td></tr>
+<tr><td class="k">毛利</td><td>成交额 − 结算额</td><td>沿用</td></tr>
+<tr><td class="k">毛利率</td><td>毛利 ÷ 成交额</td><td>沿用</td></tr>
+
+<tr><td class="k" rowspan="3">状态</td><td class="k">订单状态</td><td>见下方「状态口径」</td><td>沿用</td></tr>
+<tr><td class="k">资金闸门</td><td>未放行 / 已放行，放行才生成工单</td><td>沿用</td></tr>
+<tr><td class="k">签证办理进度</td><td>多人单聚合成「N 人待收材料 · M 人已递交」，点开逐人展开</td><td class="h">现在 UOM 侧完全没有办签进度，只有 CSP 有</td></tr>
+</table>
+<div class="note"><b>一处需要你定口径：</b>多人单的「签证办理进度」在列表里是<b>聚合显示</b>（3 人：1 待收材料 · 2 已递交）还是<b>逐人平铺</b>（像 CSP 现在那样列三行）。
+我按聚合做——UOM 一屏 48 单，逐人平铺会把列表撑到十几屏；CSP 一个门店单量小，逐人平铺反而好跟。你要是觉得专员也需要逐人看，我改成默认聚合、点一下展开。</div>
+</section>
+
+<!-- ============ CSP ============ -->
+<section id="csp">
+<h2>三、CSP 门店工作台 · 订单列表</h2>
+<p class="lead">使用人：门店销售、同业代理。只看<b>本门店 / 本渠道</b>的单，看得到结算价与毛利（要算提成），
+但看不到平台应付账款口径的字段，也不能改价、不能放行资金。</p>
+
+<div class="mock">
+  <div class="sum">
+    <i>成交额<u>¥12,738</u></i><i>已收<u>¥8,860</u></i><i>欠款<u style="color:#DC2626">¥3,878</u></i>
+    <i>已退<u>¥1,160</u></i><i>毛利<u>¥2,418</u></i><i>订单<u>16</u></i><i>人数<u>21</u></i>
+  </div>
+  <div class="l1">
+    <i>订单号 <u>VS-26080050</u></i><i>下单 <u>2026-08-27 13:07</u></i>
+    <i>渠道 <u>门店</u></i><i>销售 <u>王磊</u></i>
+    <i>合同 <span class="tag t1">未签约</span></i><i>资料 <span class="tag t1">未收件</span></i>
+    <i style="margin-left:auto"><u style="color:#EA580C">查看详情 ›</u></i>
+  </div>
+  <div class="l2" style="grid-template-columns:1.5fr .9fr .9fr .9fr 1.1fr">
+    <div><i>客户与产品</i><u><b>北京送签-日本个人单次旅游签证</b></u><u>普通办理 · 2 人</u><u>李佳宁 · 138****3333</u></div>
+    <div><i>金额</i><u>成交额 <b>¥998</b></u><u>已收 ¥0</u><u style="color:#DC2626">欠款 <b>¥998</b></u></div>
+    <div><i>我的毛利</i><u>结算价 ¥760</u><u>毛利 <b>¥238</b></u><u>毛利率 23.8%</u></div>
+    <div><i>出行</i><u>2026-11-20</u><u>成人 2 · 儿童 0</u></div>
+    <div><i>状态与办签人</i><u>订单 <span class="tag t1">待付款</span></u><u>李佳宁 <span class="tag t4">待收材料</span></u><u>王小明 <span class="tag t4">待收材料</span></u></div>
+  </div>
+  <div class="l3"><span>办签进度</span><span>申请退款</span><span class="p">代客支付 ¥998</span></div>
+</div>
+
+<div class="diff">
+<div><h5>CSP 相比 UOM，去掉这些</h5><ul>
+<li><b>待付供应商</b>——平台对供应商的应付账款，门店不参与结算</li>
+<li><b>已开票</b>——开票由集团财务统一处理，门店只发起</li>
+<li><b>建单人 / 销售公司</b>——本店内部，销售人员一个字段够了</li>
+<li><b>调价、派单、确认收款</b>三个动作全部不可执行</li>
+</ul></div>
+<div><h5>CSP 相比 UOM，多这些</h5><ul>
+<li><b>逐人办签进度</b>——门店直接对客，客人问「我的签证办到哪了」要能一眼答上</li>
+<li><b>代客支付</b>主操作——CSP 的核心动作</li>
+<li><b>资料收件状态</b>提到 L1——门店负责收客人材料，这是它每天的待办</li>
+<li>汇总条口径是<b>本店</b>，不含其它门店</li>
+</ul></div>
+</div>
+<div class="note">CSP <b>保留</b>结算价与毛利，不隐藏。理由：门店提成按毛利算，藏了销售没法判断值不值得卖；
+而且 8/27 定的产品详情页已经在显示「结算价 / 最高毛利」，列表藏起来反而不一致。
+<b>但供应商名称在列表层不显示</b>——产品详情页的「供应商比价」里已经有，列表里再挂一遍容易诱导门店绕过平台直连。这条你如果不同意，我加回来只是一行的事。</div>
+</section>
+
+<!-- ============ 状态 ============ -->
+<section id="status">
+<h2>四、状态口径：三条互不替代的线</h2>
+<p class="lead">飞猪那张单同时挂着「订单状态 / 保险状态 / 合同状态 / 运营平台已支付 / 供应商已确认」，是因为它们互相不能推导。签证业务同理，需要三条独立状态线，不能压成一个字段。</p>
+
+<table>
+<tr><th style="width:150px">状态线</th><th style="width:300px">取值</th><th>谁改它</th><th style="width:220px">跟其它线的关系</th></tr>
+<tr><td class="k">① 订单状态</td>
+<td>待付款 → 已付款 → 办理中 → 已完成 ／ 退款中 · 已退款 · 已取消</td>
+<td>系统按付款、放行、办签结果自动流转</td>
+<td>总状态，对客对外只说这一条</td></tr>
+<tr><td class="k">② 资金闸门</td><td>未放行 / 已放行</td>
+<td><b>只有 UOM 财务能改</b>，CSP 只读</td>
+<td>放行是「已付款 → 办理中」的唯一触发条件，放行后不可撤销</td></tr>
+<tr><td class="k">③ 签证办理进度<br><em>按办签人各自独立</em></td>
+<td>待收材料 → 材料审核 → 补料中 → 填表缴费 → 预约中 → 已递交 → 已出结果 → 已返还</td>
+<td>UOM 专员操作，CSP 只读</td>
+<td>同一订单多个办签人各走各的；<b>全部到「已返还」订单才算已完成</b></td></tr>
+<tr><td class="k">④ 合同状态</td><td>未签约 / 已签约 / 免签约</td><td>CSP 发起，客户签署</td><td>独立，不阻塞办理</td></tr>
+<tr><td class="k">⑤ 资料收件状态</td><td>未收件 / 部分收件 / 已收齐</td><td>CSP 或客户上传后自动判定</td><td>影响 ③ 能否从「待收材料」往下走</td></tr>
+</table>
+<div class="note">她 8/21 提过<b>「25 个状态太多了」</b>。这里没有增加状态总数，是把原来混在一条线上的值<b>拆到 5 条线</b>：
+每条线单独看都只有 2–8 个取值，列表上一次最多展示 3 条（订单 / 资金 / 办签），其余进详情页。</div>
+</section>
+
+<!-- ============ 财务三单 ============ -->
+<section id="fin">
+<h2>五、财务三单：收款 / 退款 / 转款</h2>
+<p class="lead">字段与页签直接沿用众信「财务管理 › 业务资金管理」。<b>UOM 侧是操作台（要审核、要生成凭证），CSP 侧是同一张表的只读视图</b>，门店只查自己的单、只能打印收据。</p>
+
+<h3>共用页签 <em>三张单一致</em></h3>
+<p style="margin:0 0 10px;color:#475569;font-size:13.5px">
+<span class="tag t4">全部</span> <span class="tag t1">待审核</span> <span class="tag t2">已审核</span>
+<span class="tag t4">待生成凭证</span> <span class="tag t2">已生成凭证</span> <span class="tag t3">有误</span>
+&nbsp;— CSP 侧只保留 <b>全部 / 待审核 / 已审核</b> 三个，凭证与差错是财务内部流程。</p>
+
+<h3>5.1 收款管理</h3>
+<table>
+<tr><th style="width:190px">列</th><th>内容（一格多行）</th><th style="width:150px">UOM</th><th style="width:130px">CSP</th></tr>
+<tr><td class="k">单据编号</td><td>收款单号 <code>S260830001032</code> ／ 订单编号 ／ 第三方流水号·参考号</td><td class="y">可见</td><td class="y">可见</td></tr>
+<tr><td class="k">收款方式三段</td><td>收款类别（银行 / 门店钱包 / 第三方支付）／ 收款渠道（具体银行支行、资金池）／ 收款方式（汇款 / 余额支付 / 微信 / 支付宝 / POS）</td><td class="y">可见</td><td class="y">可见</td></tr>
+<tr><td class="k">客户类型</td><td>个人客户 / 企业客户 / 同业</td><td class="y">可见</td><td class="y">可见</td></tr>
+<tr><td class="k">销售公司 / 渠道名称</td><td>两行</td><td class="y">可见</td><td class="n">本店固定，隐藏</td></tr>
+<tr><td class="k">销售 / 制单日期</td><td>两行</td><td class="y">可见</td><td class="y">可见</td></tr>
+<tr><td class="k">款项</td><td>团款 / 定金 / 尾款 / 加急费 / 补差</td><td class="y">可见</td><td class="y">可见</td></tr>
+<tr><td class="k">收款金额 / 到账金额</td><td>两行，不等时标红（手续费或部分到账）</td><td class="y">可见</td><td class="y">可见</td></tr>
+<tr><td class="k">审核状态</td><td>待审核 / 已审核 / 有误</td><td class="h">可改</td><td class="y">只读</td></tr>
+<tr><td class="k">审核人 / 审核日期</td><td>两行，系统自动填</td><td class="y">可见</td><td class="y">可见</td></tr>
+<tr><td class="k">付款日期 / 到账日期</td><td>两行</td><td class="y">可见</td><td class="y">可见</td></tr>
+<tr><td class="k">付款人名称</td><td>实际打款方，与客户不同时是重点核对项</td><td class="y">可见</td><td class="y">可见</td></tr>
+<tr><td class="k">销售备注 / 财务备注</td><td>两行，各自维护</td><td class="h">财务备注可写</td><td class="h">销售备注可写</td></tr>
+<tr><td class="k">凭证号</td><td>生成后回填</td><td class="y">可见</td><td class="n">隐藏</td></tr>
+<tr><td class="k">操作</td><td>UOM：<b>审核</b> · 查看 · 打印收款单 · 打印收据 · 生成凭证<br>CSP：查看 · 打印收据</td><td class="h">全部</td><td class="y">两项</td></tr>
+</table>
+<div class="note">和我们现在的收款管理相比，<b>缺的是</b>：收款类别 / 收款渠道两级、客户类型、款项、到账金额、付款人名称、付款与到账日期、销售与财务两条备注、凭证号，以及「待生成凭证 / 已生成凭证 / 有误」三个页签。
+现有的<code>待确认放行 / 已确认放行 / 全部单据</code>其实就是众信的<code>待审核 / 已审核 / 全部</code>，我按众信的叫法统一过来。</div>
+
+<h3>5.2 退款管理</h3>
+<table>
+<tr><th style="width:190px">列</th><th>内容</th><th style="width:150px">UOM</th><th style="width:130px">CSP</th></tr>
+<tr><td class="k">单据编号</td><td>退款单号 <code>T260828000137</code> ／ 订单编号</td><td class="y">可见</td><td class="y">可见</td></tr>
+<tr><td class="k">原收款单</td><td>原收款单号 ／ 收款方第三方流水号 ／ 退款方第三方流水号 — <b>三行，原路退回的追溯依据</b></td><td class="y">可见</td><td class="y">可见</td></tr>
+<tr><td class="k">退款方式三段</td><td>退款类别 / 退款渠道 / 退款方式</td><td class="y">可见</td><td class="y">可见</td></tr>
+<tr><td class="k">客户类型</td><td>同收款</td><td class="y">可见</td><td class="y">可见</td></tr>
+<tr><td class="k">销售公司 / 渠道名称</td><td>两行</td><td class="y">可见</td><td class="n">隐藏</td></tr>
+<tr><td class="k">销售 / 制单日期</td><td>两行</td><td class="y">可见</td><td class="y">可见</td></tr>
+<tr><td class="k">款项</td><td>团款 / 定金 / 签证费 / 服务费</td><td class="y">可见</td><td class="y">可见</td></tr>
+<tr><td class="k">退款金额 / 实退日期</td><td>两行</td><td class="y">可见</td><td class="y">可见</td></tr>
+<tr><td class="k">财务审核状态 / 退款状态</td><td>两行：待审核·已审核 ／ 退款中·已退款·已驳回</td><td class="h">可改</td><td class="y">只读</td></tr>
+<tr><td class="k">审核人 / 财务审核日期</td><td>两行</td><td class="y">可见</td><td class="y">可见</td></tr>
+<tr><td class="k">退款原因</td><td>拒签退款 / 客户取消 / 重复支付 / 服务未达成</td><td class="y">可见</td><td class="y">可见</td></tr>
+<tr><td class="k">凭证号 / 操作</td><td>UOM：<b>审核</b> · 查看 · 打印<br>CSP：查看（发起退款在订单列表操作行，不在这张表）</td><td class="h">全部</td><td class="y">查看</td></tr>
+</table>
+<div class="note">签证业务的退款有一条旅游团单没有的规则：<b>已递交使领馆之后拒签，签证费不可退，只退服务费</b>。
+所以退款单要拆「可退部分 / 不可退部分」两个金额，而不是一个退款金额。这条我按拒签退款保障套餐的口径写进去，<b>非保障套餐的具体退款比例得你给业务口径</b>——我不猜。</div>
+
+<h3>5.3 转款管理</h3>
+<p style="color:#475569;font-size:13.5px;margin:0 0 8px">众信截图里没给这张表，按业务补。转款＝<b>把 A 单已收的钱转到 B 单</b>，用于客户改期改单、重复打款、同客户多单合并。</p>
+<table>
+<tr><th style="width:190px">列</th><th>内容</th><th style="width:150px">UOM</th><th style="width:130px">CSP</th></tr>
+<tr><td class="k">转款单号</td><td><code>Z260830000112</code></td><td class="y">可见</td><td class="y">可见</td></tr>
+<tr><td class="k">转出订单 / 转入订单</td><td>两行，各自带客户名，<b>跨客户转款必须走主管审批</b></td><td class="y">可见</td><td class="y">可见</td></tr>
+<tr><td class="k">转款类别</td><td>改期结转 / 换产品结转 / 重复支付冲抵 / 同客户并单</td><td class="y">可见</td><td class="y">可见</td></tr>
+<tr><td class="k">转款金额</td><td>不得超过转出单的可用余额（已收 − 已用 − 已退）</td><td class="y">可见</td><td class="y">可见</td></tr>
+<tr><td class="k">申请人 / 申请日期</td><td>两行</td><td class="y">可见</td><td class="y">可见</td></tr>
+<tr><td class="k">审核状态 / 审核人 / 审核日期</td><td>三行</td><td class="h">可改</td><td class="y">只读</td></tr>
+<tr><td class="k">转款原因</td><td>自由文本，必填</td><td class="y">可见</td><td class="y">可见</td></tr>
+<tr><td class="k">操作</td><td>UOM：<b>审核</b> · 查看 · 打印<br>CSP：<b>发起转款</b> · 查看</td><td class="h">审核</td><td class="h">可发起</td></tr>
+</table>
+<div class="note">转款是三张单里唯一 <b>CSP 可以发起</b>的（客户改期是门店直接面对的场景），但<b>必须 UOM 财务审核后才实际生效</b>，
+未审核前转出单的钱仍冻结在原单上，两边都不能用——避免同一笔钱被算两次。</div>
+</section>
+
+<!-- ============ 权限 ============ -->
+<section id="perm">
+<h2>六、权限矩阵</h2>
+<table>
+<tr><th style="width:230px">动作</th><th style="width:110px">客户 C 端</th><th style="width:110px">CSP 门店</th><th style="width:110px">UOM 专员</th><th style="width:110px">UOM 主管</th><th style="width:110px">UOM 财务</th></tr>
+<tr><td class="k">查看订单（本人 / 本店 / 全网）</td><td class="y">本人</td><td class="y">本店</td><td class="y">全网</td><td class="y">全网</td><td class="y">全网</td></tr>
+<tr><td class="k">看成交额、已收、欠款</td><td class="y">✓</td><td class="y">✓</td><td class="y">✓</td><td class="y">✓</td><td class="y">✓</td></tr>
+<tr><td class="k">看结算价、毛利</td><td class="n">—</td><td class="y">✓</td><td class="y">✓</td><td class="y">✓</td><td class="y">✓</td></tr>
+<tr><td class="k">看待付供应商、应付账款</td><td class="n">—</td><td class="n">—</td><td class="n">—</td><td class="y">✓</td><td class="y">✓</td></tr>
+<tr><td class="k">代客下单 / 代客支付</td><td class="n">—</td><td class="y">✓</td><td class="n">—</td><td class="n">—</td><td class="n">—</td></tr>
+<tr><td class="k">调整成交价 / 结算价</td><td class="n">—</td><td class="n">—</td><td class="n">—</td><td class="y">✓</td><td class="n">—</td></tr>
+<tr><td class="k"><b>收款审核（资金放行）</b></td><td class="n">—</td><td class="n">—</td><td class="n">—</td><td class="n">—</td><td class="h">✓ 唯一</td></tr>
+<tr><td class="k">发起退款</td><td class="y">✓</td><td class="y">✓</td><td class="y">✓</td><td class="n">—</td><td class="n">—</td></tr>
+<tr><td class="k">退款审批</td><td class="n">—</td><td class="n">—</td><td class="n">—</td><td class="y">✓</td><td class="n">—</td></tr>
+<tr><td class="k">退款出账</td><td class="n">—</td><td class="n">—</td><td class="n">—</td><td class="n">—</td><td class="h">✓ 唯一</td></tr>
+<tr><td class="k">发起转款</td><td class="n">—</td><td class="y">✓</td><td class="y">✓</td><td class="n">—</td><td class="n">—</td></tr>
+<tr><td class="k">转款审核</td><td class="n">—</td><td class="n">—</td><td class="n">—</td><td class="n">—</td><td class="h">✓ 唯一</td></tr>
+<tr><td class="k">生成凭证 / 打印收款单</td><td class="n">—</td><td class="n">—</td><td class="n">—</td><td class="n">—</td><td class="h">✓ 唯一</td></tr>
+<tr><td class="k">打印收据</td><td class="n">—</td><td class="y">✓</td><td class="n">—</td><td class="n">—</td><td class="y">✓</td></tr>
+<tr><td class="k">派单 / 改办签进度</td><td class="n">—</td><td class="n">—</td><td class="y">✓</td><td class="y">✓</td><td class="n">—</td></tr>
+</table>
+</section>
+
+<footer>
+VisaOps · 订单与资金字段规格 · 2026-08-30<br>
+参照：众信旅游「财务管理 › 业务资金管理 › 收款管理 / 退款管理」、飞猪旅行「销售管理 › 订单查询」。<br>
+标 <span class="h">橙色</span> 的是相对现有系统的新增或改动项；标注「需要你定口径」的三处等你拍板后我再落地。
+</footer>
+
+</div>
+</body>
+</html>
