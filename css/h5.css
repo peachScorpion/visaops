@@ -1,0 +1,2993 @@
+/* ============================================================
+   VisaOps · C 端移动视觉系统 v4
+   现代消费级 App：冷调中性底 / 无衬线字重层级 / 单一朱红强调 / 发丝线 / 大留白
+   —— 中文界面不用衬线（屏幕上回落成宋体会显旧），层级靠字重与留白建立
+   ============================================================ */
+:root{
+  --o:#E8402E; --o-d:#C22F20; --o-l:#F26A56; --o-bg:#FEF1EF;
+  --o-grad:#E8402E;
+  --h5-ink:#0D1117; --h5-ink2:#4E5867; --h5-sub:#98A0AD;
+  --h5-line:#E9EBF0; --h5-bg:#F2F3F5;
+  --h5-fill:#F1F3F6; --h5-fill-h:#E7EAEF; --h5-hov:#F8F9FB;
+  --h5-bd:#DDE1E8; --h5-bd-h:#C7CDD8;
+  --h5-r:14px; --h5-r-s:10px;
+  --h5-sd:0 1px 2px rgba(13,17,23,.04), 0 12px 28px -22px rgba(13,17,23,.30);
+  --h5-serif:-apple-system,BlinkMacSystemFont,"PingFang SC","HarmonyOS Sans SC","Source Han Sans SC","Noto Sans CJK SC","Microsoft YaHei",system-ui,sans-serif;
+}
+
+/* ---------- 手机壳：更接近当代机型 ---------- */
+.phone:has(.ph-body.h5){border-radius:44px;border-width:11px;border-color:#0D1117;
+  box-shadow:0 30px 64px -18px rgba(13,17,23,.32), 0 2px 8px rgba(13,17,23,.10)}
+.phone:has(.ph-body.h5) .ph-bar{background:#fff;letter-spacing:.2px;padding:0 26px;height:38px}
+.phone:has(.ph-body.h5) .ph-nav{border-bottom:0;font-size:16px;font-weight:600;letter-spacing:-.2px;
+  height:48px;background:#fff}
+.phone:has(.ph-body.h5) .ph-nav .back{font-size:22px;font-weight:400;color:var(--h5-ink)}
+
+/* ---------- 版心 ---------- */
+.ph-body.h5{padding:0 0 18px;background:var(--h5-bg);color:var(--h5-ink);
+  font-size:14px;line-height:1.6;letter-spacing:-.1px;
+  -webkit-font-smoothing:antialiased}
+.ph-body.h5 *{box-sizing:border-box}
+.ph-body.h5::-webkit-scrollbar{width:0}
+
+/* 悬浮卡片：现代 App 的基本单元 */
+.h5-sec{background:#fff;margin:12px 14px;border-radius:var(--h5-r);
+  border:1px solid var(--h5-line);box-shadow:var(--h5-sd);overflow:hidden}
+.h5-pad{padding:14px 16px}
+
+/* 章节标题：去掉竖条，靠字重和留白建立层级 */
+.h5-h{display:flex;align-items:baseline;justify-content:space-between;
+  padding:18px 16px 11px;font-family:var(--h5-serif);font-size:18px;font-weight:600;letter-spacing:0}
+.h5-h>span:first-child{display:flex;align-items:baseline;gap:8px}
+.h5-h .more{font-size:12.5px;color:var(--h5-sub);font-weight:400;cursor:pointer}
+.h5-h .more:hover{color:var(--o)}
+
+/* ---------- 顶部定位 + 搜索 ---------- */
+.h5-top{display:flex;align-items:center;gap:10px;padding:10px 13px 12px;background:#fff}
+.h5-loc{display:flex;align-items:center;gap:4px;font-size:13.5px;font-weight:600;
+  color:var(--h5-ink);white-space:nowrap;cursor:pointer;padding:0 2px}
+.h5-loc::after{content:"⌄";font-size:12px;color:var(--h5-sub);position:relative;top:-2px}
+.h5-search{flex:1;height:36px;border-radius:6px;background:var(--h5-fill);display:flex;align-items:center;
+  gap:7px;padding:0 15px;font-size:13px;color:var(--h5-sub);cursor:pointer;transition:.15s}
+.h5-search::before{content:"";width:13px;height:13px;border:1.6px solid #B7BFCA;border-radius:50%;
+  flex:none;position:relative;box-shadow:2px 3px 0 -1px #B7BFCA}
+.h5-search:hover{background:var(--h5-fill-h)}
+
+.h5-banner{position:relative;height:176px;margin:2px 14px 0;border-radius:var(--h5-r);
+  background:#e8eaee center/cover no-repeat;box-shadow:var(--h5-sd);overflow:hidden}
+.h5-banner::after{content:"";position:absolute;inset:0;
+  background:linear-gradient(100deg,rgba(8,12,18,.72) 0%,rgba(8,12,18,.38) 52%,rgba(8,12,18,.05) 100%)}
+.h5-banner .cap{position:absolute;left:18px;right:18px;top:50%;transform:translateY(-52%);z-index:2;color:#fff}
+.h5-banner .cap b{display:block;font-family:var(--h5-serif);font-size:23px;font-weight:600;
+  letter-spacing:.2px;line-height:1.32}
+.h5-banner .cap s{display:block;text-decoration:none;font-size:11px;opacity:.8;margin-top:9px;
+  letter-spacing:1.4px;text-transform:uppercase}
+.h5-banner .dots{position:absolute;left:0;right:0;bottom:10px;z-index:2;display:flex;justify-content:center;gap:5px}
+.h5-banner .dots i{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.6);transition:.2s}
+.h5-banner .dots i.on{background:#fff;width:16px;border-radius:3px}
+
+/* ---------- 热门国家 ---------- */
+.h5-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:2px 16px 20px}
+.h5-tile{position:relative;height:96px;border-radius:9px;overflow:hidden;
+  background:#20242C center/cover no-repeat;cursor:pointer;transition:.18s cubic-bezier(.2,.8,.3,1)}
+.h5-tile::after{content:"";position:absolute;inset:0;
+  background:linear-gradient(175deg,rgba(10,14,20,0) 34%,rgba(10,14,20,.72) 100%)}
+.h5-tile:hover{transform:translateY(-2px);box-shadow:0 10px 20px -10px rgba(16,24,40,.45)}
+.h5-tile div{position:absolute;inset:auto 0 0 0;z-index:2;padding:0 9px 9px;color:#fff}
+.h5-tile b{display:block;font-family:var(--h5-serif);font-size:14.5px;font-weight:600;letter-spacing:.2px}
+.h5-tile s{display:block;text-decoration:none;font-size:11px;opacity:.85;margin-top:1px}
+.h5-tile.off{filter:saturate(.28) brightness(.62);cursor:default}
+.h5-tile.off s{opacity:.7}
+.h5-tile.off:hover{transform:none;box-shadow:none}
+
+/* ---------- 产品列表项 ---------- */
+.h5-prod{display:flex;gap:12px;padding:14px 16px;cursor:pointer;position:relative;transition:.15s}
+.h5-prod+.h5-prod::before{content:"";position:absolute;left:16px;right:16px;top:0;height:1px;background:var(--h5-line)}
+.h5-prod:hover{background:var(--h5-hov)}
+.h5-prod .thumb{width:94px;height:80px;border-radius:7px;flex:none;
+  background:#e8eaee center/cover no-repeat;position:relative;overflow:hidden}
+.h5-prod .thumb span{position:absolute;left:6px;bottom:6px;background:rgba(10,14,20,.55);
+  backdrop-filter:blur(6px);color:#fff;font-size:10px;padding:2px 7px;border-radius:20px}
+.h5-prod .info{flex:1;min-width:0;display:flex;flex-direction:column}
+.h5-prod .tt{font-size:14px;line-height:1.45;font-weight:600;letter-spacing:-.2px;color:var(--h5-ink);
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.h5-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
+.h5-tags span{font-size:10.5px;color:var(--h5-ink2);background:transparent;border-radius:3px;
+  border:1px solid var(--h5-line);padding:2px 7px;white-space:nowrap;line-height:1.5}
+.h5-prod .btm{display:flex;align-items:flex-end;justify-content:space-between;margin-top:auto;padding-top:8px}
+.h5-sup{font-size:11px;color:var(--h5-sub)}
+.h5-price{color:var(--h5-ink);font-size:19px;font-weight:600;line-height:1;letter-spacing:-.3px;
+  font-variant-numeric:tabular-nums}
+.h5-price i{font-style:normal;font-size:12px;font-weight:600;margin-right:1px}
+.h5-price s{text-decoration:none;font-size:11px;font-weight:400;color:var(--h5-sub);margin-left:3px}
+
+/* ---------- 列表页筛选条（吸顶） ---------- */
+.h5-fbar{display:flex;background:#fff;position:sticky;top:0;z-index:5;
+  box-shadow:0 1px 0 var(--h5-line)}
+.h5-fbar a{flex:1;text-align:center;padding:13px 0;font-size:13px;color:var(--h5-ink2);
+  cursor:pointer;text-decoration:none;transition:.15s;position:relative}
+.h5-fbar a.on{color:var(--o);font-weight:600}
+.h5-fbar a.on::after{content:"";position:absolute;left:50%;bottom:6px;transform:translateX(-50%);
+  width:20px;height:2px;background:var(--o)}
+
+/* ---------- 国家条幅 ---------- */
+.h5-cbar{display:flex;align-items:center;gap:13px;padding:15px 16px;background:#fff;
+  margin:11px 13px;border-radius:var(--h5-r);box-shadow:var(--h5-sd)}
+.h5-cbar .flag{width:56px;height:56px;border-radius:8px;background:#e8eaee center/cover no-repeat;flex:none}
+.h5-cbar b{font-family:var(--h5-serif);font-size:19px;font-weight:600;letter-spacing:0}
+.h5-slogan{display:flex;flex-wrap:wrap;gap:5px;flex:1}
+.h5-slogan span{font-size:10.5px;color:var(--o);background:transparent;border:1px solid rgba(232,64,46,.22);border-radius:3px;padding:2px 7px}
+
+/* ---------- 详情页 ---------- */
+.h5-hero{position:relative;height:230px;background:#20242C center/cover no-repeat}
+.h5-hero::after{content:"";position:absolute;inset:0;
+  background:linear-gradient(180deg,rgba(10,14,20,.28) 0%,rgba(10,14,20,0) 38%,rgba(10,14,20,.55) 100%)}
+.h5-hero .cap{position:absolute;left:0;right:0;bottom:0;z-index:2;color:#fff;
+  display:flex;justify-content:space-between;padding:0 18px 36px;font-size:11px;
+  letter-spacing:1.4px;text-transform:uppercase;
+  text-shadow:0 1px 6px rgba(0,0,0,.4)}
+.h5-sec.h5-title{margin-top:-22px;position:relative;z-index:3;padding:16px}
+.h5-title .n{font-family:var(--h5-serif);font-size:20px;font-weight:600;line-height:1.42;letter-spacing:0}
+.h5-title .p{text-align:right;margin-top:10px}
+
+/* 套餐 / 选项 */
+.h5-opts{display:grid;grid-template-columns:1fr 1fr;gap:9px;padding:2px 16px 16px}
+.h5-opt{border:1px solid var(--h5-line);border-radius:7px;padding:11px;font-size:12.5px;
+  text-align:center;cursor:pointer;color:var(--h5-ink2);background:#fff;transition:.15s}
+.h5-opt:hover{border-color:var(--h5-bd-h)}
+.h5-opt.on{border-color:var(--o);color:var(--o);background:var(--o-bg);font-weight:600}
+.h5-pkg{margin:0 16px 10px;border:1px solid var(--h5-line);border-radius:9px;
+  padding:13px 14px;cursor:pointer;transition:.15s;background:#fff}
+.h5-pkg:hover{border-color:var(--h5-bd-h)}
+.h5-pkg.on{border-color:var(--o);background:var(--o-bg)}
+.h5-pkg .r1{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.h5-pkg .nm{font-family:var(--h5-serif);font-size:15.5px;font-weight:600;color:var(--h5-ink);letter-spacing:0}
+.h5-pkg.on .nm,.h5-pkg.on .amt{color:var(--o)}
+.h5-pkg .amt{font-size:17px;font-weight:600;color:var(--h5-ink);white-space:nowrap;
+  letter-spacing:-.2px;font-variant-numeric:tabular-nums}
+.h5-pkg .dt{font-size:11.5px;color:var(--h5-ink2);line-height:1.85;margin-top:10px;
+  border-top:1px solid rgba(0,0,0,.05);padding-top:9px;white-space:pre-line}
+.h5-more{text-align:center;color:var(--h5-ink2);font-size:12.5px;padding:2px 0 16px;cursor:pointer}
+.h5-more:hover{color:var(--o)}
+
+/* 三 TAB：分段控件 */
+.h5-tabs{display:flex;gap:3px;margin:14px 16px 4px;padding:3px;background:var(--h5-fill);border-radius:8px}
+.h5-tabs a{flex:1;text-align:center;padding:8px 0;font-size:13px;border-radius:6px;
+  color:var(--h5-ink2);cursor:pointer;text-decoration:none;transition:.18s}
+.h5-tabs a.on{background:#fff;color:var(--h5-ink);font-weight:600;
+  box-shadow:0 1px 2px rgba(13,17,23,.10)}
+
+/* 参数网格 */
+.h5-kv{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;margin:12px 16px 0;
+  background:var(--h5-line);border-radius:8px;overflow:hidden}
+.h5-kv div{padding:12px 4px;text-align:center;background:#fff}
+.h5-kv i{display:block;font-style:normal;font-size:10px;color:var(--h5-sub);letter-spacing:.8px;text-transform:uppercase}
+.h5-kv b{display:block;font-size:13.5px;font-weight:600;margin-top:5px;letter-spacing:-.1px}
+.h5-note{padding:14px 16px;font-size:12.5px;color:var(--h5-ink2);line-height:1.85}
+.h5-note b{color:var(--h5-ink);display:block;font-family:var(--h5-serif);font-weight:600;margin-bottom:4px;font-size:14.5px}
+
+/* ---------- 人群 TAB + 材料手风琴 ---------- */
+.h5-crowd{display:flex;overflow-x:auto;padding:4px 10px 0;background:#fff;
+  box-shadow:inset 0 -1px 0 var(--h5-line)}
+.h5-crowd::-webkit-scrollbar{height:0}
+.h5-crowd a{padding:11px 12px 10px;font-size:13.5px;color:var(--h5-ink2);white-space:nowrap;
+  cursor:pointer;text-decoration:none;position:relative;transition:.15s}
+.h5-crowd a.on{color:var(--h5-ink);font-weight:600}
+.h5-crowd a.on::after{content:"";position:absolute;left:12px;right:12px;bottom:0;
+  height:2px;background:var(--o)}
+.h5-mgrp{display:flex;align-items:center;justify-content:space-between;
+  padding:18px 16px 9px;font-size:10.5px;color:var(--h5-sub);letter-spacing:1.6px;
+  font-weight:600;text-transform:uppercase}
+.h5-mgrp em{font-style:normal;font-size:11.5px;color:var(--h5-sub);font-weight:400;cursor:pointer}
+.h5-mat{position:relative}
+.h5-mat+.h5-mat::before{content:"";position:absolute;left:16px;right:16px;top:0;height:1px;background:var(--h5-line)}
+.h5-mat .hd{display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:13px 16px;cursor:pointer;font-size:13.5px;transition:.15s}
+.h5-mat .hd:hover{background:var(--h5-hov)}
+.h5-mat .hd .nm{flex:1;min-width:0}
+.h5-mat .hd .nm b{display:block;font-size:13.5px;font-weight:600;color:var(--h5-ink);letter-spacing:-.2px}
+.h5-mat .hd .nm s{display:block;text-decoration:none;font-size:11.5px;color:var(--h5-sub);
+  margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.h5-mat .hd .rt{display:flex;align-items:center;gap:8px;flex:none}
+.h5-mat .hd em{font-style:normal;color:var(--h5-sub);font-size:11px;transition:.2s;flex:none}
+.h5-mat.open .hd em{transform:rotate(180deg)}
+.h5-mat .bd{display:none;padding:0 16px 14px;font-size:12.5px;color:var(--h5-ink2);
+  line-height:1.9;white-space:pre-line}
+.h5-mat.open .bd{display:block}
+.h5-mail{text-align:center;padding:6px 16px 18px}
+.h5-mail button{border:1px solid var(--h5-bd);background:#fff;color:var(--h5-ink2);border-radius:5px;
+  padding:10px 30px;font-size:13px;font-weight:500;cursor:pointer;transition:.15s}
+.h5-mail button:hover{background:var(--o-bg);color:var(--o)}
+
+/* ---------- 办理流程 ---------- */
+/* 办理流程：竖排步骤条。原来是固定 82px 的圆圈、一行三个，
+   流程改成后台可配后步数与文案长度都不受控，圆圈里的字会溢出重叠
+   （唐美芳 2026-09-01）。竖排一行一步，多长都排得下。 */
+.h5-fl{padding:14px 16px 18px;position:relative}
+.h5-fl .st{position:relative;display:flex;gap:12px;padding-bottom:16px}
+.h5-fl .st:last-child{padding-bottom:0}
+/* 竖线连到下一步；最后一步不画 */
+.h5-fl .st:not(:last-child):before{content:"";position:absolute;left:12px;top:26px;bottom:2px;
+  width:2px;background:linear-gradient(180deg,rgba(232,64,46,.28),rgba(232,64,46,.10))}
+.h5-fl .st>i{flex:none;width:26px;height:26px;border-radius:50%;background:var(--o-bg);
+  border:1px solid rgba(232,64,46,.24);color:var(--o);font-style:normal;font-size:12px;
+  font-weight:700;display:grid;place-items:center;position:relative;z-index:1}
+.h5-fl .tx{flex:1;min-width:0;padding-top:3px}
+.h5-fl .tx b{display:block;font-size:13.5px;font-weight:600;color:var(--h5-ink);line-height:1.45}
+.h5-fl .tx s{display:block;text-decoration:none;margin-top:4px;font-size:12px;line-height:1.7;
+  color:var(--h5-sub);word-break:break-word}
+/* 紧凑版：下单页的产品信息弹窗里只列步骤名 */
+.h5-fl.sm{padding:6px 0 2px}
+.h5-fl.sm .st{padding-bottom:11px;gap:9px}
+.h5-fl.sm .st:not(:last-child):before{left:10px;top:23px}
+.h5-fl.sm .st>i{width:22px;height:22px;font-size:11px}
+.h5-fl.sm .tx b{font-size:13px}
+
+/* ---------- 底部操作栏 ---------- */
+.ph-foot.h5f{padding:10px 14px 12px;border-top:1px solid var(--h5-line);gap:10px;
+  background:rgba(255,255,255,.92);backdrop-filter:saturate(180%) blur(12px);align-items:center}
+.ph-foot.h5f .sv{flex:none;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:1px;font-size:11px;color:var(--h5-ink2);cursor:pointer;padding:0 12px}
+.ph-foot.h5f .sum{flex:1;display:flex;align-items:baseline;gap:5px;padding-left:4px;
+  font-size:12px;color:var(--h5-sub)}
+.ph-foot.h5f .sum b{font-size:19px;font-weight:600;color:var(--h5-ink);letter-spacing:-.3px;
+  font-variant-numeric:tabular-nums}
+.ph-foot.h5f .cta{flex:1;max-width:210px;background:var(--o);color:#fff;border:0;
+  border-radius:6px;height:48px;font-size:14.5px;font-weight:600;letter-spacing:1.2px;cursor:pointer;
+  transition:.15s}
+.ph-foot.h5f .cta:hover{filter:brightness(1.04)}
+.ph-foot.h5f .cta:active{transform:scale(.985)}
+.ph-foot.h5f .cta:disabled{background:#D3D8E0;color:#fff;box-shadow:none;cursor:not-allowed}
+
+/* ---------- 订单卡片 ---------- */
+.h5-ord{background:#fff;margin:12px 14px;border-radius:var(--h5-r);
+  border:1px solid var(--h5-line);box-shadow:var(--h5-sd);overflow:hidden}
+.h5-ord .hd{display:flex;justify-content:space-between;align-items:center;
+  padding:13px 16px 0}
+.h5-ord .no{font-size:12px;color:var(--h5-sub);font-variant-numeric:tabular-nums;letter-spacing:.2px}
+.h5-ord .st{font-size:11px;color:var(--o);font-weight:600;letter-spacing:1.2px;text-transform:uppercase}
+.h5-ord .bd{padding:8px 16px 13px}
+.h5-ord .nm{font-family:var(--h5-serif);font-size:16px;line-height:1.5;font-weight:600;letter-spacing:0}
+.h5-ord .pk{font-size:12.5px;color:var(--h5-ink2);margin-top:3px}
+.h5-ord .r{display:flex;align-items:flex-end;justify-content:space-between;margin-top:10px}
+.h5-ord .r .l{font-size:12px;color:var(--h5-sub)}
+.h5-ord .ft{display:flex;align-items:center;justify-content:space-between;gap:8px;
+  border-top:1px solid var(--h5-line);padding:11px 16px;flex-wrap:wrap}
+.h5-ord .ft .t{font-size:11px;color:var(--h5-sub)}
+
+/* 按钮 */
+.h5-btn{border:1px solid var(--h5-bd);color:var(--h5-ink2);background:#fff;border-radius:5px;
+  padding:7px 15px;font-size:12.5px;font-weight:500;cursor:pointer;white-space:nowrap;transition:.15s}
+.h5-btn:hover{border-color:var(--h5-bd-h);background:var(--h5-hov)}
+.h5-btn.solid{background:var(--o);color:#fff;border-color:var(--o);font-weight:600}
+.h5-btn.solid:hover{background:var(--o-d);border-color:var(--o-d)}
+.h5-btn.grey{border-color:var(--h5-bd);color:var(--h5-sub)}
+.h5-btn+.h5-btn{margin-left:7px}
+
+/* ---------- 办理跟踪时间轴 ---------- */
+.h5-tl{padding:18px 16px 20px 0;position:relative}
+.h5-tl::after{content:"";position:absolute;left:33px;top:26px;bottom:26px;width:2px;
+  border-radius:2px;background:linear-gradient(180deg,var(--o) 0%,var(--h5-line) 100%);z-index:0;opacity:.4}
+.h5-tl .grp{position:relative;padding-left:58px;margin:14px 0 4px;z-index:1}
+.h5-tl .grp:first-child{margin-top:0}
+.h5-tl .grp>b{display:inline-block;background:transparent;color:var(--o);font-size:10.5px;
+  border:1px solid rgba(232,64,46,.24);border-radius:3px;padding:3px 10px;font-weight:600;letter-spacing:1.4px;text-transform:uppercase}
+.h5-tl .grp::before{content:"";position:absolute;left:28px;top:5px;width:12px;height:12px;
+  border-radius:50%;background:var(--o);box-shadow:0 0 0 3.5px var(--o-bg)}
+.h5-tl .it{position:relative;padding:8px 0 8px 58px;font-size:13px;color:var(--h5-sub);z-index:1;
+  display:grid;grid-template-columns:82px 1fr;column-gap:8px;align-items:baseline}
+.h5-tl .it::before{content:"";position:absolute;left:31px;top:15px;width:6px;height:6px;
+  border-radius:50%;background:#CFD5DE}
+.h5-tl .it.now{color:var(--h5-ink);font-weight:500}
+.h5-tl .it.now::before{background:var(--o);box-shadow:0 0 0 3px var(--o-bg)}
+.h5-tl .it .d{font-size:12px;color:var(--h5-sub);font-variant-numeric:tabular-nums;
+  white-space:nowrap;line-height:1.35}
+.h5-tl .it .d b{display:block;font-weight:400}
+.h5-tl .it .d s{display:block;text-decoration:none;font-size:11px;opacity:.75}
+.h5-tl .it .x{grid-column:2;font-size:12px;color:var(--h5-sub);margin-top:3px;font-weight:400}
+
+/* ---------- 表单行 ---------- */
+.h5-row{display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:14px 16px;font-size:13.5px;cursor:pointer;position:relative;transition:.15s}
+.h5-row+.h5-row::before{content:"";position:absolute;left:16px;right:16px;top:0;height:1px;background:var(--h5-line)}
+.h5-row:hover{background:var(--h5-hov)}
+.h5-row .lb{color:var(--h5-ink);flex:none;font-weight:500}
+.h5-row .vl{color:var(--h5-ink2);text-align:right;flex:1;overflow:hidden;text-overflow:ellipsis}
+.h5-row .vl.mut{color:#B6BDC8}
+.h5-row .ar{color:#BFC6D1;font-size:15px;flex:none}
+.h5-tip{padding:12px 16px 16px;font-size:11.5px;color:var(--h5-sub);line-height:1.75}
+
+/* ---------- 空态 ---------- */
+.h5-empty{text-align:center;padding:76px 24px;color:var(--h5-sub);font-size:13px}
+.h5-empty::before{content:"";display:block;width:52px;height:52px;margin:0 auto 16px;
+  border-radius:50%;border:1px solid var(--h5-line);background:var(--h5-hov)}
+
+/* ---------- 选择项 ---------- */
+.h5-pick{display:flex;align-items:center;gap:12px;padding:15px 16px;cursor:pointer;
+  font-size:13.5px;position:relative;transition:.15s}
+.h5-pick+.h5-pick::before{content:"";position:absolute;left:16px;right:16px;top:0;height:1px;background:var(--h5-line)}
+.h5-pick:hover{background:var(--h5-hov)}
+.h5-pick .bx{width:20px;height:20px;border-radius:50%;border:1.5px solid var(--h5-bd-h);flex:none;
+  position:relative;transition:.15s}
+.h5-pick.on .bx{border-color:var(--o);background:var(--o)}
+.h5-pick.on .bx::after{content:"";position:absolute;left:6.5px;top:3.5px;width:5px;height:9px;
+  border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg)}
+.h5-pick .gr{flex:1;font-weight:500}
+.h5-pick .gr s{display:block;text-decoration:none;font-size:11.5px;color:var(--h5-sub);
+  margin-top:3px;font-weight:400;line-height:1.7}
+.h5-pick .am{color:var(--h5-ink);font-size:15px;font-weight:600;letter-spacing:-.2px;
+  font-variant-numeric:tabular-nums}
+.h5-pick.dis{opacity:.4;cursor:not-allowed}
+.h5-pick.dis:hover{background:transparent}
+
+/* ---------- 状态标签在 H5 内的适配 ---------- */
+.ph-body.h5 .tag{border-radius:3px;font-size:10.5px;padding:2.5px 8px;font-weight:500;letter-spacing:.3px}
+
+/* ============================================================
+   小程序形态 v4：底部 TabBar / 金刚位 / 客服会话 / 个人中心
+   ============================================================ */
+
+/* ---------- 底部 TabBar ---------- */
+.phone.has-tab .ph-body{padding-bottom:6px}
+.ph-tab{flex:none;display:flex;background:rgba(255,255,255,.94);backdrop-filter:saturate(180%) blur(14px);
+  border-top:1px solid var(--h5-line);padding:6px 0 9px}
+.ph-tab a{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;
+  color:#9AA2AF;cursor:pointer;text-decoration:none;transition:.15s;position:relative;padding:2px 0}
+.ph-tab a svg{width:22px;height:22px;stroke-width:1.6}
+.ph-tab a span{font-size:10.5px;letter-spacing:.2px;line-height:1}
+.ph-tab a:hover{color:var(--h5-ink2)}
+.ph-tab a.on{color:var(--o)}
+.ph-tab a.on svg{stroke-width:1.9}
+.ph-tab a em{position:absolute;top:-1px;left:calc(50% + 6px);min-width:15px;height:15px;
+  border-radius:9px;background:var(--o);color:#fff;font-style:normal;font-size:10px;
+  line-height:15px;text-align:center;padding:0 4px;font-weight:600;box-shadow:0 0 0 2px #fff}
+
+/* ---------- 首页横幅升级 ---------- */
+.h5-banner .cap s{margin:0 0 7px;opacity:.72}
+.h5-banner .cap u{display:block;text-decoration:none;font-size:11.5px;opacity:.82;margin-top:8px;line-height:1.6}
+
+/* ---------- 金刚位 ---------- */
+.h5-kong{display:grid;grid-template-columns:repeat(5,1fr);gap:2px;margin:14px 14px 2px;
+  background:#fff;border-radius:var(--h5-r);border:1px solid var(--h5-line);
+  box-shadow:var(--h5-sd);padding:15px 4px 13px}
+.h5-kong-i{display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;
+  text-decoration:none;transition:.15s;padding:2px 1px}
+.h5-kong-i i{width:38px;height:38px;border-radius:11px;background:var(--o-bg);color:var(--o);
+  display:flex;align-items:center;justify-content:center;transition:.18s}
+.h5-kong-i i svg{width:19px;height:19px}
+.h5-kong-i b{font-size:11.5px;font-weight:600;color:var(--h5-ink);letter-spacing:-.2px;white-space:nowrap}
+.h5-kong-i s{text-decoration:none;font-size:9.5px;color:var(--h5-sub);white-space:nowrap;
+  transform:scale(.94);letter-spacing:0}
+.h5-kong-i:hover i{background:var(--o);color:#fff;transform:translateY(-2px)}
+
+/* ---------- 服务承诺 ---------- */
+.h5-why{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--h5-line);
+  border-top:1px solid var(--h5-line)}
+.h5-why div{background:#fff;padding:14px 15px}
+.h5-why b{display:block;font-family:var(--h5-serif);font-size:14.5px;font-weight:600;color:var(--h5-ink)}
+.h5-why s{display:block;text-decoration:none;font-size:11px;color:var(--h5-sub);
+  line-height:1.65;margin-top:5px}
+
+/* ---------- 品牌页脚 ---------- */
+.h5-brand{text-align:center;padding:26px 30px 14px;font-family:var(--h5-serif);
+  font-size:13px;color:var(--h5-sub);letter-spacing:.6px}
+.h5-brand s{display:block;text-decoration:none;font-family:inherit;font-size:10.5px;
+  color:#B6BDC8;margin-top:7px;line-height:1.7;letter-spacing:0}
+
+/* ---------- 国家筛选 chips ---------- */
+.h5-chips{display:flex;gap:7px;overflow-x:auto;padding:11px 14px;background:#fff;
+  position:sticky;top:0;z-index:6}
+.h5-chips::-webkit-scrollbar{height:0}
+.h5-chips a{flex:none;padding:6px 14px;border-radius:20px;font-size:12.5px;cursor:pointer;
+  text-decoration:none;background:var(--h5-fill);color:var(--h5-ink2);transition:.15s;white-space:nowrap}
+.h5-chips a:hover{background:var(--h5-fill-h)}
+.h5-chips a.on{background:var(--h5-ink);color:#fff;font-weight:500}
+.h5-fbar{top:0}
+.h5-cnt{padding:13px 16px 2px;font-size:11.5px;color:var(--h5-sub)}
+.h5-cnt b{color:var(--h5-ink);font-weight:600}
+
+/* ---------- 客服 ---------- */
+.h5-svc-hd{display:flex;align-items:center;gap:11px;padding:14px 16px;background:#fff;
+  box-shadow:inset 0 -1px 0 var(--h5-line)}
+.h5-svc-hd .av{width:40px;height:40px;border-radius:50%;background:var(--o);color:#fff;flex:none;
+  display:flex;align-items:center;justify-content:center;font-family:var(--h5-serif);
+  font-size:17px;font-weight:600}
+.h5-svc-hd b{display:block;font-size:14px;font-weight:600;letter-spacing:-.2px}
+.h5-svc-hd s{display:flex;align-items:center;gap:5px;text-decoration:none;font-size:11.5px;
+  color:var(--h5-sub);margin-top:3px}
+.h5-svc-hd s .dot{width:6px;height:6px;border-radius:50%;background:#16A34A;display:inline-block}
+.h5-svc-hd>div{flex:1;min-width:0}
+.h5-chat{padding:16px 14px 4px;display:flex;flex-direction:column;gap:13px}
+.h5-chat .bb{display:flex;gap:8px;align-items:flex-start;max-width:100%}
+.h5-chat .bb i{width:28px;height:28px;border-radius:50%;background:var(--o);color:#fff;flex:none;
+  font-style:normal;font-size:12px;display:flex;align-items:center;justify-content:center;
+  font-family:var(--h5-serif);font-weight:600;margin-top:2px}
+.h5-chat .bb p{margin:0;background:#fff;border:1px solid var(--h5-line);border-radius:3px 11px 11px 11px;
+  padding:11px 13px;font-size:13px;line-height:1.72;color:var(--h5-ink);max-width:78%;
+  box-shadow:var(--h5-sd)}
+.h5-chat .bb.u{justify-content:flex-end}
+.h5-chat .bb.u p{background:var(--o);border-color:var(--o);color:#fff;border-radius:11px 3px 11px 11px}
+.h5-quick{display:flex;flex-wrap:wrap;gap:8px;padding:2px 16px 6px}
+.h5-quick a{padding:8px 13px;border:1px solid var(--h5-line);border-radius:18px;background:#fff;
+  font-size:12.5px;color:var(--h5-ink2);cursor:pointer;text-decoration:none;transition:.15s}
+.h5-quick a:hover{border-color:var(--o);color:var(--o);background:var(--o-bg)}
+
+/* ---------- 个人中心 ---------- */
+.h5-me{display:flex;align-items:center;gap:14px;padding:22px 18px 24px;
+  background:linear-gradient(150deg,#151A22 0%,#2A2F3A 55%,var(--o-d) 135%);color:#fff}
+.h5-me .av{width:52px;height:52px;border-radius:50%;flex:none;background:rgba(255,255,255,.14);
+  border:1px solid rgba(255,255,255,.22);display:flex;align-items:center;justify-content:center;
+  font-family:var(--h5-serif);font-size:21px;font-weight:600}
+.h5-me .tx b{display:block;font-family:var(--h5-serif);font-size:19px;font-weight:600;letter-spacing:.2px}
+.h5-me .tx s{display:block;text-decoration:none;font-size:11.5px;opacity:.68;margin-top:5px;letter-spacing:.4px}
+.h5-sec:has(.h5-cells){margin-top:-14px;position:relative;z-index:3}
+.h5-cells{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--h5-line)}
+.h5-cell{background:#fff;padding:16px 4px 14px;text-align:center;cursor:pointer;
+  text-decoration:none;transition:.15s}
+.h5-cell b{display:block;font-size:21px;font-weight:600;color:var(--h5-ink);letter-spacing:-.5px;
+  font-variant-numeric:tabular-nums;line-height:1}
+.h5-cell s{display:block;text-decoration:none;font-size:11px;color:var(--h5-sub);margin-top:6px}
+.h5-cell:hover{background:var(--h5-hov)}
+.h5-cell:hover b{color:var(--o)}
+.h5-alert{padding:15px 16px;cursor:pointer;background:var(--o-bg);position:relative;transition:.15s}
+.h5-alert:hover{background:#FDE6E2}
+.h5-alert b{display:block;font-size:13.5px;font-weight:600;color:var(--o-d)}
+.h5-alert s{display:block;text-decoration:none;font-size:11.5px;color:var(--h5-ink2);margin-top:4px}
+.h5-alert em{position:absolute;right:16px;top:50%;transform:translateY(-50%);font-style:normal;
+  font-size:12px;color:var(--o);font-weight:600}
+/* 订单状态过滤条上的计数 */
+.h5-fbar a u{text-decoration:none;font-size:10px;margin-left:3px;color:var(--h5-sub);
+  font-variant-numeric:tabular-nums}
+.h5-fbar a.on u{color:var(--o)}
+
+/* ============================================================
+   v4 字阶收敛：原衬线位改为无衬线，靠字重 + 负字距建立层级
+   ============================================================ */
+.h5-h{font-size:17px;font-weight:700;letter-spacing:-.4px;padding:20px 16px 10px;color:var(--h5-ink)}
+.h5-banner .cap b{font-size:22px;font-weight:700;letter-spacing:-.6px;line-height:1.28}
+.h5-tile b{font-size:14px;font-weight:600;letter-spacing:-.3px}
+.h5-cbar b{font-size:18px;font-weight:700;letter-spacing:-.5px}
+.h5-title .n{font-size:19px;font-weight:700;line-height:1.4;letter-spacing:-.5px}
+.h5-pkg .nm{font-size:15px;font-weight:600;letter-spacing:-.3px}
+.h5-note b{font-size:14px;font-weight:700;letter-spacing:-.3px}
+.h5-ord .nm{font-size:15px;font-weight:600;line-height:1.45;letter-spacing:-.3px;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.h5-why b{font-size:14px;font-weight:700;letter-spacing:-.3px}
+.h5-me .tx b{font-size:19px;font-weight:700;letter-spacing:-.5px}
+.h5-brand{font-size:12.5px;letter-spacing:.4px}
+.h5-svc-hd .av,.h5-chat .bb i,.h5-me .av{font-family:inherit;font-weight:700;letter-spacing:-.3px}
+
+/* 两行式列表项：标题在上、说明在下，避免右列长文本挤成三行 */
+.h5-row .vl{white-space:nowrap}
+.h5-row.two{align-items:flex-start;padding:13px 16px}
+.h5-row.two .lb{flex:1;min-width:0;font-size:14px;font-weight:600;letter-spacing:-.2px}
+.h5-row.two .lb s{display:block;text-decoration:none;font-size:12px;font-weight:400;
+  color:var(--h5-sub);margin-top:4px;line-height:1.55;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.h5-row.two .ar{margin-top:2px}
+
+/* 控件质感 */
+.h5-btn{border-radius:8px;padding:8px 16px}
+.ph-foot.h5f .cta{border-radius:10px}
+.h5-opt,.h5-pkg{border-radius:10px}
+.h5-search{border-radius:9px;height:38px}
+.h5-tabs{border-radius:10px}
+.h5-tabs a{border-radius:8px}
+.h5-tile{border-radius:11px}
+.h5-prod .thumb{border-radius:9px}
+.h5-cbar .flag{border-radius:10px}
+.h5-kv{border-radius:10px}
+
+/* ============================================================
+   v5 · 境外游消费级门面：沉浸式渐变头图 / 运营位 / 榜单式产品卡
+   参照携程一类 OTA 的营销语言，主视觉走深蓝→青渐变（国际线气质），
+   CTA 用珊瑚橙形成唯一高饱和落点。
+   ============================================================ */
+:root{
+  --c-grad:linear-gradient(135deg,#1B54F0 0%,#2E8BF5 46%,#12B8C9 100%);
+  --c-cta:#FF5A2D; --c-cta-d:#E8441A;
+  --c-cta-grad:linear-gradient(135deg,#FF7A3D 0%,#FF4D2E 100%);
+}
+
+/* ---------- 沉浸式头图 ---------- */
+.h5-hd{position:relative;background:var(--c-grad);padding:0 0 54px;overflow:hidden}
+.h5-hd::before{content:"";position:absolute;right:-70px;top:-90px;width:250px;height:250px;
+  border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.30),rgba(255,255,255,0) 68%)}
+.h5-hd::after{content:"";position:absolute;left:-60px;bottom:-40px;width:200px;height:200px;
+  border-radius:50%;background:radial-gradient(circle,rgba(0,255,214,.24),rgba(255,255,255,0) 70%)}
+.h5-hd>*{position:relative;z-index:2}
+.h5-hd .bar{display:flex;align-items:center;justify-content:space-between;
+  padding:12px 16px 0;color:#fff;font-size:13px}
+.h5-hd .bar .loc{display:flex;align-items:center;gap:4px;font-weight:600;cursor:pointer}
+.h5-hd .bar .loc::after{content:"⌄";opacity:.8;position:relative;top:-1px}
+.h5-hd .bar .rt{font-size:11.5px;opacity:.86;letter-spacing:.6px}
+.h5-hd .ttl{padding:16px 18px 0;color:#fff}
+.h5-hd .ttl b{display:block;font-size:25px;font-weight:800;letter-spacing:-1.1px;line-height:1.26;
+  text-shadow:0 2px 14px rgba(0,32,80,.22)}
+.h5-hd .ttl b em{font-style:normal;background:linear-gradient(180deg,#FFF 30%,#CFF3FF);
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+.h5-hd .ttl s{display:block;text-decoration:none;font-size:12.5px;opacity:.88;margin-top:9px;line-height:1.6}
+.h5-hd .sb{display:flex;align-items:center;gap:8px;margin:15px 16px 0;height:46px;
+  border-radius:23px;background:#fff;padding:0 6px 0 16px;
+  box-shadow:0 10px 26px -12px rgba(0,32,90,.45)}
+.h5-hd .sb i{flex:none;width:15px;height:15px;border:1.8px solid #9AA6B8;border-radius:50%;
+  box-shadow:2px 3px 0 -1px #9AA6B8}
+.h5-hd .sb span{flex:1;font-size:13.5px;color:var(--h5-sub)}
+.h5-hd .sb button{flex:none;height:34px;padding:0 18px;border:0;border-radius:17px;
+  background:var(--c-cta-grad);color:#fff;font-size:13.5px;font-weight:700;cursor:pointer;
+  box-shadow:0 4px 12px -4px rgba(255,77,46,.6)}
+.h5-lift{margin-top:-42px;position:relative;z-index:3}
+
+/* ---------- 运营位（本期热推） ---------- */
+.h5-promo{display:flex;gap:10px;margin:0 14px}
+.h5-promo a{flex:1;min-width:0;position:relative;border-radius:14px;padding:13px 13px 12px;
+  background:linear-gradient(158deg,#FFF7F3 0%,#FFEBE1 100%);border:1px solid #FFDACB;
+  cursor:pointer;text-decoration:none;overflow:hidden;transition:.16s}
+.h5-promo a:hover{transform:translateY(-2px);box-shadow:0 12px 24px -14px rgba(255,90,45,.55)}
+.h5-promo a::after{content:"";position:absolute;right:-16px;top:-16px;width:56px;height:56px;
+  border-radius:50%;background:rgba(255,122,61,.10)}
+.h5-promo .k{font-size:10.5px;color:var(--c-cta-d);font-weight:700;letter-spacing:.6px}
+.h5-promo .v{display:flex;align-items:baseline;gap:2px;margin-top:5px;color:var(--c-cta)}
+.h5-promo .v i{font-style:normal;font-size:13px;font-weight:700}
+.h5-promo .v b{font-size:27px;font-weight:800;letter-spacing:-1.4px;line-height:1;
+  font-variant-numeric:tabular-nums}
+.h5-promo .v u{text-decoration:none;font-size:11px;font-weight:600;margin-left:2px;opacity:.8}
+.h5-promo .d{font-size:11px;color:var(--h5-ink2);margin-top:7px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.h5-promo .go{display:inline-block;margin-top:9px;font-size:11.5px;font-weight:700;color:#fff;
+  background:var(--c-cta-grad);border-radius:12px;padding:4px 13px}
+
+/* ---------- 金刚位：渐变图标 ---------- */
+.h5-kong{grid-template-columns:repeat(5,1fr);padding:16px 4px 14px;border-radius:16px;
+  box-shadow:0 2px 6px rgba(13,17,23,.04),0 18px 34px -26px rgba(13,17,23,.34)}
+.h5-kong-i i{width:42px;height:42px;border-radius:14px;color:#fff;
+  box-shadow:0 6px 12px -6px rgba(13,17,23,.4)}
+.h5-kong-i i svg{width:20px;height:20px}
+.h5-kong-i:nth-child(1) i{background:linear-gradient(140deg,#4F8BFF,#1B54F0)}
+.h5-kong-i:nth-child(2) i{background:linear-gradient(140deg,#3FD0C9,#0FA5A0)}
+.h5-kong-i:nth-child(3) i{background:linear-gradient(140deg,#FFA24D,#FF7A3D)}
+.h5-kong-i:nth-child(4) i{background:linear-gradient(140deg,#A98BFF,#7A54EF)}
+.h5-kong-i:nth-child(5) i{background:linear-gradient(140deg,#FF7E9D,#F0426A)}
+.h5-kong-i:hover i{background-image:none;background-color:var(--h5-ink);transform:translateY(-3px)}
+.h5-kong-i b{font-size:12px;font-weight:600}
+
+/* ---------- 国家快选 ---------- */
+.h5-cpick{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:2px 16px 18px}
+.h5-cpick a{position:relative;border-radius:11px;overflow:hidden;height:58px;cursor:pointer;
+  text-decoration:none;background:#20242C center/cover no-repeat;transition:.18s}
+.h5-cpick a::after{content:"";position:absolute;inset:0;
+  background:linear-gradient(180deg,rgba(8,14,26,0) 34%,rgba(8,14,26,.62) 100%)}
+.h5-cpick a:hover{transform:translateY(-2px);box-shadow:0 10px 18px -10px rgba(13,17,23,.5)}
+.h5-cpick b{position:absolute;left:0;right:0;bottom:5px;z-index:2;text-align:center;color:#fff;
+  font-size:12.5px;font-weight:600;letter-spacing:-.2px;text-shadow:0 1px 4px rgba(0,0,0,.4)}
+.h5-cpick s{position:absolute;left:5px;top:5px;z-index:2;text-decoration:none;font-size:9.5px;
+  color:#fff;background:rgba(255,90,45,.92);border-radius:8px;padding:1px 6px;font-weight:600}
+.h5-cpick a{height:64px}
+.h5-cpick a.off{filter:grayscale(1);opacity:.5;pointer-events:none}
+.h5-cpick a.off s{background:rgba(13,17,23,.55);font-weight:400}
+
+/* ---------- 榜单标题 ---------- */
+.h5-rank{display:flex;align-items:center;justify-content:space-between;padding:20px 16px 12px}
+.h5-rank b{display:flex;align-items:center;gap:8px;font-size:18px;font-weight:800;letter-spacing:-.6px}
+.h5-rank b::before{content:"";width:4px;height:17px;border-radius:3px;background:var(--c-cta-grad)}
+.h5-rank s{text-decoration:none;font-size:12px;color:var(--h5-sub);cursor:pointer}
+.h5-rank s:hover{color:var(--c-cta)}
+
+/* ---------- 榜单式产品卡 ---------- */
+.h5-pcard{display:flex;gap:12px;margin:0 14px 11px;padding:12px;background:#fff;
+  border-radius:16px;border:1px solid var(--h5-line);cursor:pointer;transition:.18s;
+  box-shadow:0 2px 5px rgba(13,17,23,.03),0 16px 30px -26px rgba(13,17,23,.42)}
+.h5-pcard:hover{transform:translateY(-2px);border-color:#CFDAEB;
+  box-shadow:0 4px 10px rgba(13,17,23,.05),0 20px 34px -22px rgba(13,17,23,.45)}
+.h5-pcard .th{width:100px;height:104px;flex:none;border-radius:12px;overflow:hidden;position:relative;
+  background:#e8eaee center/cover no-repeat}
+.h5-pcard .th em{position:absolute;left:0;top:7px;z-index:2;font-style:normal;font-size:9.5px;
+  color:#fff;background:var(--c-cta-grad);padding:2px 7px;border-radius:0 9px 9px 0;font-weight:600}
+.h5-pcard .th u{position:absolute;left:6px;bottom:6px;z-index:2;text-decoration:none;font-size:9.5px;
+  color:#fff;background:rgba(10,16,28,.56);backdrop-filter:blur(6px);padding:2px 7px;border-radius:9px}
+.h5-pcard .in{flex:1;min-width:0;display:flex;flex-direction:column}
+.h5-pcard .nm{font-size:14.5px;font-weight:700;line-height:1.42;letter-spacing:-.3px;color:var(--h5-ink);
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.h5-pcard .cz{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
+.h5-pcard .cz span{font-size:10px;color:#2E6BD6;background:#EDF3FE;border-radius:4px;
+  padding:2px 7px;line-height:1.55;white-space:nowrap}
+.h5-pcard .bt{display:flex;align-items:flex-end;justify-content:space-between;gap:8px;
+  margin-top:auto;padding-top:9px}
+.h5-pcard .pr{display:flex;align-items:baseline;gap:3px;color:var(--c-cta);min-width:0}
+.h5-pcard .pr i{font-style:normal;font-size:13px;font-weight:700}
+.h5-pcard .pr b{font-size:23px;font-weight:800;letter-spacing:-1.2px;line-height:1;
+  font-variant-numeric:tabular-nums}
+.h5-pcard .pr u{text-decoration:none;font-size:11px;color:var(--h5-sub);font-weight:400;margin-left:1px}
+.h5-pcard .go{flex:none;border:0;border-radius:15px;height:30px;padding:0 17px;color:#fff;
+  background:var(--c-cta-grad);font-size:12.5px;font-weight:700;cursor:pointer;
+  box-shadow:0 5px 12px -5px rgba(255,77,46,.65)}
+.h5-pcard .go:active{transform:scale(.96)}
+
+/* ---------- 服务承诺条 ---------- */
+.h5-trust{display:flex;gap:8px;margin:2px 14px 4px;padding:12px 10px;background:#fff;
+  border-radius:14px;border:1px solid var(--h5-line)}
+.h5-trust div{flex:1;text-align:center;min-width:0}
+.h5-trust b{display:block;font-size:12px;font-weight:700;letter-spacing:-.2px;color:var(--h5-ink)}
+.h5-trust s{display:block;text-decoration:none;font-size:10px;color:var(--h5-sub);margin-top:3px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* ===== v6 · 列表页 / 详情页 消费级门面 ===== */
+.h5-chero{position:relative;height:152px;background-size:cover;background-position:center;
+  display:flex;align-items:flex-end}
+.h5-chero::after{content:"";position:absolute;inset:0;
+  background:linear-gradient(180deg,rgba(10,22,48,.10) 0%,rgba(10,22,48,.30) 42%,rgba(10,22,48,.80) 100%)}
+.h5-chero .tx{position:relative;z-index:2;padding:0 16px 26px;color:#fff}
+.h5-chero .tx b{display:block;font-size:24px;font-weight:800;letter-spacing:-1px;
+  text-shadow:0 2px 12px rgba(0,20,50,.35)}
+.h5-chero .tx s{display:block;text-decoration:none;font-size:12.5px;opacity:.92;margin-top:5px}
+.h5-chero .cz{display:flex;gap:6px;margin-top:9px}
+.h5-chero .cz span{font-size:10.5px;padding:3px 8px;border-radius:5px;
+  background:rgba(255,255,255,.20);backdrop-filter:blur(6px)}
+.h5-fbar.lift{position:relative;z-index:3;margin:-14px 12px 12px;border-radius:12px;
+  background:#fff;border:0;padding:5px;display:flex;gap:4px;
+  box-shadow:0 8px 22px -14px rgba(10,22,48,.42)}
+.h5-fbar.lift a{flex:1;text-align:center;border-radius:8px;padding:8px 0;font-size:12.5px;
+  color:var(--h5-ink2);font-weight:500}
+.h5-fbar.lift a.on{background:var(--h5-fill);color:var(--h5-ink);font-weight:700}
+.h5-sec.plain{background:transparent;border:0;box-shadow:none;padding:0;margin:0 0 10px}
+.h5-dprice{display:flex;align-items:center;justify-content:space-between;
+  margin:-16px 14px 10px;position:relative;z-index:3;padding:13px 15px;border-radius:14px;
+  background:linear-gradient(135deg,#FFF3EE 0%,#FFE6DC 100%);border:1px solid #FFD6C6;
+  box-shadow:0 10px 24px -18px rgba(200,60,20,.55)}
+.h5-dprice .l{display:flex;align-items:baseline;color:var(--c-cta)}
+.h5-dprice .l i{font-style:normal;font-size:14px;font-weight:700;margin-right:1px}
+.h5-dprice .l b{font-size:28px;font-weight:800;letter-spacing:-1.4px;line-height:1}
+.h5-dprice .l u{text-decoration:none;font-size:12px;color:#B4553A;margin-left:5px}
+.h5-dprice .r{display:flex;gap:6px}
+.h5-dprice .r span{font-size:10.5px;color:#B4553A;background:rgba(255,255,255,.72);
+  border-radius:5px;padding:3px 8px}
+.h5-title.plain{background:#fff;border-radius:14px;margin:0 14px 10px;padding:14px 15px;
+  box-shadow:var(--h5-sd)}
+.h5-title.plain .n{font-size:16px;font-weight:700;letter-spacing:-.4px;line-height:1.45;color:var(--h5-ink)}
+.h5-title.plain .cz{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.h5-title.plain .cz span{font-size:10.5px;color:#2E6BD6;background:#EDF3FE;border-radius:4px;padding:3px 8px}
+.h5-lbar{background:var(--c-grad);padding:18px 16px 20px;color:#fff}
+.h5-lbar b{display:block;font-size:20px;font-weight:800;letter-spacing:-.8px}
+.h5-lbar s{display:block;text-decoration:none;font-size:12px;opacity:.9;margin-top:4px}
+.h5-chips{margin-top:-8px;position:relative;z-index:3;padding:0 12px}
+.h5-fbar.lift.flat{margin:10px 12px 12px;box-shadow:none;border:1px solid var(--h5-line)}
+.h5-fbar.lift{top:auto}
+
+/* ============================================================
+   v7 首页重做：对齐主流 OTA 签证频道骨架
+   照片头图 → 搜索胶囊 → 服务入口 → 圆形目的地 → 洲际 Tab 国家列表
+   配色纪律：蓝为唯一主色，橙红只出现在价格与主 CTA
+   ============================================================ */
+.h5-hero{position:relative;height:196px;background-size:cover;background-position:center 42%;
+  display:flex;align-items:flex-end;padding:0 0 30px}
+.h5-hero::after{content:"";position:absolute;inset:0;
+  background:linear-gradient(178deg,rgba(8,20,44,.62) 0%,rgba(8,20,44,.22) 34%,rgba(8,20,44,.78) 100%)}
+.h5-hero .tx{position:relative;z-index:2;padding:0 18px;color:#fff;width:100%}
+.h5-hero .bar{position:absolute;top:-158px;left:18px;right:18px;display:flex;
+  align-items:center;justify-content:space-between;font-size:12.5px;color:rgba(255,255,255,.9)}
+.h5-hero .bar .loc{font-weight:600;font-size:13.5px}
+.h5-hero .bar .loc::after{content:"▾";margin-left:3px;font-size:10px;opacity:.8}
+.h5-hero .bar .rt{letter-spacing:.4px;opacity:.82}
+.h5-hero b{display:block;font-size:26px;font-weight:800;letter-spacing:-1.2px;line-height:1.15;
+  text-shadow:0 2px 16px rgba(0,16,40,.45)}
+.h5-hero s{display:block;text-decoration:none;margin-top:7px;font-size:12.5px;
+  color:rgba(255,255,255,.88);letter-spacing:-.1px}
+
+/* 搜索胶囊：压出头图 */
+.h5-sbar{position:relative;z-index:3;margin:-22px 14px 0;height:46px;background:#fff;
+  border-radius:23px;display:flex;align-items:center;gap:9px;padding:0 6px 0 16px;
+  box-shadow:0 10px 26px -14px rgba(8,20,44,.45),0 1px 3px rgba(8,20,44,.08);cursor:pointer}
+.h5-sbar i{width:16px;height:16px;flex:none;border:1.7px solid var(--h5-sub);border-radius:50%;
+  position:relative}
+.h5-sbar i::after{content:"";position:absolute;right:-5px;bottom:-3px;width:7px;height:1.7px;
+  background:var(--h5-sub);transform:rotate(45deg);border-radius:1px}
+.h5-sbar span{flex:1;font-size:14px;color:var(--h5-sub)}
+.h5-sbar button{border:0;height:34px;padding:0 18px;border-radius:17px;background:var(--o);
+  color:#fff;font-size:13.5px;font-weight:600;cursor:pointer;font-family:inherit}
+
+/* 服务入口：单色线性，四等分，去掉彩色渐变方块 */
+.h5-kong{display:grid;grid-template-columns:repeat(4,1fr);padding:18px 8px 4px;background:transparent}
+.h5-kong-i{display:flex;flex-direction:column;align-items:center;gap:7px;cursor:pointer;
+  text-decoration:none}
+.h5-kong-i i{width:42px;height:42px;border-radius:13px;background:#fff;display:flex;
+  align-items:center;justify-content:center;color:#1B6EF3;box-shadow:var(--h5-sd)}
+.h5-kong-i i svg{width:21px;height:21px}
+.h5-kong-i b{font-size:12.5px;font-weight:500;color:var(--h5-ink2);letter-spacing:-.2px}
+.h5-kong-i:active i{transform:scale(.95)}
+
+/* 圆形目的地入口：横向滚动 */
+.h5-quick{display:flex;gap:14px;overflow-x:auto;padding:16px 14px 4px;scrollbar-width:none}
+.h5-quick::-webkit-scrollbar{display:none}
+.h5-quick a{flex:none;width:60px;display:flex;flex-direction:column;align-items:center;gap:6px;
+  cursor:pointer;text-decoration:none}
+.h5-quick a i{width:54px;height:54px;border-radius:50%;background-size:cover;background-position:center;
+  box-shadow:0 4px 14px -6px rgba(8,20,44,.45);border:2px solid #fff}
+.h5-quick a b{font-size:12.5px;font-weight:600;color:var(--h5-ink);letter-spacing:-.2px}
+.h5-quick a s{text-decoration:none;font-size:11px;color:var(--o);font-weight:600;
+  font-variant-numeric:tabular-nums}
+.h5-quick a:active i{transform:scale(.95)}
+
+/* 洲际 Tab + 国家列表行 */
+.h5-cont{background:#fff;margin:0 14px 4px;border-radius:var(--h5-r);border:1px solid var(--h5-line);
+  box-shadow:var(--h5-sd);overflow:hidden}
+.h5-cont .tb{display:flex;gap:4px;padding:12px 12px 4px;overflow-x:auto;scrollbar-width:none}
+.h5-cont .tb::-webkit-scrollbar{display:none}
+.h5-cont .tb a{flex:none;padding:6px 14px;border-radius:15px;font-size:13px;color:var(--h5-ink2);
+  cursor:pointer;background:var(--h5-fill)}
+.h5-cont .tb a.on{background:#1B6EF3;color:#fff;font-weight:600}
+.h5-cont .rows{padding:6px 0 4px}
+.h5-crow{display:flex;align-items:center;gap:12px;padding:11px 14px;cursor:pointer;
+  text-decoration:none;border-bottom:1px solid var(--h5-line)}
+.h5-cont .rows .h5-crow:last-child{border-bottom:0}
+.h5-crow i{width:52px;height:52px;flex:none;border-radius:10px;background-size:cover;
+  background-position:center}
+.h5-crow .tx{flex:1;min-width:0}
+.h5-crow .tx b{display:block;font-size:15px;font-weight:600;color:var(--h5-ink);letter-spacing:-.3px}
+.h5-crow .tx s{display:block;text-decoration:none;margin-top:4px;font-size:11.5px;
+  color:var(--h5-sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.h5-crow .pr{flex:none;text-align:right;color:var(--o)}
+.h5-crow .pr b{font-size:17px;font-weight:800;letter-spacing:-.6px;font-variant-numeric:tabular-nums}
+.h5-crow .pr s{text-decoration:none;font-size:11px;margin-left:1px}
+.h5-crow .pr::after{content:"›";display:inline-block;margin-left:6px;color:var(--h5-sub);
+  font-size:16px;vertical-align:1px}
+.h5-crow .pr.off{font-size:12px;color:var(--h5-sub);font-weight:500}
+.h5-crow.off{cursor:default}
+.h5-crow.off i{filter:grayscale(1);opacity:.55}
+.h5-crow.off .tx b{color:var(--h5-ink2)}
+.h5-crow:not(.off):active{background:var(--h5-hov)}
+
+/* 服务保障：压到榜单之后，一行四格，克制 */
+.h5-trust{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--h5-line);
+  margin:12px 14px;border-radius:var(--h5-r);overflow:hidden;border:1px solid var(--h5-line)}
+.h5-trust>div{background:#fff;padding:13px 6px;text-align:center}
+.h5-trust>div b{display:block;font-size:12.5px;font-weight:600;color:var(--h5-ink)}
+.h5-trust>div s{display:block;text-decoration:none;margin-top:4px;font-size:10.5px;
+  color:var(--h5-sub);line-height:1.4}
+/* 覆盖 v5 彩虹渐变金刚位（nth-child 特异性更高，需同级压制） */
+.h5-kong .h5-kong-i:nth-child(1) i,.h5-kong .h5-kong-i:nth-child(2) i,
+.h5-kong .h5-kong-i:nth-child(3) i,.h5-kong .h5-kong-i:nth-child(4) i,
+.h5-kong .h5-kong-i:nth-child(5) i{background:#fff;background-image:none;color:#1B6EF3;
+  box-shadow:var(--h5-sd)}
+.h5-kong .h5-kong-i:hover i{background:#EEF4FF;background-image:none;color:#1B6EF3;transform:none}
+.h5-kong .h5-kong-i s{display:none}
+/* 圆形目的地入口：压制 v4 的胶囊标签样式 */
+.h5-quick{flex-wrap:nowrap}
+.h5-quick a.qc{padding:0;border:0;background:transparent;border-radius:0}
+.h5-quick a.qc:hover{border:0;background:transparent;color:inherit}
+.h5-quick a.qc i{border-radius:50%}
+.h5-quick a.qc.off i{filter:grayscale(.85);opacity:.7}
+.h5-quick a.qc.off s{color:var(--h5-sub);font-weight:500}
+/* 头图顶栏：定位到头图本身，不跟随文字块 */
+.h5-hero .bar{position:absolute;top:12px;left:18px;right:18px;z-index:2}
+.h5-hero .tx{position:static}
+.h5-hero .tx b,.h5-hero .tx s{position:relative;z-index:2}
+.h5-cmore{padding:12px 14px 14px;font-size:11.5px;color:var(--h5-sub);text-align:center;
+  border-top:1px solid var(--h5-line)}
+.h5-hero .bar .rt{cursor:pointer}
+/* 办理流程：横向节点时间轴，替换旧的粉色圆圈网格 */
+.h5-flow2{display:flex;padding:6px 14px 18px;gap:0}
+.h5-flow2 .st{flex:1;position:relative;text-align:center;padding-top:26px}
+.h5-flow2 .st::before{content:"";position:absolute;top:11px;left:0;right:0;height:2px;
+  background:var(--h5-line)}
+.h5-flow2 .st:first-child::before{left:50%}
+.h5-flow2 .st:last-child::before{right:50%}
+.h5-flow2 .st i{position:absolute;top:0;left:50%;transform:translateX(-50%);width:22px;height:22px;
+  border-radius:50%;background:#1B6EF3;color:#fff;font-size:12px;font-weight:700;font-style:normal;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 0 0 3px #fff,0 2px 8px -3px rgba(27,110,243,.6)}
+.h5-flow2 .st s{display:block;text-decoration:none;font-size:11.5px;color:var(--h5-ink2);
+  line-height:1.45;padding:0 3px}
+
+/* ============================================================
+   v8 C 端首页：深色品牌头 + 白色内容面板（小程序质感，非传统 H5）
+   紫黑渐变 → 玫瑰红强调；内容区圆角上翻，参数四宫格产品卡
+   ============================================================ */
+:root{ --d1:#2B1B45; --d2:#1A1030; --d3:#3A1E4E; --ro:#FF3F6C; --ro2:#E0245E; }
+
+/* 手机壳适配：首页隐藏白色标题栏，状态栏转深色 */
+.phone:has(.h5-top) .ph-nav{display:none}
+.phone:has(.h5-top) .ph-bar{background:var(--d2);color:#fff}
+.ph-body.h5:has(.h5-top){background:#F4F5F7}
+
+/* ---------- 深色品牌头 ---------- */
+.h5-top{display:block;gap:0;position:relative;padding:14px 18px 30px;overflow:hidden;
+  background:linear-gradient(158deg,#3A1E4E 0%,#2B1B45 46%,#1A1030 100%)}
+.h5-top::before{content:"";position:absolute;top:-70px;right:-70px;width:230px;height:230px;
+  border-radius:50%;background:radial-gradient(circle at 38% 34%,#FF5C7A 0%,#E0245E 46%,rgba(224,36,94,0) 72%);
+  filter:blur(2px);opacity:.85}
+.h5-top>*{position:relative;z-index:2}
+.h5-top .tbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.h5-top .tbar .bk{width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.12);
+  color:#fff;display:flex;align-items:center;justify-content:center;font-size:19px;line-height:1}
+.h5-top .tbar .od{padding:6px 13px;border-radius:15px;background:rgba(255,255,255,.12);
+  color:#fff;font-size:12px;cursor:pointer;backdrop-filter:blur(6px)}
+.h5-top .tag{display:flex;align-items:center;gap:9px;margin-bottom:11px}
+.h5-top .tag em{font-style:normal;padding:3px 10px;border-radius:5px;background:var(--ro);
+  color:#fff;font-size:11px;font-weight:800;letter-spacing:1.4px}
+.h5-top .tag span{font-size:11.5px;color:rgba(255,255,255,.72)}
+.h5-top .tag span::before{content:"✓";margin-right:4px;color:#5FE0A8;font-weight:700}
+.h5-top h1{margin:0;font-size:27px;font-weight:800;color:#fff;letter-spacing:-1.2px;line-height:1.2}
+.h5-top .en{margin-top:5px;font-size:11px;letter-spacing:3.4px;color:rgba(255,255,255,.34);
+  font-weight:600}
+.h5-top .dot{margin-top:11px;font-size:11.5px;color:rgba(255,255,255,.56)}
+
+/* 数据指标条 */
+.h5-top .stat{display:grid;grid-template-columns:repeat(4,1fr);margin-top:17px;padding:14px 4px;
+  border-radius:14px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.10)}
+.h5-top .stat>div{text-align:center;position:relative}
+.h5-top .stat>div+div::before{content:"";position:absolute;left:0;top:12%;height:76%;width:1px;
+  background:rgba(255,255,255,.12)}
+.h5-top .stat b{display:block;font-size:19px;font-weight:800;letter-spacing:-.6px;color:#FF7A97;
+  font-variant-numeric:tabular-nums}
+.h5-top .stat s{display:block;text-decoration:none;margin-top:3px;font-size:10.5px;
+  color:rgba(255,255,255,.5)}
+
+/* 深色搜索条 */
+.h5-top .sch{margin-top:14px;height:42px;border-radius:12px;background:rgba(255,255,255,.09);
+  border:1px solid rgba(255,255,255,.12);display:flex;align-items:center;gap:9px;padding:0 14px;
+  cursor:pointer}
+.h5-top .sch i{width:14px;height:14px;flex:none;border:1.6px solid rgba(255,255,255,.5);
+  border-radius:50%;position:relative}
+.h5-top .sch i::after{content:"";position:absolute;right:-5px;bottom:-3px;width:7px;height:1.6px;
+  background:rgba(255,255,255,.5);transform:rotate(45deg);border-radius:1px}
+.h5-top .sch span{font-size:13px;color:rgba(255,255,255,.45)}
+
+/* ---------- 白色内容面板 ---------- */
+.h5-sheet{position:relative;z-index:3;margin-top:-18px;border-radius:20px 20px 0 0;
+  background:#F4F5F7;padding:4px 0 14px}
+.h5-sh{display:flex;align-items:baseline;gap:8px;padding:20px 16px 12px}
+.h5-sh b{font-size:17.5px;font-weight:800;color:#12121A;letter-spacing:-.6px}
+.h5-sh em{font-style:normal;font-size:10px;letter-spacing:1.6px;color:#B4B8C4;font-weight:700}
+.h5-sh s{margin-left:auto;text-decoration:none;font-size:12px;color:#8A8F9E;cursor:pointer}
+
+/* 国旗圆标 */
+.h5-flags{display:flex;gap:10px;overflow-x:auto;padding:0 14px 4px;scrollbar-width:none}
+.h5-flags::-webkit-scrollbar{display:none}
+.h5-flags a{flex:none;width:60px;display:flex;flex-direction:column;align-items:center;gap:7px;
+  cursor:pointer;position:relative}
+.h5-flags a i{width:50px;height:50px;border-radius:50%;background-size:cover;background-position:center;
+  background-color:#fff;border:2px solid #fff;box-shadow:0 4px 12px -4px rgba(20,10,40,.35)}
+.h5-flags a b{font-size:12px;font-weight:600;color:#33384A;letter-spacing:-.2px}
+.h5-flags a em{position:absolute;top:-4px;left:50%;margin-left:2px;font-style:normal;z-index:2;
+  padding:1px 5px;border-radius:7px 7px 7px 2px;background:var(--ro);color:#fff;
+  font-size:8.5px;font-weight:800;letter-spacing:.4px}
+.h5-flags a:active i{transform:scale(.94)}
+
+/* 分类胶囊 */
+.h5-cats{display:flex;gap:8px;overflow-x:auto;padding:16px 14px 12px;scrollbar-width:none}
+.h5-cats::-webkit-scrollbar{display:none}
+.h5-cats a{flex:none;padding:8px 16px;border-radius:19px;background:#fff;border:1px solid #E7E9EF;
+  font-size:13px;color:#5A6072;cursor:pointer}
+.h5-cats a.on{background:#12121A;border-color:#12121A;color:#fff;font-weight:600}
+
+/* 国家列表：暗色主题下的白卡 */
+.h5-sheet .h5-cont{margin:0 14px;border-radius:16px;border:0;box-shadow:0 2px 14px -8px rgba(20,10,40,.22)}
+.h5-sheet .h5-crow .pr{color:var(--ro2)}
+.h5-sheet .h5-cmore{color:#9298A8}
+
+/* ---------- 精选产品卡 ---------- */
+.h5-feat{padding:0 14px}
+.h5-fcard{background:#fff;border-radius:16px;padding:15px 15px 13px;margin-bottom:12px;
+  box-shadow:0 2px 16px -9px rgba(20,10,40,.26);cursor:pointer;position:relative;overflow:hidden}
+.h5-fcard::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;
+  background:linear-gradient(180deg,var(--ro),var(--ro2))}
+.h5-fcard .hd{display:flex;align-items:center;gap:11px}
+.h5-fcard .hd i{width:30px;height:30px;flex:none;border-radius:50%;background-size:cover;
+  background-position:center;background-color:#fff;box-shadow:0 1px 4px rgba(20,10,40,.18)}
+.h5-fcard .hd .nm{flex:1;min-width:0}
+.h5-fcard .hd .nm b{display:block;font-size:15.5px;font-weight:700;color:#12121A;letter-spacing:-.4px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.h5-fcard .hd .nm s{display:block;text-decoration:none;margin-top:3px;font-size:11px;color:#9298A8;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.h5-fcard .hd em{flex:none;font-style:normal;padding:3px 8px;border-radius:6px;background:#FFEDF2;
+  color:var(--ro2);font-size:10.5px;font-weight:700}
+.h5-fcard .hd em.ins{background:#E9F7F1;color:#0E9E6E}
+.h5-fcard .gd{display:grid;grid-template-columns:repeat(4,1fr);margin:13px 0 12px;padding:11px 0;
+  border-top:1px solid #F0F1F5;border-bottom:1px solid #F0F1F5}
+.h5-fcard .gd>div{text-align:center;position:relative}
+.h5-fcard .gd>div+div::before{content:"";position:absolute;left:0;top:8%;height:84%;width:1px;
+  background:#F0F1F5}
+.h5-fcard .gd s{display:block;text-decoration:none;font-size:10.5px;color:#9EA3B2}
+.h5-fcard .gd b{display:block;margin-top:4px;font-size:13px;font-weight:700;color:#22252F;
+  letter-spacing:-.3px}
+/* 列表卡上的套餐行（2026-09-07）。价格与时效必须成对显示，
+   原来卡片只给「¥X 起 · 最快 N 天」，两个数来自不同套餐，客人按哪个点进来都对不上。 */
+.h5-pks{margin:0 0 12px;border:1px solid #F0F1F5;border-radius:11px;overflow:hidden}
+.h5-pk{display:flex;align-items:center;gap:8px;padding:9px 11px;background:#FBFBFD}
+.h5-pk+.h5-pk{border-top:1px solid #F0F1F5}
+.h5-pk b{flex:1;min-width:0;font-size:12.5px;font-weight:600;color:#22252F;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.h5-pk s{flex:none;text-decoration:none;font-size:11px;color:#8B90A0}
+.h5-pk i{flex:none;font-style:normal;font-size:14px;font-weight:800;color:var(--ro2);
+  font-variant-numeric:tabular-nums}
+.h5-pkm{display:block;padding:8px 11px;border-top:1px solid #F0F1F5;background:#fff;
+  font-size:11.5px;color:#8B90A0;text-align:center}
+.h5-fcard .ft{display:flex;align-items:flex-end;justify-content:space-between;gap:10px}
+.h5-fcard .pz{min-width:0;flex:1}
+.h5-fcard .pz>s{display:block;text-decoration:none;font-size:10.5px;color:#A8ACB8;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.h5-fcard .pr{margin-top:3px;color:var(--ro2);display:flex;align-items:baseline}
+.h5-fcard .pr i{font-style:normal;font-size:13px;font-weight:700}
+.h5-fcard .pr b{font-size:25px;font-weight:800;letter-spacing:-1.2px;font-variant-numeric:tabular-nums}
+.h5-fcard .pr u{text-decoration:none;margin-left:2px;font-size:11px;color:#A8ACB8;font-weight:500}
+.h5-fcard .go{flex:none;border:0;height:38px;padding:0 20px;border-radius:19px;color:#fff;
+  font-size:13.5px;font-weight:600;cursor:pointer;font-family:inherit;
+  background:linear-gradient(135deg,#FF5C7A,#E0245E);
+  box-shadow:0 6px 16px -8px rgba(224,36,94,.9)}
+.h5-fcard:active{transform:translateY(1px)}
+
+/* 服务保障：编号列表 */
+.h5-why{padding:0 14px}
+.h5-why>div{display:flex;gap:12px;background:#fff;border-radius:14px;padding:13px 15px;
+  margin-bottom:9px;box-shadow:0 2px 12px -9px rgba(20,10,40,.24)}
+.h5-why i{flex:none;width:24px;height:24px;border-radius:8px;font-style:normal;font-size:12px;
+  font-weight:800;color:#fff;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(135deg,#5B4B8A,#2B1B45)}
+.h5-why b{display:block;font-size:13.5px;font-weight:700;color:#12121A}
+.h5-why s{display:block;text-decoration:none;margin-top:4px;font-size:11.5px;color:#8A8F9E;
+  line-height:1.55}
+
+/* 流程 / FAQ / 尾注在深色主题下的容器 */
+.h5-sheet .h5-flow2{background:#fff;border-radius:16px;margin:0 14px;padding:20px 12px 18px;
+  box-shadow:0 2px 12px -9px rgba(20,10,40,.24)}
+.h5-sheet .h5-flow2 .st i{background:var(--ro2);box-shadow:0 0 0 3px #fff,0 2px 8px -3px rgba(224,36,94,.7)}
+.h5-faq{background:#fff;border-radius:16px;margin:0 14px;padding:4px 0;
+  box-shadow:0 2px 12px -9px rgba(20,10,40,.24)}
+
+/* ---------- 深色子页头（国家列表 / 产品详情），保留返回栏 ---------- */
+.h5-cats.sortbar{padding-top:16px}
+/* 详情页配色统一到玫红，覆盖旧的橙/蓝强调色 */
+.ph-body.h5:has(.h5-dhd) .h5-pkg.on{border-color:var(--ro);background:#FFF4F7}
+.ph-body.h5:has(.h5-dhd) .h5-pkg.on .amt{color:var(--ro2)}
+.ph-body.h5:has(.h5-dhd) .h5-crowd a.on{background:#12121A;border-color:#12121A;color:#fff}
+.ph-body.h5:has(.h5-dhd) .h5-title .cz span{background:#FFF0F4;color:var(--ro2);border-color:#FFD9E3}
+.phone:has(.h5-dhd) .ph-foot .buy,
+.h5-top .tag,.h5-dhd .tag{background:transparent;padding:0;border-radius:0;color:inherit}
+.phone:has(.ph-body.h5):has(.h5-dhd) .ph-bar{background:var(--d2);color:#fff}
+.phone:has(.ph-body.h5):has(.h5-dhd) .ph-nav{background:var(--d2);color:#fff;border-bottom:0}
+.phone:has(.ph-body.h5):has(.h5-dhd) .ph-nav .back{color:#fff}
+
+/* C 端强调色统一到品牌玫红（仅作用于手机壳内，后台不受影响） */
+.phone{--o:#E0245E;--o-d:#C0184A;--o-l:#FF5C7A;--o-bg:#FFF0F4;--o-grad:#E0245E}
+/* 客服页快捷问句：横向滚动的胶囊，不再挤成竖排 */
+.h5-qask{display:flex;gap:8px;overflow-x:auto;padding:2px 16px 4px}
+.h5-qask::-webkit-scrollbar{height:0}
+.h5-qask a{flex:none;white-space:nowrap;padding:9px 15px;border-radius:19px;font-size:12.5px;
+  background:#fff;border:1px solid var(--h5-line);color:var(--h5-ink2);cursor:pointer;
+  text-decoration:none;transition:.15s}
+.h5-qask a:hover{border-color:var(--o);color:var(--o)}
+
+/* ================================================================
+   v50 · 小程序视觉与后台统一：紫黑玫瑰 → 深岩灰 + 暖橙，品牌头压实拍图
+   ================================================================ */
+:root{ --d1:#1E293B; --d2:#0B1220; --d3:#334155; --ro:#EA580C; --ro2:#C2410C; }
+
+.h5-top{padding:14px 18px 30px;
+  background:linear-gradient(158deg,#1E293B 0%,#131C2C 46%,#0B1220 100%)}
+/* 品牌头压一张目的地实拍，图文结合而不是纯色块 */
+.h5-top::after{content:"";position:absolute;inset:0;z-index:0;
+  background:url(../img/dest/hero.jpg) center/cover no-repeat;opacity:.30;
+  -webkit-mask-image:linear-gradient(180deg,#000 0%,rgba(0,0,0,.35) 62%,transparent 100%);
+  mask-image:linear-gradient(180deg,#000 0%,rgba(0,0,0,.35) 62%,transparent 100%)}
+.h5-top::before{background:radial-gradient(circle at 38% 34%,#FDBA74 0%,#EA580C 46%,rgba(234,88,12,0) 72%);
+  opacity:.55}
+.h5-top .tag span::before{color:#FDBA74}
+.h5-top .stat b{color:#FDBA74}
+.h5-top h1{font-size:29px;letter-spacing:-1.4px}
+
+/* 内容面板：白卡 + 更大圆角，与后台同一套语言 */
+.h5-sheet{margin-top:-16px}
+.h5-fcard{border-radius:14px}
+.ph-body.h5:has(.h5-dhd) .h5-pkg.on{border-color:var(--ro);background:#FFF7ED}
+.h5-btn,.h5f .btn.p{background:var(--ro);border-color:var(--ro)}
+
+/* 一单多人：每位办签人独立一行，各自带补料与查进度入口 */
+.h5-apr{display:flex;align-items:center;gap:8px;margin-top:7px}
+.h5-apr .h5-tags{flex:1;min-width:0;margin:0}
+.h5-apa{flex:none;display:flex;gap:6px}
+.h5-apa a{padding:4px 10px;border:1px solid var(--ro);border-radius:99px;
+  font-size:11px;font-weight:600;color:var(--ro);white-space:nowrap;cursor:pointer}
+.h5-apa a:active{background:var(--ro);color:#fff}
+
+/* ===== v77 · 国家商品页（对齐携程签证频道的信息结构） ===== */
+.dp-hero{position:relative;min-height:268px;padding:0;background-size:cover;background-position:center}
+.dp-mask{position:absolute;inset:0;background:linear-gradient(180deg,rgba(11,18,32,.30) 0%,rgba(11,18,32,.06) 34%,rgba(11,18,32,.62) 100%)}
+.dp-htx{position:relative;z-index:2;padding:96px 18px 0}
+.dp-r1{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.dp-r1 h1{margin:0;font-size:30px;font-weight:800;color:#fff;letter-spacing:-1px;
+  text-shadow:0 2px 12px rgba(0,0,0,.45)}
+.dp-reg{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:99px;
+  background:rgba(255,255,255,.92);font-size:12px;font-weight:600;color:#1E293B}
+.dp-reg em{font-style:normal;font-size:10px;color:#64748B}
+.dp-sub{margin:8px 0 0;font-size:12px;color:rgba(255,255,255,.9);
+  text-shadow:0 1px 6px rgba(0,0,0,.5)}
+.dp-anchor{position:relative;z-index:2;display:flex;gap:0;margin-top:16px;padding:0 6px 12px}
+.dp-anchor a{flex:1;text-align:center;font-size:12px;font-weight:600;color:#fff;
+  text-shadow:0 1px 6px rgba(0,0,0,.55)}
+
+.dp-sheet{padding:0 0 18px;background:#F5F6F8}
+.dp-purpose{display:flex;gap:0;padding:0 4px;background:#fff;border-bottom:1px solid #EEF1F5}
+.dp-purpose a{flex:1;position:relative;padding:13px 4px 11px;text-align:center;
+  font-size:15px;font-weight:600;color:#64748B}
+.dp-purpose a.on{color:#0F172A;font-weight:800}
+.dp-purpose a.on::after{content:"";position:absolute;left:50%;bottom:0;transform:translateX(-50%);
+  width:26px;height:3px;border-radius:2px;background:var(--ro)}
+
+.dp-types{display:flex;gap:9px;padding:14px 14px 4px;overflow-x:auto;background:#fff}
+.dp-types::-webkit-scrollbar{height:0}
+.dp-tc{position:relative;flex:none;width:118px;padding:15px 12px 13px;border-radius:10px;
+  border:1.5px solid #E5E8EE;background:#fff}
+.dp-tc b{display:block;font-size:16px;font-weight:800;color:#0F172A;letter-spacing:-.4px}
+.dp-tc u{display:block;margin-top:7px;text-decoration:none;font-size:16px;font-weight:800;color:var(--ro)}
+.dp-tc u s{text-decoration:none;font-size:10px;font-weight:600;margin-left:2px}
+.dp-tc em.hot{position:absolute;top:-8px;left:8px;padding:1px 6px;border-radius:4px 4px 4px 0;
+  background:#1E293B;font-style:normal;font-size:10px;font-weight:600;color:#fff}
+.dp-tc.on{border-color:var(--ro);background:#FFF7ED}
+.dp-tc .ck{display:none}
+.dp-tc.on .ck{display:block;position:absolute;right:0;bottom:0;width:0;height:0;
+  border:9px solid transparent;border-right-color:var(--ro);border-bottom-color:var(--ro);
+  border-radius:0 0 10px 0}
+.dp-tc.on .ck::after{content:"✓";position:absolute;right:-8px;bottom:-7px;font-size:9px;color:#fff}
+
+.dp-spec{margin:12px 14px 0;padding:12px 13px;border-radius:10px;background:#F0F6FF}
+.dp-scope{display:block;font-size:12px;line-height:1.65;color:#1E3A5F}
+.dp-scope em{font-style:normal;color:#64748B}
+.dp-attr{display:flex;flex-wrap:wrap;gap:14px;margin-top:10px;padding-top:10px;
+  border-top:1px solid rgba(30,58,95,.10)}
+.dp-attr span{font-size:11.5px;color:#1E3A5F}
+.dp-attr span::before{margin-right:4px;opacity:.75}
+.ic-e::before{content:"⇄"}.ic-d::before{content:"📅"}.ic-v::before{content:"⏱"}.ic-f::before{content:"👤"}
+
+.dp-svc{display:flex;align-items:center;gap:7px;margin:10px 14px 0;padding:9px 12px;
+  border-radius:10px;background:#F0FDF4;overflow-x:auto;white-space:nowrap}
+.dp-svc>span{flex:none;font-size:11px;font-weight:700;color:#166534}
+.dp-svc em{flex:none;font-style:normal;font-size:11px;color:#15803D}
+.dp-svc em+em::before{content:"|";margin-right:7px;color:#BBF7D0}
+/* v124 订后赠整条撤掉（签证是资质交付，送赠品的话术反而削弱可信度），
+   服务保障顶上来：紧贴 hero 通栏，不再是套餐区上方那条窄边距的小条。 */
+.dp-svc.top{margin:0;border-radius:0;padding:9px 14px;overflow-x:auto;white-space:nowrap}
+
+.dp-filt{display:flex;align-items:center;gap:8px;padding:14px 14px 8px}
+.dp-filt a{padding:5px 11px;border-radius:99px;border:1px solid #E0E4EA;background:#fff;
+  font-size:11.5px;color:#475569}
+.dp-filt a.on{border-color:var(--ro);background:#FFF7ED;color:var(--ro);font-weight:600}
+.dp-cnt{margin-left:auto;font-size:11px;color:#94A3B8}
+
+.dp-pks{padding:0 14px}
+.dp-pk{position:relative;margin-bottom:11px;padding:13px 13px 10px;border-radius:12px;background:#fff;
+  box-shadow:0 1px 3px rgba(15,23,42,.05)}
+.dp-pkhot{display:inline-block;margin:-13px 0 9px -13px;padding:3px 9px;
+  border-radius:12px 0 10px 0;background:linear-gradient(90deg,#EA580C,#F97316);
+  font-size:10.5px;font-weight:700;color:#fff}
+.dp-pkh{display:flex;align-items:center;gap:7px}
+.dp-pkh b{flex:1;min-width:0;font-size:14.5px;font-weight:700;color:#0F172A;line-height:1.4}
+.dp-pkh em.ins{flex:none;padding:2px 6px;border-radius:4px;border:1px solid #FDBA74;
+  font-style:normal;font-size:10px;font-weight:600;color:#C2410C}
+.dp-pkm{display:flex;align-items:center;gap:16px;margin-top:9px}
+.dp-pkm span{font-size:12px;color:#475569}
+.dp-pkm span b{font-size:14px;font-weight:800;color:#0F172A;margin-right:2px}
+.dp-pkd{margin-left:auto;font-size:11.5px;color:#0891B2}
+.dp-pkf{display:flex;align-items:flex-end;gap:10px;margin-top:11px;padding-top:10px;
+  border-top:1px dashed #EDF0F4}
+.dp-pkf .l{flex:1;min-width:0}
+.dp-pkf .l s{display:block;text-decoration:none;font-size:11.5px;color:#16A34A}
+.dp-pkf .l i{display:block;margin-top:3px;font-style:normal;font-size:10.5px;color:#94A3B8}
+.dp-pkf .r{flex:none;display:flex;align-items:flex-end;gap:9px}
+.dp-pkf .pr{display:flex;align-items:baseline;color:var(--ro)}
+.dp-pkf .pr i{font-style:normal;font-size:12px;font-weight:700}
+.dp-pkf .pr b{font-size:23px;font-weight:800;letter-spacing:-1px}
+.dp-pkf .pr u{text-decoration:none;font-size:10.5px;color:#94A3B8;margin-left:2px}
+.dp-buy{padding:8px 20px;border:none;border-radius:8px;background:var(--ro);
+  font-size:15px;font-weight:700;color:#fff}
+.dp-buy:active{background:var(--ro2)}
+.dp-pkn{margin-top:8px;font-size:10.5px;color:#94A3B8}
+
+/* ===== v79 · 签证频道首页 · 编辑式版面 =====
+   信息结构沿用签证频道的通行找签逻辑，视觉语言独立：
+   墨黑 + 暖白纸 + 单一朱红，靠大图与字号建立层级，不用彩色色块头和方块宫格。
+   圆角只有两档：媒体 6px、胶囊 99px。 */
+.phone:has(.ed-hero) .ph-nav{display:none}
+.phone:has(.ph-body.h5):has(.ed-hero) .ph-bar{background:transparent;color:#fff;position:absolute;
+  left:0;right:0;top:0;z-index:6;border:0}
+.ph-body.h5:has(.ed-hero){background:#F7F6F3}
+
+.ed-hero{position:relative;height:312px;background:#1A1D22 center/cover no-repeat}
+.ed-hero::after{content:"";position:absolute;inset:0;
+  background:linear-gradient(178deg,rgba(10,12,16,.46) 0%,rgba(10,12,16,.10) 26%,rgba(10,12,16,.66) 62%,rgba(10,12,16,.92) 100%)}
+.ed-nav{position:absolute;left:0;right:0;top:44px;z-index:3;
+  display:flex;align-items:center;gap:10px;padding:0 16px}
+.ed-nav .sch{flex:1;min-width:0;height:34px;display:flex;align-items:center;gap:8px;padding:0 14px;
+  border-radius:99px;background:rgba(255,255,255,.17);backdrop-filter:blur(10px);
+  border:1px solid rgba(255,255,255,.24);font-size:12.5px;color:rgba(255,255,255,.86);cursor:pointer}
+.ed-nav .sch i{flex:none;width:12px;height:12px;border:1.5px solid rgba(255,255,255,.86);
+  border-radius:50%;box-shadow:2px 3px 0 -1px rgba(255,255,255,.86)}
+.ed-nav .ic{flex:none;width:22px;color:#fff;opacity:.92;cursor:pointer}
+.ed-nav .ic svg{width:20px;height:20px}
+.ed-tx{position:absolute;left:18px;right:18px;bottom:26px;z-index:3;color:#fff}
+.ed-tx s{display:block;text-decoration:none;font-size:9.5px;font-weight:700;letter-spacing:2.6px;
+  color:rgba(255,255,255,.62)}
+.ed-tx h1{margin:10px 0 0;font-size:31px;line-height:1.14;font-weight:800;letter-spacing:-1.2px}
+.ed-tx p{margin:11px 0 0;font-size:11.5px;color:rgba(255,255,255,.74);letter-spacing:.1px}
+
+.ed-sec{padding:24px 0 22px;background:#fff;border-bottom:1px solid #EDEBE6}
+.ed-h{display:flex;align-items:baseline;gap:10px;padding:0 18px;margin-bottom:15px}
+.ed-h h2{flex:none;margin:0;font-size:19px;font-weight:800;letter-spacing:-.7px;color:#12151A}
+.ed-h a{margin-left:auto;font-size:11.5px;color:#8A8F98;cursor:pointer;white-space:nowrap}
+.ed-h a.mut{cursor:default}
+.ed-h a i{font-style:normal;margin-left:2px}
+
+.ed-tabs{display:flex;gap:18px;padding:0 18px 14px;overflow-x:auto}
+.ed-tabs::-webkit-scrollbar{display:none}
+.ed-tabs a{position:relative;flex:none;padding-bottom:5px;font-size:13.5px;color:#8A8F98;
+  cursor:pointer;white-space:nowrap;transition:color .15s}
+.ed-tabs a.on{color:#12151A;font-weight:700}
+.ed-tabs a.on::after{content:"";position:absolute;left:0;right:0;bottom:0;height:2px;background:var(--o)}
+
+.ed-rail{display:flex;gap:10px;padding:0 18px 2px;overflow-x:auto;scroll-snap-type:x mandatory}
+.ed-rail::-webkit-scrollbar{display:none}
+.ed-c{position:relative;flex:none;width:152px;height:204px;border-radius:6px;overflow:hidden;
+  background:#DEDCD7 center/cover no-repeat;scroll-snap-align:start;cursor:pointer;
+  transition:transform .18s}
+.ed-c::after{content:"";position:absolute;inset:0;
+  background:linear-gradient(180deg,rgba(8,10,14,0) 40%,rgba(8,10,14,.78) 100%)}
+.ed-c:active{transform:scale(.975)}
+.ed-c.off{filter:grayscale(.9) brightness(.86);cursor:default}
+.ed-c .tx{position:absolute;left:13px;right:12px;bottom:13px;z-index:2;color:#fff}
+.ed-c .tx b{display:block;font-size:17px;font-weight:800;letter-spacing:-.5px;
+  text-shadow:0 1px 8px rgba(0,0,0,.4)}
+.ed-c .tx s{display:block;text-decoration:none;margin-top:3px;font-size:11px;
+  color:#FFB9A6;font-weight:600}
+.ed-c .tx s.off{color:rgba(255,255,255,.6);font-weight:400}
+
+.ed-trust{display:grid;grid-template-columns:repeat(4,1fr);background:#fff;
+  border-bottom:1px solid #EDEBE6}
+.ed-trust div{padding:16px 6px;text-align:center;border-left:1px solid #F1EFEA}
+.ed-trust div:first-child{border-left:0}
+.ed-trust b{display:block;font-size:12.5px;font-weight:700;color:#12151A}
+.ed-trust s{display:block;text-decoration:none;margin-top:4px;font-size:10px;line-height:1.45;
+  color:#8A8F98}
+
+.ed-entry{display:grid;grid-template-columns:repeat(5,1fr);gap:2px;padding:0 10px}
+.ed-entry a{text-align:center;cursor:pointer}
+.ed-entry i{display:flex;align-items:center;justify-content:center;width:40px;height:40px;
+  margin:0 auto;border-radius:99px;background:#F7F6F3;color:#12151A;transition:.15s}
+.ed-entry svg{width:19px;height:19px}
+.ed-entry s{display:block;text-decoration:none;margin-top:7px;font-size:11px;color:#4A5058}
+.ed-entry a:active i{background:var(--o-bg);color:var(--o)}
+.ed-outb .ed-entry i{color:#8A8F98}
+
+.ed-ban{position:relative;display:block;height:172px;background:#1A1D22 center/cover no-repeat;
+  border-bottom:1px solid #EDEBE6;cursor:pointer}
+.ed-ban::after{content:"";position:absolute;inset:0;
+  background:linear-gradient(92deg,rgba(8,10,14,.86) 0%,rgba(8,10,14,.46) 58%,rgba(8,10,14,.06) 100%)}
+.ed-ban .tx{position:absolute;left:18px;top:50%;transform:translateY(-50%);z-index:2;color:#fff}
+.ed-ban .tx s{display:block;text-decoration:none;font-size:9.5px;font-weight:700;letter-spacing:2.4px;
+  color:rgba(255,255,255,.58)}
+.ed-ban .tx b{display:block;margin-top:9px;font-size:25px;line-height:1.16;font-weight:800;
+  letter-spacing:-1px}
+.ed-ban .tx em{display:block;margin-top:10px;font-style:normal;font-size:11px;
+  color:rgba(255,255,255,.76)}
+
+/* 下方沿用的板块跟着换成纸白底，避免和上面的白色版面撞出灰缝 */
+.ph-body.h5:has(.ed-hero) .h5-sheet{background:#fff;border-radius:0;margin:0;padding-top:6px}
+
+/* 国家页与首页统一为沉浸式头图：隐藏白色标题栏，返回与首页入口压在图上 */
+.phone:has(.dp-hero) .ph-nav{display:none}
+.phone:has(.ph-body.h5):has(.dp-hero) .ph-bar{background:transparent;color:#fff;position:absolute;
+  left:0;right:0;top:0;z-index:6;border:0}
+.ph-body.h5:has(.dp-hero){background:#F7F6F3}
+.dp-nav{position:absolute;left:0;right:0;top:44px;z-index:3;
+  display:flex;align-items:center;padding:0 16px}
+.dp-nav .bk{font-size:26px;line-height:1;color:#fff;cursor:pointer;
+  text-shadow:0 1px 8px rgba(0,0,0,.4)}
+.dp-nav .ic{margin-left:auto;width:20px;color:#fff;opacity:.92;cursor:pointer}
+.dp-nav .ic svg{width:19px;height:19px}
+
+/* ===== v82 · 我的订单 = 客户待办中枢 =====
+   原「我的」整页并进来。头部用墨黑实底把身份与四个待办数字压成一块，
+   下面是发丝线分栏的二级入口，再往下才是订单列表——先看该做什么，再看有什么。 */
+.mo-hd{background:#12151A;color:#fff;padding:20px 18px 0}
+.mo-hd .who{display:flex;align-items:center;gap:12px}
+.mo-hd .who i{flex:none;width:44px;height:44px;border-radius:50%;font-style:normal;
+  display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:700;
+  background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.2)}
+.mo-hd .who .tx{min-width:0}
+.mo-hd .who .tx b{display:block;font-size:17px;font-weight:700;letter-spacing:-.4px;color:#fff}
+.mo-hd .who .tx s{display:block;text-decoration:none;margin-top:4px;font-size:11.5px;
+  color:rgba(255,255,255,.56);letter-spacing:.3px}
+.mo-more{margin-left:auto;flex:none;font-size:11.5px;color:rgba(255,255,255,.7);cursor:pointer}
+.mo-more:active{color:#fff}
+.mo-cells{display:grid;grid-template-columns:repeat(4,1fr);margin-top:18px}
+.mo-cells a{padding:0 4px 18px;text-align:center;cursor:pointer;
+  border-left:1px solid rgba(255,255,255,.09)}
+.mo-cells a:first-child{border-left:0}
+.mo-cells b{display:block;font-size:23px;font-weight:800;letter-spacing:-.8px;
+  font-variant-numeric:tabular-nums}
+.mo-cells s{display:block;text-decoration:none;margin-top:5px;font-size:11px;
+  color:rgba(255,255,255,.56)}
+.mo-cells a:active b{color:var(--o-l)}
+
+.mo-alert{display:block;padding:13px 18px;background:var(--o-bg);
+  border-bottom:1px solid #F4DBD5;cursor:pointer}
+.mo-alert b{display:block;font-size:13px;font-weight:700;color:var(--o-d)}
+.mo-alert s{display:block;text-decoration:none;margin-top:4px;font-size:11.5px;color:#8A6055}
+.mo-alert em{display:block;margin-top:6px;font-style:normal;font-size:11.5px;
+  font-weight:600;color:var(--o)}
+
+.mo-entry{display:grid;grid-template-columns:repeat(4,1fr);background:#fff;
+  border-bottom:1px solid #EDEBE6}
+.mo-entry a{padding:14px 4px;text-align:center;font-size:12px;color:#2B3038;
+  border-left:1px solid #F1EFEA;cursor:pointer}
+.mo-entry a:first-child{border-left:0}
+.mo-entry a:active{background:#F7F6F3;color:var(--o)}
+
+/* 订单页有了自己的深色头部，就不再需要外层的白色标题栏。
+   选择器必须带上 :has(.ph-body.h5)，否则会被本文件第 21 行同名规则的更高权重压掉。 */
+.phone:has(.mo-hd) .ph-nav{display:none}
+.phone:has(.ph-body.h5):has(.mo-hd) .ph-bar{background:#12151A;color:#fff;border:0}
+.ph-body.h5:has(.mo-hd){background:#F7F6F3}
+.ph-body.h5:has(.mo-hd) .h5-fbar{border-bottom:1px solid #EDEBE6}
+
+/* ===== v82 · 产品详情页 · 沉浸式 =====
+   与首页 .ed-* / 国家页 .dp-* 同一套：实拍大图 + 大字 + 发丝线分栏，不再用白色卡片盒。 */
+.phone:has(.pv-hero) .ph-nav{display:none}
+.phone:has(.ph-body.h5):has(.pv-hero) .ph-bar{background:transparent;color:#fff;position:absolute;
+  left:0;right:0;top:0;z-index:6;border:0}
+.ph-body.h5:has(.pv-hero){background:#F7F6F3}
+.pv-hero{position:relative;min-height:286px;background:#1A1D22 center/cover no-repeat}
+.pv-hero::after{content:"";position:absolute;inset:0;
+  background:linear-gradient(178deg,rgba(10,12,16,.50) 0%,rgba(10,12,16,.12) 24%,
+  rgba(10,12,16,.70) 64%,rgba(10,12,16,.94) 100%)}
+.pv-nav{position:absolute;left:0;right:0;top:44px;z-index:3;
+  display:flex;align-items:center;padding:0 16px}
+.pv-nav .bk{font-size:26px;line-height:1;color:#fff;cursor:pointer;
+  text-shadow:0 1px 8px rgba(0,0,0,.4)}
+.pv-nav .ic{margin-left:auto;width:20px;color:#fff;opacity:.92;cursor:pointer}
+.pv-nav .ic svg{width:19px;height:19px}
+.pv-tx{position:relative;z-index:2;padding:104px 18px 22px;color:#fff}
+.pv-tx s{display:block;text-decoration:none;font-size:10.5px;font-weight:700;letter-spacing:1.8px;
+  color:rgba(255,255,255,.62)}
+.pv-tx h1{margin:9px 0 0;font-size:28px;line-height:1.16;font-weight:800;letter-spacing:-1px}
+.pv-price{display:flex;align-items:baseline;gap:2px;margin-top:12px;color:var(--o-l)}
+.pv-price i{font-style:normal;font-size:14px;font-weight:700}
+.pv-price b{font-size:29px;font-weight:800;letter-spacing:-1px;font-variant-numeric:tabular-nums}
+.pv-price u{text-decoration:none;font-size:12px;color:rgba(255,255,255,.72);margin-left:3px}
+.pv-cz{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.pv-cz span{padding:4px 9px;border-radius:99px;font-size:11px;color:rgba(255,255,255,.9);
+  background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.2)}
+
+.pv-name{background:#fff;padding:17px 18px 15px;border-bottom:1px solid #EDEBE6}
+.pv-name b{display:block;font-size:15px;line-height:1.5;font-weight:700;color:#12151A;
+  letter-spacing:-.2px}
+.pv-name .cz{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}
+.pv-name .cz span{font-size:11px;color:var(--o);background:var(--o-bg);padding:3px 8px;border-radius:99px}
+
+.pv-svc{display:grid;grid-template-columns:repeat(4,1fr);background:#fff;
+  border-bottom:1px solid #EDEBE6}
+.pv-svc div{padding:15px 5px;text-align:center;border-left:1px solid #F1EFEA}
+.pv-svc div:first-child{border-left:0}
+.pv-svc b{display:block;font-size:12px;font-weight:700;color:#12151A}
+.pv-svc s{display:block;text-decoration:none;margin-top:5px;font-size:10px;line-height:1.4;color:#7A808A}
+
+.pv-sec{background:#fff;padding:22px 0 20px;border-bottom:1px solid #EDEBE6}
+.pv-h{display:flex;align-items:baseline;gap:10px;padding:0 18px 14px}
+.pv-h h2{flex:none;margin:0;font-size:18px;font-weight:800;letter-spacing:-.6px;color:#12151A}
+.pv-h .mut{margin-left:auto;font-size:11.5px;color:#8A8F98}
+.pv-body{padding:0 18px;font-size:13px;line-height:1.75;color:#4A5058}
+
+.pv-pks{padding:0 18px;display:flex;flex-direction:column;gap:9px}
+.pv-pk{padding:13px 14px;border:1px solid #E6E3DD;border-radius:6px;cursor:pointer;
+  background:#fff;transition:.15s}
+.pv-pk.on{border-color:var(--o);background:var(--o-bg)}
+.pv-pk .r1{display:flex;align-items:center;gap:7px}
+.pv-pk .r1 b{font-size:14.5px;font-weight:700;color:#12151A}
+.pv-pk .r1 em{font-style:normal;font-size:10px;color:var(--o);background:#fff;
+  border:1px solid var(--o-l);padding:1px 6px;border-radius:99px}
+.pv-pk .r1 .amt{margin-left:auto;font-size:17px;font-weight:800;color:var(--o);
+  letter-spacing:-.5px;font-variant-numeric:tabular-nums}
+.pv-pk .r2{margin-top:7px;font-size:11.5px;color:#7A808A}
+.pv-pk .r3{margin-top:8px;padding-top:8px;border-top:1px dashed #E6D2CC;
+  font-size:11.5px;line-height:1.6;color:#8A6055;white-space:pre-line}
+.pv-more{margin:12px 18px 0;padding:10px 0;text-align:center;font-size:12px;color:#7A808A;
+  border:1px dashed #DDD9D2;border-radius:6px;cursor:pointer}
+.pv-more:active{color:var(--o);border-color:var(--o-l)}
+
+.pv-tabs{display:flex;gap:20px;padding:0 18px 14px;border-bottom:1px solid #F1EFEA;margin-bottom:14px}
+.pv-tabs a{position:relative;padding-bottom:10px;font-size:13.5px;color:#7A808A;cursor:pointer}
+.pv-tabs a.on{color:#12151A;font-weight:700}
+.pv-tabs a.on::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;
+  background:var(--o)}
+/* 四块内容改成铺开 + 吸顶锚点（唐美芳 2026-08-27：C 端也要能下滑看见，不只是点击）。
+   吸顶时下面的内容会从底下穿过去，所以必须给实底，不能透。 */
+.pv-tabs.sticky{position:sticky;top:0;z-index:9;background:#fff;padding-top:12px}
+.pv-anc+.pv-anc{margin-top:20px}
+.pv-anch{display:flex;align-items:center;gap:7px;margin:0 18px 11px;
+  font-size:13.5px;font-weight:700;color:#12151A}
+.pv-anch::before{content:"";width:3px;height:12px;border-radius:2px;background:var(--o)}
+
+/* ===== v83 · C 端其余页面统一到编辑式语言 =====
+   这些子页此前还是「灰底 + 白色圆角卡片盒」的传统 H5 版式。这里统一改掉的是版式本身：
+   1) 细标题条 → 纸白底的大字页头（24px/800），返回箭头与标题同排；
+   2) 卡片盒 → 全宽白底分栏，靠发丝线和留白分隔，不再靠阴影浮起来；
+   3) 圆角收敛到两档：媒体与控件 6px、胶囊 99px；
+   4) 底色统一为暖白纸 #F7F6F3，与首页 / 国家页 / 产品详情页一致。
+   只写在 .ph-body.h5 作用域内，沉浸式头图的几个页面自己会把页头隐藏掉，不受影响。 */
+.phone:has(.ph-body.h5) .ph-bar{background:#F7F6F3;color:#12151A}
+.phone:has(.ph-body.h5) .ph-nav{height:auto;padding:16px 18px 14px;background:#F7F6F3;
+  font-size:24px;font-weight:800;letter-spacing:-.9px;color:#12151A;
+  display:flex;align-items:center;gap:6px;justify-content:flex-start}
+.phone:has(.ph-body.h5) .ph-nav .back{font-size:23px;font-weight:400;line-height:1;
+  margin-right:2px;color:#12151A}
+.ph-body.h5{background:#F7F6F3}
+
+/* 分栏：全宽白底 + 发丝线，取消卡片盒 */
+.ph-body.h5 .h5-sec{margin:0;border-radius:0;box-shadow:none;background:#fff;
+  border:0;border-bottom:1px solid #EDEBE6;padding:20px 0 18px}
+.ph-body.h5 .h5-sec.plain{background:transparent;border-bottom:0;padding:0}
+.ph-body.h5 .h5-h{padding:0 18px 12px;font-size:18px;font-weight:800;letter-spacing:-.6px;
+  color:#12151A}
+.ph-body.h5 .h5-h .more{font-size:11.5px;color:#8A8F98}
+
+/* 列表行：发丝线分隔，不再各自成盒 */
+.ph-body.h5 .h5-row{padding:13px 18px;border-bottom:1px solid #F1EFEA;border-radius:0}
+.ph-body.h5 .h5-row:last-child{border-bottom:0}
+.ph-body.h5 .h5-row .lb{font-weight:600;color:#12151A}
+
+/* 订单卡：去掉圆角浮层，改成全宽条目，状态字压在右上 */
+.ph-body.h5 .h5-ord{margin:0;border-radius:0;box-shadow:none;background:#fff;
+  border:0;border-bottom:8px solid #F7F6F3}
+.ph-body.h5 .h5-ord .nm{font-size:15.5px;font-weight:700;letter-spacing:-.3px;line-height:1.45}
+.ph-body.h5 .h5-ord .st{font-size:11.5px;font-weight:700;letter-spacing:0;text-transform:none}
+
+/* 材料条目 / 折叠块 / 时间轴 / 空态：统一到 6px 与发丝线 */
+.ph-body.h5 .h5-mat{border-radius:0;border-bottom:1px solid #F1EFEA}
+.ph-body.h5 .h5-btn{border-radius:99px}
+.ph-body.h5 .h5-empty{padding:52px 18px;color:#8A8F98;font-size:13px;text-align:center}
+
+/* 胶囊页签统一：人群选择、筛选条 */
+.ph-body.h5 .h5-crowd a{border-radius:99px}
+.ph-body.h5 .h5-fbar{background:#fff;border-bottom:1px solid #EDEBE6}
+.ph-body.h5 .h5-fbar a.on{color:var(--o);font-weight:700}
+
+/* 底部操作条：与新版面同底色，主按钮收成胶囊 */
+.ph-foot.h5f{background:#fff;border-top:1px solid #EDEBE6}
+.ph-foot.h5f .cta{border-radius:99px;font-weight:700;letter-spacing:-.2px}
+
+/* ===== v85 · 强调色收敛到一支玫红 =====
+   v50 把 --ro 定成暖橙，v82 之后页头/CTA/徽标又走了玫红，同屏出现两支高饱和色。
+   这里在 .phone 作用域内把 --ro 一并压成玫红，全端只留一个强调落点。 */
+.phone{--ro:#E0245E;--ro2:#C0184A}
+
+/* ===== v91 · 全部目的地页：并入编辑式语言 =====
+   这页原来还留着 v76 的紫色渐变页头（.h5-dhd），和 v82 之后的纸感版式不是一套东西。
+   现在改成：搜索框 + 在售目的地大图 + 按大洲浏览 + 全部产品，三段都在白底纸面上。 */
+.ed-h em{margin-left:auto;font-style:normal;font-size:11.5px;color:#8A8F98;white-space:nowrap}
+
+.al-sch{position:sticky;top:0;z-index:9;display:flex;align-items:center;gap:8px;
+  padding:11px 14px;background:#fff;border-bottom:1px solid #EDEBE6}
+.al-sch .ic{flex:none;width:16px;height:16px;color:#8A8F98;display:flex}
+.al-sch .ic svg{width:16px;height:16px}
+.al-sch input{flex:1;min-width:0;border:0;outline:0;background:transparent;
+  font-size:14px;color:var(--h5-ink);font-family:inherit}
+.al-sch input::placeholder{color:#A8ADB5}
+.al-sch .clr{display:none;flex:none;width:18px;height:18px;line-height:17px;text-align:center;
+  border-radius:50%;background:#E9E7E2;color:#6B7280;font-size:13px;cursor:pointer}
+
+.al-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;padding:0 18px}
+.al-dc{position:relative;height:118px;border-radius:8px;overflow:hidden;cursor:pointer;
+  background-size:cover;background-position:center;display:block}
+.al-dc::after{content:"";position:absolute;inset:0;
+  background:linear-gradient(180deg,rgba(0,0,0,0) 34%,rgba(0,0,0,.62) 100%)}
+.al-dc .tx{position:absolute;left:11px;right:11px;bottom:10px;z-index:2}
+.al-dc .tx b{display:block;font-size:15px;font-weight:800;color:#fff;letter-spacing:-.3px}
+.al-dc .tx s{display:block;text-decoration:none;font-size:10.5px;color:rgba(255,255,255,.82);
+  margin-top:2px}
+
+.al-rows{padding:0 18px}
+.al-row{display:flex;align-items:center;gap:11px;padding:11px 0;cursor:pointer;
+  border-bottom:1px solid #F0EEE9}
+.al-row:last-child{border-bottom:0}
+.al-row i{flex:none;width:44px;height:44px;border-radius:6px;background-size:cover;
+  background-position:center}
+.al-row div{flex:1;min-width:0}
+.al-row b{display:block;font-size:14px;font-weight:700;color:#12151A;letter-spacing:-.2px}
+.al-row s{display:block;text-decoration:none;font-size:11px;color:#8A8F98;margin-top:3px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.al-row u{flex:none;text-decoration:none;font-size:14px;font-weight:800;color:var(--ro2)}
+.al-row u em{font-style:normal;font-size:10.5px;font-weight:500;margin-left:1px;color:#8A8F98}
+.al-row.off{cursor:default}
+.al-row.off i{filter:grayscale(1);opacity:.5}
+.al-row.off b{color:#A8ADB5;font-weight:600}
+.al-row.off u{font-size:11px;font-weight:500;color:#A8ADB5}
+
+.al-note{margin:12px 18px 0;padding:9px 11px;border-radius:6px;background:#F7F6F3;
+  font-size:10.5px;line-height:1.65;color:#8A8F98}
+
+.al-filt{padding:0 18px 14px}
+.al-fr{display:flex;align-items:center;gap:7px;overflow-x:auto;padding-bottom:8px}
+.al-fr::-webkit-scrollbar{display:none}
+.al-fr:last-child{padding-bottom:0}
+.al-fr .sp{flex:none;width:1px;height:15px;background:#E9E7E2;margin:0 3px}
+.al-fr a{flex:none;padding:5px 12px;border-radius:14px;border:1px solid #E5E2DC;
+  background:#fff;font-size:11.5px;color:#6B7280;cursor:pointer;white-space:nowrap}
+.al-fr a.on{background:var(--ro2);border-color:var(--ro2);color:#fff;font-weight:600}
+
+.al-none{margin:0 18px;padding:30px 18px;border-radius:8px;background:#F7F6F3;text-align:center}
+.al-none b{display:block;font-size:14px;font-weight:700;color:#12151A}
+.al-none s{display:block;text-decoration:none;font-size:11.5px;color:#8A8F98;
+  margin:6px auto 0;line-height:1.7;max-width:15em}
+.al-none a{display:inline-block;margin-top:14px;padding:7px 20px;border-radius:16px;
+  background:var(--ro2);color:#fff;font-size:12px;font-weight:600;cursor:pointer}
+
+/* v124 产品详情页新增「常见问题」页签：国家页顶部锚点里一直有这一项，
+   点进来却没有对应内容。FAQ 全平台一套口径，不按产品分。 */
+.pv-faq{padding:4px 0}
+.pv-faq>div{padding:12px 0;border-top:1px solid #EEF1F5}
+.pv-faq>div:first-child{border-top:0}
+.pv-faq b{display:block;font-size:13.5px;font-weight:600;color:#101828}
+.pv-faq p{margin:5px 0 0;font-size:12.5px;line-height:1.7;color:#667085}
+
+/* ================= 订单填写页（bk-*） =================
+   唐美芳 2026-08-27 参照携程订单填写页的分区提的意见。原来整页是一串等重的 h5-row，
+   客人扫一眼分不清哪个必填、还差什么。这里改成「一块只干一件事」的卡片：
+   每块自带标题 + 必填红星 + 未填时的橙色徽标，缺什么在标题行就能看到。 */
+
+/* 产品条：名称 + 卖点 + 产品信息回看入口 */
+.bk-prod{background:#fff;border-radius:var(--h5-r);box-shadow:var(--h5-sd);padding:13px 14px;margin-bottom:10px}
+.bk-prod>b{display:block;font-size:15px;font-weight:600;line-height:1.45;color:var(--h5-ink)}
+.bk-prod>s{display:block;margin-top:5px;font-size:12px;line-height:1.6;color:var(--h5-sub);text-decoration:none}
+.bk-lk{display:flex;align-items:center;gap:2px;margin-top:10px;padding-top:10px;border-top:1px solid var(--h5-line);font-size:12.5px;color:#1D6FE0;cursor:pointer}
+.bk-lk span{color:var(--h5-sub)}
+.bk-lk em{margin-left:auto;font-style:normal;white-space:nowrap}
+
+/* 退改保障条：口径取自后端 /order/cancel，不写「随时可退」这种会引发投诉的模糊话 */
+.bk-trust{display:flex;align-items:flex-start;gap:6px;margin-bottom:10px;padding:9px 12px;border-radius:var(--h5-r-s);background:#EAF8EF;color:#177245;font-size:12px;line-height:1.6}
+.bk-trust svg{flex:0 0 auto;width:14px;height:14px;margin-top:2px;fill:none;stroke:#177245;stroke-width:1.8}
+.bk-trust b{font-weight:600}
+
+/* 分区卡片 */
+.bk-sec{background:#fff;border-radius:var(--h5-r);box-shadow:var(--h5-sd);padding:12px 14px 13px;margin-bottom:10px}
+.bk-h{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.bk-h>b{font-size:13.5px;font-weight:600;color:var(--h5-ink)}
+.bk-h>b i{margin-left:3px;font-style:normal;color:#E5484D}
+.bk-bg{margin-left:auto;padding:2px 8px;border-radius:9px;background:#FFF2E2;color:#B25A00;font-size:11px;text-decoration:none;white-space:nowrap}
+
+/* 可点行（日期 / 联系人）：右侧统一铅笔图标，跟携程一致 */
+.bk-date,.bk-kv{position:relative;padding:10px 30px 10px 12px;border-radius:var(--h5-r-s);background:var(--h5-fill);cursor:pointer}
+.bk-date>b{display:block;font-size:14px;font-weight:600;color:var(--h5-ink)}
+.bk-date>b.ph{color:var(--h5-sub);font-weight:400}
+.bk-date>s{display:block;margin-top:4px;font-size:11.5px;color:var(--h5-sub);text-decoration:none}
+.bk-pen{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-style:normal;line-height:0}
+.bk-pen svg{width:15px;height:15px;fill:none;stroke:#98A2B3;stroke-width:1.7}
+.bk-warn{margin-top:8px;padding:8px 10px;border-radius:8px;background:#FEF3F2;color:#B42318;font-size:11.5px;line-height:1.7}
+.bk-warn b{font-weight:600}
+
+/* 办签人芯片：几个人、谁没填完，一眼扫完 */
+.bk-chips{display:flex;flex-wrap:wrap;gap:8px}
+.bk-chip{position:relative;min-width:96px;padding:8px 22px 8px 11px;border:1px solid var(--h5-line);border-radius:var(--h5-r-s);background:#fff;cursor:pointer}
+.bk-chip>b{display:block;font-size:13px;font-weight:600;color:var(--h5-ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bk-chip>s{display:block;margin-top:3px;font-size:11px;color:var(--h5-sub);text-decoration:none}
+.bk-chip.bad{border-color:#FDA29B;background:#FFFBFA}
+.bk-chip.bad>s{color:#D92D20}
+.bk-chip.add{display:flex;align-items:center;justify-content:center;min-width:80px;padding:8px 12px;border-style:dashed;color:#1D6FE0;font-size:12.5px}
+.bk-x{position:absolute;right:4px;top:2px;width:18px;height:18px;line-height:18px;text-align:center;color:#98A2B3;font-size:13px;text-decoration:none}
+
+/* 联系人 */
+.bk-kv>div{display:flex;align-items:center;gap:10px;padding:3px 0}
+.bk-kv i{flex:0 0 60px;font-style:normal;font-size:12px;color:var(--h5-sub)}
+.bk-kv b{font-size:13px;font-weight:500;color:var(--h5-ink)}
+.bk-kv b.ph{color:#98A2B3;font-weight:400}
+
+/* 资料提交方式 */
+.bk-way>div{padding:8px 0;border-top:1px solid var(--h5-line)}
+.bk-way>div:first-child{padding-top:0;border-top:0}
+.bk-way b{display:block;font-size:12.5px;font-weight:600;color:var(--h5-ink)}
+.bk-way s{display:block;margin-top:3px;font-size:11.5px;line-height:1.65;color:var(--h5-sub);text-decoration:none}
+
+/* 费用明细：携程这个位置是优惠券，我们没有优惠券系统，换成真实算账 */
+.bk-fee>div{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:6px 0;font-size:12.5px}
+.bk-fee i{font-style:normal;color:var(--h5-sub)}
+.bk-fee b{font-weight:500;color:var(--h5-ink)}
+.bk-fee b.mut{color:var(--h5-sub);font-weight:400}
+.bk-fee .tt{margin-top:4px;padding-top:9px;border-top:1px solid var(--h5-line)}
+.bk-fee .tt i{color:var(--h5-ink)}
+.bk-fee .tt b{font-size:15px;font-weight:600;color:var(--ro2)}
+
+.bk-tip{margin-top:9px;font-size:11px;line-height:1.7;color:var(--h5-sub)}
+
+/* 「产品信息 查看」弹窗 */
+.bk-mtab{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.bk-mtab a{padding:4px 11px;border:1px solid var(--h5-line);border-radius:14px;font-size:12px;color:#475467;cursor:pointer}
+.bk-mtab a.on{border-color:var(--ro2);background:var(--ro2);color:#fff}
+.bk-mlist>div{padding:9px 0;border-top:1px solid #EEF1F5}
+.bk-mlist>div:first-child{border-top:0}
+.bk-mlist b{display:block;font-size:13px;font-weight:600;color:var(--h5-ink)}
+.bk-mlist b em{margin-left:6px;padding:1px 6px;border-radius:8px;background:#F2F4F7;color:#667085;font-style:normal;font-size:10.5px;font-weight:400}
+.bk-mlist b em.must{background:#FEF3F2;color:#B42318}
+.bk-mlist s{display:block;margin-top:3px;font-size:11.5px;color:var(--h5-sub);text-decoration:none}
+.bk-mlist p{margin:4px 0 0;font-size:11.5px;line-height:1.7;color:#667085}
+.bk-mlist .empty{padding:14px 0;text-align:center;font-size:12px;color:var(--h5-sub)}
+.bk-mflow>div{padding:7px 0;border-top:1px solid #EEF1F5}
+.bk-mflow>div:first-child{border-top:0}
+.bk-mflow b{display:block;font-size:12.5px;font-weight:600;color:var(--h5-ink)}
+.bk-mflow s{display:block;margin-top:3px;font-size:11.5px;line-height:1.65;color:var(--h5-sub);text-decoration:none}
+.bk-mkv{display:grid;grid-template-columns:1fr 1fr;gap:8px 14px}
+.bk-mkv>div{display:flex;align-items:center;gap:8px;font-size:12px}
+.bk-mkv i{font-style:normal;color:var(--h5-sub)}
+.bk-mkv b{font-weight:500;color:var(--h5-ink)}
+.ph-foot .sum{display:flex;align-items:center;font-size:12.5px;color:var(--h5-sub)}
+
+/* ================================================================
+   v150 · 小程序内的弹层：底部抽屉，不出机身
+   唐美芳 2026-08-27：「C 端小程序部分页面，为什么不在小程序内直接流转，
+   而是跳转到小程序外面…都在一个小程序里进行交互就可以」。
+   根因不在页面路由——C 端所有视图本来就渲染在真机里；跳出去的是**弹层**：
+   modal / ask / toast 一律 position:fixed 挂在 body 上，浮到 PC 视口正中，
+   于是「填办签人」这种最高频的一步，客人看到的是机身外面弹出一个 PC 白框。
+   core.js 的 overlayHost() 已把宿主换成 .phone，这里把形态也换成移动端该有的样子：
+   遮罩 absolute 裁在机身内，面板从底部升起，按钮做成通栏大按钮。
+   ================================================================ */
+.phone{position:relative}
+
+.mask.in-ph{position:absolute;inset:0;padding:0;z-index:80;
+  align-items:flex-end;background:rgba(8,12,18,.46);
+  animation:phFade .18s ease both}
+@keyframes phFade{from{opacity:0}to{opacity:1}}
+@keyframes phUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+
+.mask.in-ph>.modal,.mask.in-ph>.modal.wide{position:relative;width:100%;max-width:none;max-height:84%;
+  border-radius:20px 20px 0 0;box-shadow:0 -12px 40px rgba(8,12,18,.26);
+  animation:phUp .26s cubic-bezier(.2,.8,.3,1) both}
+/* 抓手条：告诉客人这是可以下拉收起的一层，而不是一个新页面 */
+.mask.in-ph>.modal::before{content:"";position:absolute;top:7px;left:50%;transform:translateX(-50%);
+  width:34px;height:4px;border-radius:2px;background:#DDE1E8}
+.mask.in-ph>.modal>header{padding:18px 18px 12px;border-bottom:1px solid var(--h5-line);
+  font-family:var(--h5-serif);font-size:16.5px;font-weight:600;letter-spacing:-.2px;color:var(--h5-ink)}
+.mask.in-ph>.modal>header button{font-size:22px;color:var(--h5-sub)}
+.mask.in-ph>.modal>.c{padding:14px 18px 4px;background:#fff}
+.mask.in-ph>.modal>footer{padding:10px 18px calc(10px + env(safe-area-inset-bottom));
+  border-top:1px solid var(--h5-line);gap:10px}
+/* 通栏大按钮：手机上「取消 / 确定」不该是右下角两个小方块 */
+.mask.in-ph>.modal>footer .btn{flex:1;justify-content:center;height:44px;border-radius:22px;
+  font-size:15px;font-weight:600}
+.mask.in-ph>.modal>footer .btn.p,.mask.in-ph>.modal>footer .btn.r{
+  background:var(--o);border-color:var(--o);color:#fff}
+
+/* 表单：拉高到手机该有的点击尺寸，标签压到 12px 但行距放开 */
+.mask.in-ph label.f{margin-bottom:14px}
+.mask.in-ph label.f>span{font-size:12.5px;color:var(--h5-ink2);margin-bottom:6px}
+.mask.in-ph label.f>span i{color:var(--o)}
+.mask.in-ph .f input,.mask.in-ph .f select,.mask.in-ph .f textarea{
+  height:44px;border-radius:10px;border-color:var(--h5-bd);font-size:15px;padding:0 13px;
+  background:#fff;-webkit-appearance:none}
+.mask.in-ph .f select{appearance:none;background-image:
+  linear-gradient(45deg,transparent 50%,#98A0AD 50%),linear-gradient(135deg,#98A0AD 50%,transparent 50%);
+  background-position:calc(100% - 17px) 19px,calc(100% - 12px) 19px;
+  background-size:5px 5px,5px 5px;background-repeat:no-repeat;padding-right:34px}
+.mask.in-ph .f textarea{height:auto;min-height:92px;padding:11px 13px;line-height:1.65}
+.mask.in-ph .f input:focus,.mask.in-ph .f select:focus,.mask.in-ph .f textarea:focus{
+  border-color:var(--o);box-shadow:0 0 0 3px rgba(232,64,46,.12)}
+.mask.in-ph .f .hint{margin-top:5px;font-size:11.5px;line-height:1.6;color:var(--h5-sub)}
+.mask.in-ph .chks label{padding:8px 13px;border-radius:18px;font-size:13px;border-color:var(--h5-bd)}
+
+/* 提示条：贴机身顶部，不再飞到 PC 视口顶上 */
+.toast.in-ph{position:absolute;top:auto;bottom:76px;left:50%;transform:translateX(-50%);
+  width:max-content;max-width:calc(100% - 40px);text-align:center;font-size:13px;
+  line-height:1.55;padding:10px 16px;border-radius:12px;z-index:90}
+
+/* 机身内的全屏文件预览层：点材料样例、点客人传的证件都走这里，不再开浏览器新标签页 */
+.ph-view{position:absolute;inset:0;z-index:95;background:rgba(8,12,18,.94);
+  display:flex;flex-direction:column;animation:phFade .16s ease both}
+.ph-view .hd{flex:none;display:flex;align-items:center;gap:10px;padding:14px 18px;
+  color:#fff;font-size:14px;font-weight:600}
+.ph-view .hd b{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
+.ph-view .hd a{flex:none;font-size:13px;color:rgba(255,255,255,.7);cursor:pointer;
+  border:1px solid rgba(255,255,255,.28);border-radius:14px;padding:3px 12px}
+.ph-view .hd a:hover{background:rgba(255,255,255,.14);color:#fff}
+.ph-view .bd{flex:1;display:flex;align-items:center;justify-content:center;padding:0 14px 24px;overflow:auto}
+.ph-view .bd img{max-width:100%;max-height:100%;border-radius:8px;object-fit:contain}
+.ph-view .bd .tx{color:rgba(255,255,255,.72);font-size:13px;line-height:1.9;text-align:center;padding:0 12px}
+.ph-view .bd .tx a{color:#FF8A72;text-decoration:underline}
+
+/* C 端常用办签人 / 收货地址（2026-08-31）——一条一卡，操作在卡片右下角 */
+.h5-tv{background:#fff;margin:0 14px 10px;border-radius:var(--h5-r);padding:13px 15px 10px;
+  border:1px solid var(--h5-line);box-shadow:var(--h5-sd)}
+.h5-tv .hd{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:7px}
+.h5-tv .hd b{font-size:15px;font-weight:600}
+.h5-tv .hd s{text-decoration:none;font-size:12px;color:var(--h5-sub)}
+.h5-tv .ln{font-size:12.5px;color:var(--h5-ink2);line-height:1.85}
+.h5-tv .ln.mut{color:var(--h5-sub)}
+.h5-tv .ln.wn{color:var(--o-d)}
+.h5-tv .ln em{font-style:normal;margin-left:7px;background:var(--o-bg);color:var(--o-d);
+  border-radius:5px;padding:1px 7px;font-size:11px}
+.h5-tv .op{display:flex;gap:16px;justify-content:flex-end;margin-top:9px;padding-top:9px;
+  border-top:1px solid var(--h5-line)}
+.h5-tv .op a{font-size:13px;color:var(--o);cursor:pointer}
+.h5-add{display:block;margin:0 14px;padding:13px;text-align:center;background:#fff;
+  border:1px dashed var(--h5-bd);border-radius:var(--h5-r);color:var(--o);
+  font-size:14px;font-weight:600;cursor:pointer}
+.h5-add:active{background:var(--o-bg)}
+.h5-empty{margin:36px 14px;text-align:center}
+.h5-empty b{display:block;font-size:15px;margin-bottom:7px}
+.h5-empty s{display:block;text-decoration:none;font-size:12.5px;color:var(--h5-sub);line-height:1.8}
+/* 下单时「从常用办签人选」的挑人弹窗。
+   modal 的内容区在手机壳里是 flex 容器，子元素会被排成一行 —— 必须显式声明纵向。 */
+.h5-pick{display:flex;flex-direction:column;gap:9px;max-height:52vh;overflow-y:auto}
+.h5-pick a{display:block;flex:none;padding:12px 14px;border:1px solid var(--h5-line);border-radius:10px;
+  cursor:pointer;transition:border-color .15s,background .15s}
+.h5-pick a:hover{border-color:var(--o);background:var(--o-bg)}
+.h5-pick b{font-size:14.5px;font-weight:600;margin-right:8px}
+.h5-pick s{text-decoration:none;font-size:12.5px;color:var(--h5-sub);white-space:nowrap}
+.h5-pick em{font-style:normal;float:right;font-size:11.5px;background:var(--h5-fill);
+  color:var(--h5-ink2);border-radius:5px;padding:1px 8px}
+.h5-pick u{display:block;text-decoration:none;font-size:11.5px;margin-top:4px}
+.h5-pick u.wn{color:var(--o-d)}
+
+/* ===== C 端订单详情（2026-08-31 重做） =====
+   第一版照搬了 2018 设计图的样式（左侧橙色竖条标题、80px 窄标签双栏、
+   底部一排描边按钮），跟本小程序其他页面对不上——本文件上面就写着
+   「章节标题：去掉竖条，靠字重和留白建立层级」。
+   现在只留这几条页面专有的，其余全部复用 .h5-sec / .h5-h / .h5-row。 */
+.h5-ord .hd,.h5-ord .bd{cursor:pointer}
+
+/* 订单头：左订单号与时间，右状态与金额 */
+.od-hd{display:flex;justify-content:space-between;align-items:flex-start;padding:16px}
+.od-hd .l b{display:block;font-size:14.5px;font-variant-numeric:tabular-nums;letter-spacing:.3px}
+.od-hd .l s{display:block;text-decoration:none;font-size:12px;color:var(--h5-sub);margin-top:5px}
+.od-hd .r{text-align:right}
+.od-hd .r em{font-style:normal;font-size:12.5px;font-weight:600;color:var(--o)}
+.od-hd .r em.gy{color:var(--h5-sub)}
+.od-hd .r .amt{display:block;font-size:22px;font-weight:600;letter-spacing:-.4px;margin-top:3px;
+  font-variant-numeric:tabular-nums;color:var(--h5-ink)}
+.od-hd .r i{display:block;font-style:normal;font-size:11.5px;color:var(--h5-sub);margin-top:2px}
+
+/* 可折叠段：标题整行可点，箭头翻转 */
+.od-fold .h5-h{cursor:pointer}
+.od-fold .fc{font-style:normal;font-size:15px;color:var(--h5-sub);
+  display:inline-block;transition:transform .18s}
+.od-fold .od-fb{display:none}
+.od-fold.open .od-fb{display:block}
+.od-fold.open .fc{transform:rotate(180deg)}
+
+/* 产品信息：产品名一行，其余属性用现成的 .h5-tags 胶囊 */
+.od-pd{padding:0 16px 14px}
+.od-pd b{display:block;font-size:14px;line-height:1.55;font-weight:600}
+.od-pd .h5-tags{margin-top:9px}
+
+/* 办签人行：姓名下挂证件号，右侧状态下挂待办数 */
+.od-apn{display:flex;flex-direction:column;gap:3px;font-weight:600}
+.od-apn s{text-decoration:none;font-size:11.5px;color:var(--h5-sub);font-weight:400;
+  font-variant-numeric:tabular-nums}
+.h5-row .vl em{display:block;font-style:normal;font-size:11.5px;margin-top:3px}
+.h5-row .vl em.od-wn{color:var(--o);font-weight:600}
+.h5-row .vl em.od-mut{color:var(--h5-sub)}
+
+/* 底栏跟商品页、退款页同一套：左汇总右主按钮 */
+.ph-foot.h5f .sum.od-urge b{color:var(--o)}
+.ph-foot.h5f .h5-btn.grey{flex:none;height:48px;padding:0 16px}
+
+/* 办理跟踪：多办签人横向切换（设计图《签证状态办理跟踪》顶部那一排人名） */
+.tk-tabs{display:flex;overflow-x:auto;background:#fff;border-bottom:1px solid var(--h5-line);
+  -webkit-overflow-scrolling:touch;scrollbar-width:none}
+.tk-tabs::-webkit-scrollbar{display:none}
+.tk-tabs a{flex:none;padding:13px 18px;font-size:14px;color:var(--h5-sub);position:relative;
+  white-space:nowrap;cursor:pointer}
+.tk-tabs a.on{color:var(--o);font-weight:700}
+.tk-tabs a.on:after{content:"";position:absolute;left:18px;right:18px;bottom:0;height:2px;
+  background:var(--o);border-radius:2px}
+
+/* ===== C 端材料页重构（2026-08-31）=====
+   唐美芳：「只有查看样例，没有提交的入口啊，可不可以有个整体的填写页面，现在这样太散了」。
+   原来每项默认折叠、操作藏在里面。现在不折叠，一项一块，动作摆在面上。
+   分组口径与免登录分享页 fill.js 保持一致。 */
+.h5-mhd{display:flex;justify-content:space-between;align-items:flex-start;padding:16px 16px 10px}
+.h5-mhd .l b{display:block;font-size:17px;font-weight:600;letter-spacing:-.2px}
+.h5-mhd .l s{display:block;text-decoration:none;font-size:12.5px;color:var(--h5-sub);margin-top:5px}
+.h5-mhd .r{text-align:right}
+.h5-mhd .r b{font-size:22px;font-weight:600;letter-spacing:-.5px;font-variant-numeric:tabular-nums}
+.h5-mhd .r b i{font-style:normal;font-size:14px;color:var(--h5-sub);font-weight:500}
+.h5-mhd .r s{display:block;text-decoration:none;font-size:11.5px;color:var(--h5-sub);margin-top:2px}
+.h5-pb{height:5px;margin:0 16px;border-radius:3px;background:var(--h5-line);overflow:hidden}
+.h5-pb i{display:block;height:100%;background:var(--o);border-radius:3px;transition:width .3s}
+/* 分组说明：告诉客人这一组要做什么，而不只是列条目 */
+.h5-gn{padding:9px 16px 12px;font-size:12.5px;line-height:1.7;color:var(--h5-sub)}
+
+.h5-mt{padding:13px 16px;border-top:1px solid var(--h5-line)}
+.h5-mt.bad{background:#FFFBFB}
+.h5-mt .hd{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.h5-mt .nm{flex:1;font-size:14px;font-weight:600;line-height:1.5}
+.h5-mt .nm em.must{font-style:normal;font-size:10.5px;font-weight:600;margin-left:6px;
+  padding:1px 5px;border-radius:4px;background:var(--o-bg);color:var(--o);vertical-align:1.5px}
+.h5-mt .rq{margin-top:6px;font-size:12.5px;line-height:1.65;color:var(--h5-ink2);white-space:pre-wrap}
+.h5-mt .fl,.h5-mt .ai,.h5-mt .rj{margin-top:6px;font-size:12px;line-height:1.6}
+.h5-mt .fl{color:var(--h5-ink2)}
+.h5-mt .ai{color:var(--ok,#0E9F6E)}
+.h5-mt .rj{color:var(--o);background:var(--o-bg);border-radius:7px;padding:6px 9px}
+.h5-mt .op{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+/* 本文件靠后有一条 `.h5-btn{background:var(--ro)}` 会把所有按钮涂成实心，
+   于是「查看样例」跟「上传」一样抢眼，客人不知道该点哪个。
+   这一组里只让当前该做的那个动作实心，其余描边。 */
+.h5-mt .op .h5-btn{background:#fff;color:var(--h5-ink2);border:1px solid var(--h5-bd);
+  font-weight:500;padding:7px 14px}
+.h5-mt .op .h5-btn:hover{background:var(--h5-hov);border-color:var(--h5-bd-h)}
+.h5-mt .op .h5-btn.solid{background:var(--o);border-color:var(--o);color:#fff;font-weight:600}
+.h5-mt .op .h5-btn.solid:hover{background:var(--o-d);border-color:var(--o-d)}
+/* 不能线上交的项也留个位置写明为什么，不留空——留空客人会以为功能坏了 */
+.h5-mt .op .h5-btn.off{border-style:dashed;color:var(--h5-sub);background:#fff;cursor:default}
+.h5-mt .op .h5-btn.off:hover{background:#fff;border-color:var(--h5-bd)}
+/* 「生成填写链接」「导出清单」这类整块操作沿用 .h5-mail 原样式，不动 */
+
+/* 分享链接弹窗里的地址条 */
+.shlink{margin-top:10px;padding:11px 13px;background:var(--h5-bg,#F2F3F5);border-radius:8px;
+  font-size:12.5px;line-height:1.7;word-break:break-all;user-select:all;
+  font-family:ui-monospace,Menlo,Consolas,monospace}
+
+/* ===== C 端填申请表（2026-08-31，结构照唐美芳给的闪签原型《填申请表》）=====
+   板块列表复用 .h5-row / .h5-mhd / .h5-pb，这里只加填写页那几件。 */
+.cf-left{color:var(--o);font-weight:600}
+.cf-ok{color:var(--h5-sub)}
+.cf-form{padding:2px 0 6px}
+.cf-form.locked{opacity:.6;pointer-events:none}
+.cf-q{padding:14px 16px;border-top:1px solid var(--h5-line)}
+.cf-q:first-child{border-top:none}
+.cf-q.risk{background:#FFFBFB}
+.cf-nm{font-size:14px;font-weight:600;line-height:1.55}
+.cf-nm em{font-style:normal;font-size:10.5px;font-weight:600;margin-left:6px;
+  padding:1px 6px;border-radius:4px;vertical-align:1.5px}
+.cf-nm em.rk{background:var(--o-bg);color:var(--o)}
+.cf-nm em.dn{background:#ECFDF5;color:#0E9F6E}
+.cf-nm em.rq{background:var(--h5-bg);color:var(--h5-sub)}
+.cf-note{margin-top:6px;font-size:12.5px;line-height:1.65;color:var(--h5-ink2);white-space:pre-wrap}
+.cf-must{margin-top:7px;font-size:12.5px;line-height:1.6;color:var(--o);
+  background:var(--o-bg);border-radius:7px;padding:7px 10px}
+.cf-ipt{width:100%;margin-top:9px;padding:10px 12px;border:1px solid var(--h5-bd);
+  border-radius:8px;font:inherit;font-size:14px;background:#fff;color:var(--h5-ink);
+  -webkit-appearance:none}
+.cf-ipt:focus{outline:none;border-color:var(--o)}
+textarea.cf-ipt{line-height:1.7;resize:vertical}
+.cf-yn{display:flex;gap:10px;margin-top:10px}
+.cf-yn button{flex:1;padding:10px;border:1px solid var(--h5-bd);border-radius:8px;
+  background:#fff;color:var(--h5-ink2);font-size:14px;font-weight:500;cursor:pointer}
+.cf-yn button.on{border-color:var(--o);background:var(--o-bg);color:var(--o);font-weight:600}
+
+/* 底栏里的次要按钮（2026-08-31）。
+   本文件 952 行有一条 `.h5-btn{background:var(--ro)}` 把所有 h5-btn 涂成实心玫红，
+   于是底栏「取消」「下一块」跟主按钮长得一模一样，客人分不清该点哪个。
+   这条规则在批次 25 重写订单详情样式时被我自己一起删掉了，这里补回来并放到文件末尾，
+   免得再被后面的段落误伤。 */
+.ph-foot .h5-btn{background:#fff;color:var(--h5-ink2);border:1px solid var(--h5-bd);
+  font-weight:500;flex:none;height:44px;padding:0 16px;border-radius:8px}
+.ph-foot .h5-btn:hover{background:var(--h5-hov);border-color:var(--h5-bd-h)}
+.ph-foot .h5-btn.grey{color:var(--h5-sub)}
+
+/* ============================================================
+   事务页卡片式排版（2026-08-31）
+   唐美芳给了同程订单详情的截图：「页面UI结构看起来不太规整，
+   你能参考这种风格和排版吗，要规整一些的」。
+   本文件靠前有一批杂志风改造把 .h5-sec 的卡片盒取消了
+   （margin:0 / border-radius:0 / 全宽白底 + 发丝线），
+   那套适合首页、商城、产品详情这类内容页；填表、材料、订单详情这类
+   一块一块的事务信息，还是卡片分组更清楚——每张卡是一件事，
+   卡片之间的留白就是「这是另一件事」。
+   所以做成按页开关的 .cardy，不去全局推翻已经定型的内容页。
+   ============================================================ */
+.ph-body.h5.cardy{background:#F2F3F5;padding:0 0 20px}
+.ph-body.h5.cardy .h5-sec{margin:10px 12px;padding:0 0 6px;background:#fff;
+  border:1px solid rgba(16,24,40,.05);border-radius:12px;border-bottom:1px solid rgba(16,24,40,.05);
+  box-shadow:0 1px 2px rgba(16,24,40,.05);overflow:hidden}
+.ph-body.h5.cardy .h5-sec:first-child{margin-top:12px}
+.ph-body.h5.cardy .h5-h{padding:14px 15px 9px;font-size:16px;font-weight:700;letter-spacing:-.3px}
+.ph-body.h5.cardy .h5-row{padding:12px 15px;border-bottom:1px solid #F4F5F7}
+.ph-body.h5.cardy .h5-row:last-child{border-bottom:0}
+.ph-body.h5.cardy .h5-gn{padding:0 15px 12px}
+.ph-body.h5.cardy .h5-mhd{padding:15px 15px 10px}
+.ph-body.h5.cardy .h5-pb{margin:0 15px}
+.ph-body.h5.cardy .h5-tip{padding:4px 16px 14px}
+.ph-body.h5.cardy .cf-q{padding:13px 15px;border-top:1px solid #F4F5F7}
+.ph-body.h5.cardy .h5-mt{padding:12px 15px}
+.ph-body.h5.cardy .od-hd{padding:15px}
+.ph-body.h5.cardy .od-pd{padding:0 15px 13px}
+.ph-body.h5.cardy .h5-mail{padding:0 15px 13px}
+.ph-body.h5.cardy .h5-empty{padding:44px 16px}
+/* 顶部页头也压成同一底色，不然灰底上顶着一条暖白纸很脏 */
+.phone:has(.ph-body.h5.cardy) .ph-bar,
+.phone:has(.ph-body.h5.cardy) .ph-nav{background:#F2F3F5}
+
+/* 填表页的步骤序号（2026-08-31）：唐美芳「第一步是基础信息，第二步是xx信息之类的」。
+   填完那一步序号变勾，一眼看出还剩哪几步。 */
+.cf-step{gap:11px}
+.cf-no{flex:none;width:22px;height:22px;border-radius:50%;background:var(--o-bg);color:var(--o);
+  font-style:normal;font-size:12px;font-weight:700;display:grid;place-items:center;
+  font-variant-numeric:tabular-nums}
+.cf-no.ok{background:#ECFDF5;color:#0E9F6E}
+
+/* ============================================================
+   事务页的彩色状态头（2026-08-31）
+   唐美芳：「不是让你和我刚才截图的风格一样么，现在这怎么一点颜色都没有呀」。
+   她给的同程订单页，顶部是一整块品牌绿铺满 + 白色大字状态（「已确认，待入住」），
+   第一张白卡压在色块下沿。上一版我只做到「灰底 + 白卡」，缺的正是这块颜色。
+   我们的 C 端强调色是玫红（.phone 作用域里的 --ro），照它做渐变。
+   ============================================================ */
+.ph-body.h5.cardy.hue{background:#F2F3F5}
+/* 色块从状态栏一直铺到页头下方，卡片再压上来 */
+.phone:has(.ph-body.h5.cardy.hue) .ph-bar,
+.phone:has(.ph-body.h5.cardy.hue) .ph-nav{background:var(--ro);color:#fff}
+.phone:has(.ph-body.h5.cardy.hue) .ph-nav .back{color:#fff}
+.ph-body.h5.cardy.hue .cf-hero{background:var(--ro);color:#fff;padding:2px 18px 58px;
+  background-image:linear-gradient(180deg,var(--ro) 0%,var(--ro2) 100%)}
+.cf-hero .st{font-size:23px;font-weight:800;letter-spacing:-.6px;line-height:1.3}
+.cf-hero .st em{font-style:normal;font-size:15px;font-weight:600;opacity:.9;margin-left:6px}
+.cf-hero .sub{margin-top:8px;font-size:13px;line-height:1.65;color:rgba(255,255,255,.86)}
+.cf-hero .chips{display:flex;gap:8px;margin-top:13px;flex-wrap:wrap}
+/* 明写 color：这一段在 .ph-body.h5 作用域内，不写会被前面 .h5-tags span 那类
+   规则的橙色继承下来，在玫红底上很脏 */
+.cf-hero .chips span{background:rgba(255,255,255,.18);border-radius:99px;padding:4px 11px;
+  font-size:12px;font-weight:600;color:#fff;border:0}
+/* 第一张卡往上提，压住色块下沿，跟同程一样 */
+.ph-body.h5.cardy.hue .cf-hero + .h5-sec{margin-top:-44px;position:relative;z-index:2;
+  box-shadow:0 4px 16px -8px rgba(16,24,40,.24),0 1px 2px rgba(16,24,40,.05)}
+
+/* 订单卡上的办理状态标签（2026-08-31）：跟订单状态并排但明显次一级——
+   订单状态管钱走到哪，办理状态管签证办到哪，是两条线，不能合成一个词。 */
+.h5-ord .st .wk{font-style:normal;font-weight:500;font-size:11px;color:var(--h5-sub);
+  background:var(--h5-bg);border-radius:4px;padding:1.5px 6px;margin-left:6px;
+  vertical-align:1px;letter-spacing:0}
+
+/* ===== 有米小程序（门店销售移动端，2026-08-31）=====
+   唐美芳：「csp还有个移动端叫有米小程序，你也帮我整个产品预定中心的移动端，
+   有签证频道，销售需要代客下单，同时能分享客人填写」。
+   复用 C 端的 h5 + cardy/hue 那套，这里只加销售端特有的几件：
+   产品卡、套餐选中态、办签人表单、订单卡。 */
+.ym-srch{display:flex;gap:8px;padding:12px 15px 6px}
+.ym-srch input{flex:1;min-width:0;padding:9px 12px;border:1px solid var(--h5-bd);
+  border-radius:8px;font:inherit;font-size:13.5px;background:#fff;-webkit-appearance:none}
+.ym-srch input:focus{outline:none;border-color:var(--o)}
+.ym-srch button{flex:none;padding:0 15px;border:0;border-radius:8px;background:var(--o);
+  color:#fff;font-size:13.5px;font-weight:600;cursor:pointer}
+.ym-cs{display:flex;gap:7px;overflow-x:auto;padding:8px 15px 13px;scrollbar-width:none}
+.ym-cs::-webkit-scrollbar{display:none}
+.ym-cs a{flex:none;padding:5px 13px;border-radius:99px;background:var(--h5-bg);
+  font-size:12.5px;color:var(--h5-ink2);cursor:pointer;white-space:nowrap}
+.ym-cs a.on{background:var(--o);color:#fff;font-weight:600}
+
+.ym-p{cursor:pointer}
+.ym-pt{padding:14px 15px 8px;font-size:14.5px;font-weight:600;line-height:1.5}
+.ym-p .h5-tags{padding:0 15px}
+.ym-pf{display:flex;align-items:center;justify-content:space-between;padding:11px 15px 14px}
+.ym-pf .pr b{font-size:20px;font-weight:700;color:var(--o);letter-spacing:-.4px;
+  font-variant-numeric:tabular-nums}
+.ym-pf .pr s{text-decoration:none;font-size:12px;color:var(--h5-sub);margin-left:3px}
+.ym-pf .pr em{display:block;font-style:normal;font-size:11.5px;color:#0E9F6E;margin-top:2px}
+
+/* 套餐行选中态：销售要一眼看出当前选的是哪档 */
+.ym-pk{cursor:pointer}
+.ym-pk.on{background:var(--o-bg)}
+.ym-pk.on .lb{color:var(--o)}
+.ym-price{font-size:15px;font-weight:700;color:var(--o);font-variant-numeric:tabular-nums}
+.ym-mg{display:block;font-style:normal;font-size:11px;color:#0E9F6E;margin-top:2px}
+.ym-mg2{color:#0E9F6E;font-size:15px;font-weight:700}
+.ym-bad{color:var(--o);font-size:15px;font-weight:700}
+
+/* 办签人分组表单：手机上两列排布，姓名与证件号占满一行 */
+.ym-pax{border-top:1px solid var(--h5-line);padding:12px 15px}
+.ym-pax.bad{background:#FFFBFB}
+.ym-pax .hd{display:flex;align-items:center;gap:8px;margin-bottom:9px}
+.ym-pax .hd b{font-size:13.5px}
+.ym-pax .hd a{margin-left:auto;font-size:12px;color:var(--h5-sub);cursor:pointer}
+.ym-g{display:grid;grid-template-columns:1fr 1fr;gap:9px;padding:0 15px 12px}
+.ym-pax .ym-g{padding:0}
+.ym-f{display:flex;flex-direction:column;gap:5px}
+.ym-f>span{font-size:11.5px;color:var(--h5-sub)}
+.ym-f input,.ym-f select{width:100%;padding:9px 11px;border:1px solid var(--h5-bd);
+  border-radius:8px;font:inherit;font-size:13.5px;background:#fff;-webkit-appearance:none}
+.ym-f input:focus,.ym-f select:focus{outline:none;border-color:var(--o)}
+.ym-g>.ym-f:nth-child(1),.ym-g>.ym-f:nth-child(3){grid-column:1 / -1}
+
+/* 订单卡 */
+.ym-fbar{position:sticky;top:0;z-index:6}
+.ym-oh{display:flex;justify-content:space-between;align-items:center;padding:13px 15px 6px}
+.ym-oh .no{font-size:12.5px;color:var(--h5-sub);font-variant-numeric:tabular-nums}
+.ym-oh .st{font-size:13px;font-weight:700;color:var(--o)}
+.ym-oh .st .wk{font-style:normal;font-weight:500;font-size:11px;color:var(--h5-sub);
+  background:var(--h5-bg);border-radius:4px;padding:1.5px 6px;margin-left:6px;vertical-align:1px}
+.ym-ot{padding:0 15px 8px;font-size:14px;font-weight:600;line-height:1.5}
+.ym-o .h5-tags{padding:0 15px}
+.ym-todo{margin:10px 15px 0;padding:8px 11px;background:var(--o-bg);color:var(--o);
+  border-radius:8px;font-size:12.5px;line-height:1.6}
+.ym-oa{display:flex;align-items:center;gap:8px;padding:12px 15px 14px}
+.ym-oa .amt{flex:1;font-size:17px;font-weight:700;font-variant-numeric:tabular-nums}
+.ym-oa .amt em{display:block;font-style:normal;font-size:11.5px;font-weight:500;color:var(--o)}
+
+/* 分享弹窗里的办签人选择行 */
+.ym-sh{display:flex;justify-content:space-between;align-items:center;padding:12px 2px;
+  border-bottom:1px solid var(--line-2);cursor:pointer}
+.ym-sh:hover{background:var(--h5-hov)}
+.ym-sh span{font-size:12.5px;color:var(--brand,#E0245E)}
+
+/* 常用办签人里的「本人」（2026-09-01）：唐美芳「包括标记本人等，
+   默认带出本人的办签人信息」。本人置顶并给一条主色左边线，
+   下单时默认带的就是这一位，得让人一眼认出来。 */
+.h5-tv.me{border-left:3px solid var(--o)}
+.h5-tv .op a[data-self]{color:var(--o)}
+.h5-pick a b .mine{font-style:normal;font-size:10.5px;font-weight:600;margin-left:6px;
+  padding:1px 6px;border-radius:4px;background:var(--o-bg);color:var(--o);vertical-align:1.5px}
+
+/* 有米工作台的待办格子（2026-09-01）：对齐 CSP 首页的 stat 卡片口径 */
+.ym-kpi{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--h5-line);
+  border-top:1px solid var(--h5-line)}
+.ym-kpi .k{background:#fff;padding:14px 15px}
+.ym-kpi .k b{display:block;font-size:22px;font-weight:700;letter-spacing:-.5px;
+  font-variant-numeric:tabular-nums}
+.ym-kpi .k s{display:block;text-decoration:none;font-size:12px;color:var(--h5-sub);margin-top:3px}
+.ym-kpi .k.hot b{color:var(--o)}
+
+/* ============================================================
+   有米小程序 · 复刻「销售定制小程序」（travel-sales）的视觉规范
+   唐美芳 2026-09-01：「你可以复刻一下我之前发的html的有米小程序页面，
+   是现成的，你直接copy后，重构增加签证频道，就和csp的逻辑一样就好了」。
+
+   原件在 incoming/to-chizong/TO 迟总/销售定制小程序-进入后双击travel-sales，
+   React + Tailwind。这里把它的设计 token 抄成 CSS：
+     底色 #f5f7fa · 卡片白 + 16px 圆角 + 细描边 + 轻阴影
+     主色 #FF6B3D → #FF8A5C（原型「优游有米」的橙色）
+     页头：白底、标题居中、返回箭头浮在左侧
+     首页横幅：圆角渐变卡片浮在灰底上（不是通栏色块）
+   与我上一版自己设计的那套（通栏色块 + 大字状态）不同，按原件来。
+   ============================================================ */
+.ph-body.h5.ym{background:#f5f7fa;padding:0 0 16px}
+.ym-pri{--ym:#FF6B3D;--ym-d:#e85a2c;--ym-50:#fff0f5;--ym-100:#ffe0eb}
+/* 页头：白底 + 居中标题 + 左侧返回 */
+.phone:has(.ph-body.h5.ym) .ph-bar{background:#fff;color:#111827}
+.phone:has(.ph-body.h5.ym) .ph-nav{background:#fff;height:48px;padding:0 16px;
+  font-size:16px;font-weight:600;color:#111827;letter-spacing:0;
+  display:flex;align-items:center;justify-content:center;position:relative;
+  box-shadow:0 1px 2px rgba(16,24,40,.05)}
+.phone:has(.ph-body.h5.ym) .ph-nav .back{position:absolute;left:10px;top:50%;
+  transform:translateY(-50%);width:32px;height:32px;border-radius:50%;
+  display:grid;place-items:center;font-size:20px;color:#374151;margin:0}
+.ym-wrap{padding:16px}
+.ym-wrap>*+*{margin-top:16px}
+
+/* 顶部渐变横幅 */
+.ymh{position:relative;overflow:hidden;border-radius:14px;padding:18px;
+  background:linear-gradient(135deg,#FF6B3D 0%,#FF8A5C 100%);color:#fff;
+  box-shadow:0 10px 20px -12px rgba(255,107,61,.5)}
+.ymh .hd{display:flex;align-items:flex-start;justify-content:space-between}
+.ymh .hd s{display:block;text-decoration:none;font-size:12px;opacity:.8;letter-spacing:.3px}
+.ymh .hd b{display:block;margin-top:5px;font-size:20px;font-weight:700;letter-spacing:-.3px}
+.ymh .bell{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.2);
+  display:grid;place-items:center;font-size:17px;position:relative;flex:none}
+.ymh .bell.on:after{content:"";position:absolute;right:-1px;top:-1px;width:11px;height:11px;
+  border-radius:50%;background:#ef4444;border:2px solid #e85a2c}
+.ymh .st3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:20px}
+.ymh .st3 div{background:rgba(255,255,255,.15);border-radius:12px;padding:12px 8px;text-align:center}
+.ymh .st3 b{display:block;font-size:18px;font-weight:700;letter-spacing:-.3px}
+.ymh .st3 s{display:block;text-decoration:none;margin-top:2px;font-size:11.5px;opacity:.7}
+
+/* 快捷入口：三格图标卡 */
+.ym-qk{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.ym-qk a{display:flex;flex-direction:column;align-items:center;background:#fff;
+  border-radius:16px;padding:16px 8px;box-shadow:0 1px 2px rgba(16,24,40,.05);
+  box-shadow:0 1px 2px rgba(16,24,40,.05),0 0 0 1px #f3f4f6;cursor:pointer;transition:.18s}
+.ym-qk a:active{transform:scale(.95)}
+.ym-qk i{width:44px;height:44px;border-radius:12px;background:#fff0f5;color:#e85a2c;
+  display:grid;place-items:center;font-style:normal;font-size:19px;margin-bottom:10px}
+.ym-qk span{font-size:12px;font-weight:500;color:#374151}
+
+/* 区块标题 */
+.ym-h2{display:flex;align-items:center;justify-content:space-between}
+.ym-h2 .l{display:flex;align-items:center;gap:8px}
+.ym-h2 b{font-size:14px;font-weight:600;color:#111827}
+.ym-h2 em{font-style:normal;height:20px;min-width:20px;padding:0 6px;border-radius:10px;
+  background:#FF6B3D;color:#fff;font-size:11.5px;font-weight:500;
+  display:grid;place-items:center}
+.ym-h2 a{font-size:12px;color:#9ca3af;cursor:pointer}
+.ym-h2 a:hover{color:#FF6B3D}
+
+/* 订单卡（复刻 OrderCard） */
+.ymc{background:#fff;border-radius:16px;padding:16px;cursor:pointer;transition:.18s;
+  box-shadow:0 1px 2px rgba(16,24,40,.05),0 0 0 1px #f3f4f6}
+.ymc+.ymc{margin-top:12px}
+.ymc:active{transform:scale(.98)}
+.ymc .t1{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px}
+.ymc .t1 s{display:block;text-decoration:none;font-size:11.5px;color:#9ca3af;
+  font-variant-numeric:tabular-nums}
+.ymc .t1 b{display:block;margin-top:4px;font-size:15px;font-weight:600;color:#111827}
+.ymc .ln{display:flex;align-items:center;font-size:13px;color:#4b5563;margin-bottom:12px}
+.ymc .ln i{font-style:normal;margin-right:5px;color:#FF6B3D;font-size:12px}
+.ymc .meta{display:flex;align-items:center;gap:16px;font-size:11.5px;color:#6b7280;
+  margin-bottom:12px}
+
+/* 关键信息两列网格：原来出行日期/人数/金额横着一行挤，窄屏必折行
+   （唐美芳 2026-09-02：「时间怎么挤到一起了，其他日期字段也有挤在一起的迹象」）。 */
+.ymc-kv{display:grid;grid-template-columns:1fr 1fr;gap:9px 12px;margin-bottom:12px}
+.ymc-kv>div{min-width:0}
+.ymc-kv s{display:block;text-decoration:none;font-size:11px;color:#9ca3af;margin-bottom:2px}
+.ymc-kv b{display:block;font-size:13px;font-weight:600;color:#374151;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ymc-kv b .owe{margin-left:6px;font-style:normal;font-weight:500;font-size:11.5px;color:#DC2626}
+.ymc-wk{margin-top:5px;font-size:11px;color:#9ca3af;white-space:nowrap}
+
+/* 操作独占一行、右对齐；不再跟下单时间挤在 space-between 里 */
+.ymc .ft{display:flex;align-items:center;justify-content:flex-end;
+  border-top:1px solid #f3f4f6;padding-top:12px}
+.ymc .ft .ar{color:#d1d5db;font-size:14px}
+
+/* 按钮分级照后台：主操作填色，其余线框浅色。原来一律是 12px 小字链接，看不出是按钮。 */
+.ymc-op{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.ymc-op a{display:inline-flex;align-items:center;height:32px;padding:0 14px;
+  border-radius:8px;font-size:12.5px;font-weight:500;white-space:nowrap;cursor:pointer;
+  border:1px solid #E6E8EB;background:#fff;color:#4B5563}
+.ymc-op a.gh{border-color:#E6E8EB;background:#fff;color:#4B5563}
+.ymc-op a.gh:active{background:#F6F7F9}
+.ymc-op a.pr{border-color:#FF6B3D;background:#FF6B3D;color:#fff}
+.ymc-op a.pr:active{background:#E85A2C}
+/* 状态胶囊 */
+.ymb{display:inline-flex;align-items:center;border-radius:99px;padding:2px 9px;
+  font-size:11.5px;font-weight:500;white-space:nowrap}
+.ymb.wait{background:#fff7ed;color:#c2410c}
+.ymb.doing{background:#eff6ff;color:#1d4ed8}
+.ymb.ok{background:#ecfdf5;color:#047857}
+.ymb.off{background:#f3f4f6;color:#6b7280}
+.ymb.bad{background:#fef2f2;color:#b91c1c}
+
+/* 列表页筛选（复刻 FilterTabs） */
+.ym-ft{display:flex;gap:4px;overflow-x:auto;background:#fff;padding:8px 12px;
+  border-bottom:1px solid #f3f4f6;scrollbar-width:none;position:sticky;top:0;z-index:5}
+.ym-ft::-webkit-scrollbar{display:none}
+.ym-ft a{position:relative;flex:none;padding:6px 12px;border-radius:99px;font-size:13.5px;
+  color:#6b7280;cursor:pointer;white-space:nowrap}
+.ym-ft a.on{color:#e85a2c;font-weight:500}
+.ym-ft a.on:after{content:"";position:absolute;bottom:0;left:50%;transform:translateX(-50%);
+  width:20px;height:2px;border-radius:2px;background:#FF6B3D}
+
+/* 白卡分组（客户档案 / 财务查询这类列表） */
+.ym-card{background:#fff;border-radius:16px;overflow:hidden;
+  box-shadow:0 1px 2px rgba(16,24,40,.05),0 0 0 1px #f3f4f6}
+.ym-card .ch{padding:14px 16px 10px;font-size:14px;font-weight:600;color:#111827;
+  display:flex;align-items:baseline;justify-content:space-between}
+.ym-card .ch em{font-style:normal;font-size:11.5px;font-weight:400;color:#9ca3af}
+.ym-row{display:flex;align-items:center;gap:12px;padding:12px 16px;
+  border-top:1px solid #f3f4f6;cursor:pointer}
+.ym-row:first-of-type{border-top:0}
+.ym-row .av{width:40px;height:40px;border-radius:12px;background:#fff0f5;color:#e85a2c;
+  display:grid;place-items:center;font-size:14px;font-weight:600;flex:none}
+.ym-row .m{flex:1;min-width:0}
+.ym-row .m b{display:block;font-size:14px;font-weight:600;color:#111827}
+.ym-row .m s{display:block;text-decoration:none;margin-top:3px;font-size:11.5px;color:#9ca3af;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ym-row .r{text-align:right;flex:none}
+.ym-row .r b{display:block;font-size:14px;font-weight:600;color:#111827;
+  font-variant-numeric:tabular-nums}
+.ym-row .r s{display:block;text-decoration:none;margin-top:3px;font-size:11.5px;color:#9ca3af}
+.ym-row .ar{color:#d1d5db;font-size:14px;flex:none}
+.ym-empty{background:#fff;border-radius:16px;padding:40px 20px;text-align:center;
+  font-size:13px;color:#9ca3af;box-shadow:0 1px 2px rgba(16,24,40,.05),0 0 0 1px #f3f4f6}
+.ym-empty i{display:block;width:48px;height:48px;margin:0 auto 12px;border-radius:50%;
+  background:#f3f4f6;font-style:normal;font-size:20px;line-height:48px;color:#9ca3af}
+
+/* 底部 Tab 跟着换成 travel-sales 的主色 */
+.phone:has(.ph-body.h5.ym) .ph-tab a.on{color:#FF6B3D}
+.phone:has(.ph-body.h5.ym) .ph-tab a.on svg{color:#FF6B3D}
+.ymc-todo{margin:0 0 12px;padding:8px 11px;background:#fff7ed;color:#c2410c;
+  border-radius:8px;font-size:12px;line-height:1.6}
+.ymc-op{display:flex;gap:12px;align-items:center}
+.ymc-op a{color:#e85a2c;font-size:12px;cursor:pointer;white-space:nowrap}
+.ym-wrap .ym-srch{background:#fff;border-radius:16px;padding:10px 12px;
+  box-shadow:0 1px 2px rgba(16,24,40,.05),0 0 0 1px #f3f4f6;margin-bottom:16px}
+.ym-wrap .ym-srch input{border-color:#e5e7eb}
+.ym-wrap .ym-srch button{background:#FF6B3D}
+/* 预订中心：顶部搜索常驻 + 产品卡 */
+.ym-top{background:#fff;padding:12px 16px 10px}
+.ym-top .ym-srch{margin:0}
+.ym-top .ym-srch input{border-color:#e5e7eb;background:#f5f7fa}
+.ym-top .ym-srch button{background:#FF6B3D}
+.ymp .t1 s{max-width:none}
+.ymp-pr{display:flex;align-items:baseline;gap:4px}
+.ymp-pr b{font-size:19px;font-weight:700;color:#FF6B3D;letter-spacing:-.4px}
+.ymp-pr s{text-decoration:none;font-size:11.5px;color:#9ca3af}
+.ymp-pr em{font-style:normal;margin-left:8px;font-size:11.5px;color:#059669}
+.ym-cta{border:0;background:#FF6B3D;color:#fff;font-size:13px;font-weight:500;
+  padding:8px 16px;border-radius:99px;cursor:pointer}
+.ym-cta:active{background:#e85a2c}
+/* 详情/表单页仍用 h5-sec 结构，在 ym 底色上补成 travel-sales 的白卡 */
+.ph-body.h5.ym .h5-sec{margin:16px;border-radius:16px;padding:16px;background:#fff;
+  box-shadow:0 1px 2px rgba(16,24,40,.05),0 0 0 1px #f3f4f6;border:0}
+.ph-body.h5.ym .h5-sec+.h5-sec{margin-top:-4px}
+.ph-body.h5.ym .ym-wrap+.h5-sec{margin-top:0}
+.ph-body.h5.ym .h5-h{font-size:14px;font-weight:600;color:#111827;margin-bottom:10px}
+.ph-body.h5.ym .h5-h .more{font-size:11.5px;font-weight:400;color:#9ca3af}
+/* .ph-foot 是 .ph-body 的兄弟节点，不在它里面——选择器要挂到 .phone 上，
+   否则底部主按钮会漏掉，还留着客户端那套玫红 */
+.ph-body.h5.ym .h5-btn.solid{background:#FF6B3D;border-color:#FF6B3D}
+.phone:has(.ph-body.h5.ym) .ph-foot .cta{background:#FF6B3D;border-color:#FF6B3D}
+.phone:has(.ph-body.h5.ym) .ph-foot.h5f .cta{background:#FF6B3D}
+.ph-body.h5.ym .h5-row.on{background:#FFF3EE;box-shadow:inset 0 0 0 1px #FFC9B2}
+.ph-body.h5.ym .ym-price{color:#FF6B3D}
+/* 详情页仍复用 cf-hero 这层结构（st/sub/chips），在有米里按 travel-sales 的
+   横幅长相渲染：圆角渐变卡浮在灰底上，不通栏、不压卡。 */
+.ph-body.h5.ym .cf-hero{margin:12px;border-radius:14px;padding:18px;color:#fff;
+  background:linear-gradient(135deg,#FF6B3D 0%,#FF8A5C 100%);
+  box-shadow:0 10px 20px -12px rgba(255,107,61,.5)}
+.ph-body.h5.ym .cf-hero .st{font-size:20px;font-weight:700;letter-spacing:-.3px}
+.ph-body.h5.ym .cf-hero .st em{font-size:13px;font-weight:500;opacity:.85}
+.ph-body.h5.ym .cf-hero .sub{font-size:12.5px;color:rgba(255,255,255,.82)}
+.ph-body.h5.ym .cf-hero .chips span{background:rgba(255,255,255,.15);font-weight:500}
+.ph-body.h5.ym .cf-hero+.h5-sec{margin-top:16px}
+/* ============================================================
+   申请人选择器（三端共用，见 js/ap-picker.js）
+   版式照携程「选择申请人」：卡片网格 2×4 + 左右翻页 + 右下新增。
+   （唐美芳 2026-09-01：「参考下携程填写的页面，特别简单清晰」）
+   ============================================================ */
+.ap-wrap{padding:2px 0}
+.ap-cust{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:0 0 14px;
+  border-bottom:1px solid #f1f3f5;margin-bottom:14px}
+.ap-cust>span{font-size:13px;color:#4b5563;font-weight:500;flex:none}
+.ap-cust select{height:34px;border:1px solid #e5e7eb;border-radius:8px;background:#fff;
+  padding:0 10px;font-size:13px;color:#111827;min-width:240px;max-width:100%}
+.ap-cust i{flex-basis:100%;font-style:normal;font-size:11.5px;color:#9ca3af;line-height:1.6}
+.ap-body{display:flex;align-items:center;gap:6px}
+.ap-nav{flex:none;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;
+  font-size:18px;color:#6b7280;background:#f3f4f6;cursor:pointer;user-select:none}
+.ap-nav:hover{background:#e5e7eb;color:#111827}
+.ap-nav.off{opacity:.35;pointer-events:none}
+.ap-nav[hidden]{display:none}
+.ap-list{flex:1;min-width:0;display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.ap-list.empty{display:block}
+.ap-c{position:relative;border:1px solid #e5e7eb;border-radius:10px;padding:14px 10px 10px;
+  text-align:center;cursor:pointer;background:#fff;min-height:92px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;transition:.15s}
+.ap-c:hover{border-color:#c9ced6}
+.ap-c.on{border-color:var(--ro,#e5004f);background:#fff7fa;box-shadow:0 0 0 1px var(--ro,#e5004f)}
+.ap-c b{font-size:14.5px;font-weight:600;color:#111827;line-height:1.3}
+.ap-c em{font-style:normal;margin-top:4px;font-size:10.5px;font-weight:500;color:#047857;
+  background:#ecfdf5;border-radius:4px;padding:1px 6px}
+.ap-c s{display:block;margin-top:6px;text-decoration:none;font-size:11.5px;color:#9ca3af;
+  max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ap-c s.miss{color:#2563eb}
+.ap-c u.wn{display:block;margin-top:4px;text-decoration:none;font-size:10.5px;color:#b91c1c}
+.ap-ck{position:absolute;right:7px;top:7px;width:17px;height:17px;border-radius:50%;
+  border:1.5px solid #d1d5db;display:grid;place-items:center;font-style:normal;
+  font-size:10px;color:#fff;background:#fff}
+.ap-c.on .ap-ck{background:var(--ro,#e5004f);border-color:var(--ro,#e5004f)}
+.ap-op{position:absolute;left:0;right:0;bottom:0;display:flex;justify-content:center;gap:8px;
+  padding:5px 4px;background:linear-gradient(180deg,rgba(255,255,255,0),#fff 40%);
+  opacity:0;transition:.15s}
+.ap-c:hover .ap-op{opacity:1}
+.ap-op a{font-size:11px;color:#6b7280;cursor:pointer;white-space:nowrap}
+.ap-op a:hover{color:var(--ro,#e5004f)}
+.ap-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;
+  margin-top:14px;flex-wrap:wrap}
+.ap-pg{font-size:11.5px;color:#9ca3af}
+.ap-add{border:1px solid var(--ro,#e5004f);border-radius:8px;padding:8px 16px;
+  color:var(--ro,#e5004f);font-size:13px;cursor:pointer;white-space:nowrap}
+.ap-add:hover{background:#fff7fa}
+.ap-empty{text-align:center;padding:26px 16px;color:#9ca3af}
+.ap-empty b{display:block;font-size:14px;color:#4b5563;margin-bottom:6px}
+.ap-empty s{text-decoration:none;font-size:12px;line-height:1.7}
+.ap-tip{margin-top:12px;font-size:11.5px;line-height:1.7;color:#9ca3af}
+/* 手机上窄，一行两个 */
+.mask.in-ph .ap-list{grid-template-columns:repeat(2,1fr)}
+.mask.in-ph .ap-cust select{min-width:0;width:100%}
+/* 下单页里已选申请人的卡片 */
+.ap-sel{display:flex;flex-direction:column;gap:8px}
+.ap-card{display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:10px;
+  background:#f7f8fa;border:1px solid transparent}
+.ap-card.bad{background:#fff7ed;border-color:#fed7aa}
+.ap-card .n{flex:1;min-width:0}
+.ap-card .n b{display:block;font-size:13.5px;font-weight:600;color:#111827}
+.ap-card .n s{display:block;text-decoration:none;margin-top:3px;font-size:11.5px;color:#6b7280}
+.ap-card .x{flex:none;color:#9ca3af;font-size:15px;cursor:pointer;padding:0 4px}
+.ap-card .x:hover{color:#b91c1c}
+.ap-pick{display:block;text-align:center;padding:11px;border:1px dashed #cbd2db;
+  border-radius:10px;color:var(--ro,#e5004f);font-size:13.5px;cursor:pointer}
+.ap-pick:hover{border-color:var(--ro,#e5004f);background:#fff7fa}
+.ap-ro{font-style:normal;font-size:11px;color:#9ca3af;white-space:nowrap}
+.ym-sel{width:100%;height:40px;border:1px solid #e5e7eb;border-radius:10px;background:#fff;
+  padding:0 10px;font-size:13.5px;color:#111827}
+/* 录入客人签证资料在手机端的排版 */
+.ph-body .oi-head{margin:12px;padding:13px 14px;border-radius:12px;flex-direction:column;gap:10px}
+.ph-body .oi-head .r{text-align:left}
+.ph-body .oi-list{padding:0 12px}
+.ph-body .oi-card{border-radius:12px}
+.ph-body .oi-kv{grid-template-columns:repeat(2,1fr)}
+.ph-body .oi-tip{padding:0 12px 12px}
+.ph-body.ym .oi-card,.ph-body.ym .oi-head{box-shadow:0 1px 2px rgba(16,24,40,.05)}
+/* 「下单后再填写」开关 */
+.ap-later{margin-top:12px}
+.ap-sw{display:flex;align-items:center;gap:9px;cursor:pointer;user-select:none}
+.ap-sw input{display:none}
+.ap-sw i{flex:none;width:38px;height:22px;border-radius:11px;background:#d1d5db;
+  position:relative;transition:.18s}
+.ap-sw i:after{content:"";position:absolute;left:2px;top:2px;width:18px;height:18px;
+  border-radius:50%;background:#fff;transition:.18s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.ap-sw input:checked+i{background:var(--ro,#e5004f)}
+.ap-sw input:checked+i:after{transform:translateX(16px)}
+.ap-sw span{font-size:13px;color:#374151}
+.ap-num{display:flex;align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap}
+.ap-num a{width:26px;height:26px;border-radius:7px;border:1px solid #e5e7eb;background:#fff;
+  display:grid;place-items:center;font-size:15px;color:#4b5563;cursor:pointer;user-select:none}
+.ap-num a:hover{border-color:var(--ro,#e5004f);color:var(--ro,#e5004f)}
+.ap-num b{min-width:26px;text-align:center;font-size:15px;font-weight:600;color:#111827}
+.ap-num em{flex-basis:100%;font-style:normal;font-size:11.5px;color:#9ca3af;line-height:1.6}
+/* 申请人选择在小程序端做成整屏的管理页形态：占满手机壳、顶部像页头。
+   唐美芳 2026-09-01：「pc 是弹窗，小程序端就是新的管理页面」。
+   仍是同一个组件（同一套增删改查与勾选逻辑），只是在手机上撑满，
+   不另写一套页面——两套代码迟早会各自漂移。 */
+.mask.in-ph:has(.ap-wrap)>.modal{max-height:100%;height:100%;border-radius:0}
+.mask.in-ph:has(.ap-wrap)>.modal::before{display:none}
+.mask.in-ph:has(.ap-wrap)>.modal>header{padding:14px 16px 12px;
+  box-shadow:0 1px 2px rgba(16,24,40,.05)}
+.mask.in-ph:has(.ap-wrap)>.modal>header b{font-size:16px}
+.mask.in-ph:has(.ap-wrap)>.modal>.c{flex:1;overflow-y:auto;padding:14px 16px 8px}
+.mask.in-ph:has(.ap-wrap) .ap-list{max-height:none}
+.mask.in-ph:has(.ap-wrap) .ap-foot{position:sticky;bottom:0;background:#fff;
+  padding:10px 0 4px;margin-top:10px}
+/* 套餐卡里的「预订须知」入口：一行，点开弹窗看全文 */
+.pv-pk .r3{margin-top:8px;padding-top:8px;border-top:1px solid var(--h5-line,#f0f1f2)}
+.pv-nt{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--h5-ink,#333)}
+.pv-nt s{flex:1;min-width:0;text-decoration:none;color:var(--h5-sub,#8a8f99);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pv-nt i{font-style:normal;color:#c8ccd3}
+.nt-box{max-height:56vh;overflow-y:auto;font-size:13px;line-height:1.8}
+/* ============================================================
+   有米小程序 · 「优游有米」外壳与页面
+   照唐美芳 2026-09-01 给的原型（v5-prototype.html 的 B端·有米）：
+   橙色主色 #FF6B3D→#FF8A5C、底部 5 项 Tab（中间 YO 圆钮）、
+   工作台十宫格 + 核心数据、收客页搜索 + 品类九宫格。
+   ============================================================ */
+/* 有米整体主色：--ro 在这个作用域里改成橙色，
+   申请人选择器、开关这些共用组件就自动跟着变，不用每处写死一遍 */
+.phone:has(.ph-body.h5.ym),.mask.in-ph:has(.ap-wrap){--ro:#FF6B3D;--ro2:#FF8A5C}
+.ph-body.h5.ym{background:#f5f5f5;padding:0 0 16px}
+.phone:has(.ph-body.h5.ym) .ph-bar{background:#FF6B3D;color:#fff}
+.phone:has(.ph-body.h5.ym) .ph-nav{background:#FF6B3D;color:#fff;height:46px;
+  font-size:16px;font-weight:600;display:flex;align-items:center;justify-content:center;
+  position:relative;box-shadow:none}
+.phone:has(.ph-body.h5.ym) .ph-nav .back{position:absolute;left:10px;top:50%;
+  transform:translateY(-50%);width:32px;height:32px;border-radius:50%;display:grid;
+  place-items:center;font-size:20px;color:#fff;margin:0}
+/* 底部 Tab：中间 YO 圆钮 */
+.ph-tab.ym-tab{display:flex;align-items:flex-end;background:#fff;
+  border-top:1px solid #f0f0f0;padding-bottom:env(safe-area-inset-bottom)}
+.ph-tab.ym-tab a{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;
+  padding:7px 0 6px;color:#9aa0a6;font-size:10.5px;cursor:pointer}
+.ph-tab.ym-tab a svg{width:21px;height:21px}
+.ph-tab.ym-tab a.on{color:#FF6B3D}
+.ph-tab.ym-tab a.yo{flex:none;width:52px;height:52px;border-radius:50%;margin:-16px 6px 4px;
+  background:linear-gradient(135deg,#FF6B3D,#FF8A5C);color:#fff;justify-content:center;
+  box-shadow:0 6px 14px -4px rgba(255,107,61,.55);font-weight:800;letter-spacing:.5px}
+.ph-tab.ym-tab a.yo span{font-size:15px}
+/* 橙色页头 */
+.uy-hd{background:linear-gradient(135deg,#FF6B3D,#FF8A5C);color:#fff;padding:14px 16px 16px}
+.uy-hd.sm{padding:12px 16px 14px}
+.uy-user{display:flex;align-items:center;gap:11px}
+.uy-user>i{flex:none;width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.25);
+  display:grid;place-items:center;font-style:normal;font-size:17px;font-weight:700}
+.uy-user .m{flex:1;min-width:0}
+.uy-user .m b{display:flex;align-items:center;gap:7px;font-size:16px;font-weight:700}
+.uy-user .m em{font-style:normal;font-size:10.5px;font-weight:500;background:rgba(255,255,255,.25);
+  border-radius:9px;padding:1px 8px}
+.uy-user .m s{display:block;text-decoration:none;margin-top:4px;font-size:11.5px;opacity:.85}
+.uy-user .edit{flex:none;font-size:17px;opacity:.85;cursor:pointer}
+.uy-brand{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.uy-brand b{font-size:17px;font-weight:800;letter-spacing:1px}
+.uy-brand span{display:flex;gap:12px;font-size:15px;opacity:.9}
+.uy-brand i{font-style:normal}
+.uy-search{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.96);
+  border-radius:18px;height:36px;padding:0 4px 0 14px}
+.uy-search input{flex:1;min-width:0;border:0;outline:none;background:transparent;
+  font-size:12.5px;color:#333}
+.uy-search button{border:0;background:linear-gradient(135deg,#FF6B3D,#FF8A5C);color:#fff;
+  font-size:12px;font-weight:600;padding:6px 15px;border-radius:14px;cursor:pointer}
+.uy-hdlk{display:flex;gap:16px;margin-top:10px;font-size:11.5px;opacity:.92}
+.uy-wrap{padding:12px}
+.uy-wrap>*+*{margin-top:12px}
+.uy-card{background:#fff;border-radius:14px;padding:14px}
+.uy-card.pad0{padding:14px 8px}
+.uy-ct{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:12px}
+.uy-ct b{font-size:14.5px;font-weight:700;color:#333}
+.uy-ct s{text-decoration:none;font-size:11.5px;color:#9aa0a6}
+/* 待办十宫格 */
+.uy-todo{display:grid;grid-template-columns:repeat(5,1fr);gap:14px 4px}
+.uy-todo a{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer}
+.uy-todo b{font-size:17px;font-weight:800;color:#bfbfbf;font-variant-numeric:tabular-nums}
+.uy-todo a.warn b{color:#FF6B3D}
+.uy-todo s{text-decoration:none;font-size:10.5px;color:#666;text-align:center;line-height:1.3}
+/* 直通车 */
+.uy-ban{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:14px;
+  background:linear-gradient(135deg,#FF6B6B,#FF8E53);color:#fff;cursor:pointer}
+.uy-ban .tx{flex:1;min-width:0}
+.uy-ban b{display:block;font-size:15px;font-weight:800;letter-spacing:.5px}
+.uy-ban s{display:block;text-decoration:none;margin-top:3px;font-size:11.5px;opacity:.88}
+.uy-ban i{flex:none;font-style:normal;font-size:26px;opacity:.85}
+/* 核心数据 */
+.uy-core{display:grid;grid-template-columns:repeat(2,1fr);gap:14px 10px}
+.uy-core s{display:block;text-decoration:none;font-size:11.5px;color:#9aa0a6;margin-bottom:3px}
+.uy-core b{font-size:17px;font-weight:800;letter-spacing:-.3px;font-variant-numeric:tabular-nums}
+.uy-core .c1{color:#FF6B3D}.uy-core .c2{color:#6C5CE7}
+.uy-core .c3{color:#2d9cdb}.uy-core .c4{color:#27AE60}
+/* 快捷入口 */
+.uy-qk{background:#fff;border-radius:14px;overflow:hidden}
+.uy-qk-i{display:flex;align-items:center;gap:12px;padding:13px 14px;cursor:pointer}
+.uy-qk-i+.uy-qk-i{border-top:1px solid #f5f5f5}
+.uy-qk-i>i{flex:none;width:38px;height:38px;border-radius:11px;display:grid;place-items:center}
+.uy-qk-i .m{flex:1;min-width:0}
+.uy-qk-i .m b{display:block;font-size:14px;font-weight:600;color:#333}
+.uy-qk-i .m s{display:block;text-decoration:none;margin-top:3px;font-size:11.5px;color:#9aa0a6}
+.uy-qk-i em{font-style:normal;color:#ccc;font-size:16px}
+.g1{background:linear-gradient(135deg,#E53935,#EF5350)}
+.g2{background:linear-gradient(135deg,#FF6B3D,#FF8A5C)}
+.g3{background:linear-gradient(135deg,#6C5CE7,#A29BFE)}
+.g4{background:linear-gradient(135deg,#00B894,#55EFC4)}
+.g5{background:linear-gradient(135deg,#FF8E53,#FFA94D)}
+.g6{background:linear-gradient(135deg,#E91E63,#F06292)}
+.g7{background:linear-gradient(135deg,#9B59B6,#8E44AD)}
+.g8{background:linear-gradient(135deg,#4A90D9,#74B9FF)}
+.g9{background:linear-gradient(135deg,#F39C12,#F4D03F)}
+.g10{background:linear-gradient(135deg,#E74C3C,#FF6B6B)}
+/* 品类九宫格 */
+.uy-cate{display:grid;grid-template-columns:repeat(5,1fr);gap:14px 4px}
+.uy-cate a{display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer}
+.uy-cate i{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;
+  font-style:normal;color:#fff;font-size:15px;font-weight:700;transition:.15s}
+.uy-cate a:active i{transform:scale(.94)}
+.uy-cate a.on i{box-shadow:0 0 0 2px #fff,0 0 0 4px rgba(229,57,53,.35)}
+.uy-cate s{text-decoration:none;font-size:10.5px;color:#333;font-weight:500;text-align:center}
+/* 区块标题 */
+.uy-h2{display:flex;align-items:center;justify-content:space-between;padding:2px 2px 0}
+.uy-h2 b{font-size:15px;font-weight:800;color:#333}
+.uy-h2 a{font-size:12px;color:#9aa0a6;cursor:pointer}
+/* 产品卡（收客页） */
+.uy-p{display:flex;gap:10px;background:#fff;border-radius:14px;padding:12px;cursor:pointer}
+.uy-p+.uy-p{margin-top:10px}
+.uy-p .uy-p-img{flex:none;width:88px;height:88px;border-radius:10px;background:#f0f0f0
+  center/cover no-repeat}
+.uy-p .m{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:space-between}
+.uy-p .m>b{font-size:13px;font-weight:600;color:#333;line-height:1.45;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.uy-p .m>s{display:block;text-decoration:none;margin-top:4px;font-size:11px;color:#9aa0a6;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.uy-p .pr{display:flex;align-items:baseline;gap:3px;margin-top:5px}
+.uy-p .pr em{font-style:normal;font-size:10px;color:#27AE60;font-weight:600}
+.uy-p .pr b{font-size:16px;font-weight:800;color:#27AE60;font-variant-numeric:tabular-nums}
+.uy-p .pr u{text-decoration:line-through;font-size:11px;color:#bbb;margin-left:6px}
+.uy-p .st{display:flex;gap:12px;margin-top:4px;font-size:10.5px;color:#9aa0a6}
+.uy-p .st b{color:#FF6B3D;font-weight:700}
+/* 有米签证频道 */
+.uy-vhero{height:158px;background:#333 center/cover no-repeat;position:relative;
+  display:flex;align-items:flex-end}
+.uy-vhero:after{content:"";position:absolute;inset:0;
+  background:linear-gradient(180deg,rgba(0,0,0,.1),rgba(0,0,0,.62))}
+.uy-vhero .tx{position:relative;z-index:1;padding:16px;color:#fff}
+.uy-vhero s{display:block;text-decoration:none;font-size:10.5px;letter-spacing:2px;opacity:.75}
+.uy-vhero b{display:block;margin-top:5px;font-size:19px;font-weight:800;letter-spacing:-.3px}
+.uy-vhero p{margin:6px 0 0;font-size:11.5px;opacity:.85;line-height:1.6}
+.uy-kpi{display:grid;grid-template-columns:repeat(4,1fr);background:#fff;padding:12px 6px}
+.uy-kpi div{text-align:center}
+.uy-kpi b{display:block;font-size:12px;font-weight:600;color:#333}
+.uy-kpi s{display:block;text-decoration:none;margin-top:3px;font-size:10px;color:#9aa0a6;
+  line-height:1.4}
+.uy-cts{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+.uy-cts::-webkit-scrollbar{display:none}
+.uy-cts a{flex:none;padding:6px 13px;border-radius:99px;background:#fff;font-size:12.5px;
+  color:#666;cursor:pointer}
+.uy-cts a.on{background:#FF6B3D;color:#fff;font-weight:600}
+.uy-dgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.uy-dc{height:78px;border-radius:10px;background:#ddd center/cover no-repeat;position:relative;
+  overflow:hidden;cursor:pointer}
+.uy-dc:after{content:"";position:absolute;inset:0;
+  background:linear-gradient(180deg,rgba(0,0,0,.05),rgba(0,0,0,.55))}
+.uy-dc span{position:absolute;left:8px;bottom:7px;z-index:1;color:#fff}
+.uy-dc b{display:block;font-size:13px;font-weight:700}
+.uy-dc s{display:block;text-decoration:none;font-size:10.5px;opacity:.9;margin-top:1px}
+.uy-dc.off{filter:grayscale(1) brightness(.8);cursor:default}
+.uy-dc s.off{opacity:.7}
+/* 产品卡（频道/列表共用） */
+.uy-pc{display:flex;gap:10px;background:#fff;border-radius:14px;padding:12px;cursor:pointer}
+.uy-pc+.uy-pc{margin-top:10px}
+.uy-pc>i{flex:none;width:74px;height:74px;border-radius:10px;background:#f0f0f0 center/cover no-repeat}
+.uy-pc .m{flex:1;min-width:0}
+.uy-pc .m>b{display:block;font-size:13.5px;font-weight:600;color:#333;line-height:1.45;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.uy-pc .tg{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px}
+.uy-pc .tg span{font-size:10px;color:#8a8f99;background:#f5f5f5;border-radius:4px;padding:1px 6px}
+.uy-pc .ft{display:flex;align-items:flex-end;justify-content:space-between;margin-top:7px;gap:8px}
+.uy-pc .pr{display:flex;align-items:baseline;gap:3px;flex-wrap:wrap;min-width:0}
+.uy-pc .pr em{font-style:normal;font-size:10px;color:#9aa0a6}
+.uy-pc .pr b{font-size:17px;font-weight:800;color:#FF6B3D;font-variant-numeric:tabular-nums}
+.uy-pc .pr u{text-decoration:none;font-size:10.5px;color:#9aa0a6}
+.uy-pc .pr .mg{flex-basis:100%;font-size:10.5px;color:#27AE60}
+/* 有米列表卡的套餐行（2026-09-07），与 C 端 .h5-pks 同一口径，多带一个毛利 */
+.uy-pks{margin-top:7px;border:1px solid #f0f0f0;border-radius:9px;overflow:hidden}
+.uy-pk{display:flex;align-items:center;gap:7px;padding:6px 9px;background:#FAFAFB}
+.uy-pk+.uy-pk{border-top:1px solid #f0f0f0}
+.uy-pk b{flex:1;min-width:0;font-size:11.5px;font-weight:600;color:#333;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.uy-pk s{flex:none;text-decoration:none;font-size:10.5px;color:#9aa0a6}
+.uy-pk i{flex:none;font-style:normal;font-size:12.5px;font-weight:800;color:#FF6B3D;
+  font-variant-numeric:tabular-nums}
+.uy-pk u{flex:none;text-decoration:none;font-size:10.5px;color:#27AE60}
+.uy-pkm{display:block;padding:6px 9px;border-top:1px solid #f0f0f0;background:#fff;
+  font-size:10.5px;color:#9aa0a6;text-align:center}
+.uy-pc .go{flex:none;background:linear-gradient(135deg,#FF6B3D,#FF8A5C);color:#fff;
+  font-size:12px;font-weight:600;padding:6px 13px;border-radius:99px;white-space:nowrap}
+.uy-pol{display:block;padding:11px 0;cursor:pointer}
+.uy-pol+.uy-pol{border-top:1px solid #f5f5f5}
+.uy-pol b{display:block;font-size:13px;font-weight:600;color:#333;line-height:1.5}
+.uy-pol s{display:block;text-decoration:none;margin-top:4px;font-size:11px;color:#9aa0a6}
+.uy-top{background:#FF6B3D;padding:10px 14px 12px}
+.uy-search.dark input{color:#333}
+/* 有米产品详情：销售专属的结算价/毛利条 + 海报弹窗 */
+/* 用 grid 而不是 flex+flex-basis:100%：后者在同一行里会把三格挤成 0 宽
+   —— 说明那行 basis 占满 100%，三格 basis 都是 0，就都被压没了
+   （唐美芳 2026-09-01 截图：结算价那三格竖成一列、数字重叠）。 */
+.ym-sale{display:grid;grid-template-columns:repeat(3,1fr);gap:4px 8px;
+  background:#FFF8F4;border-top:1px solid #FFE3D6;border-bottom:1px solid #FFE3D6;
+  padding:12px 14px}
+.ym-sale>div{min-width:0;text-align:center}
+.ym-sale s{display:block;text-decoration:none;font-size:11px;color:#b07a5e}
+.ym-sale b{display:block;margin-top:3px;font-size:16px;font-weight:700;color:#333;
+  font-variant-numeric:tabular-nums}
+.ym-sale b.g{color:#27AE60}
+.ym-sale em{grid-column:1/-1;font-style:normal;text-align:center;margin-top:4px;
+  font-size:10.5px;color:#c39a83}
+.ym-poster .pt-wrap{position:relative;text-align:center;background:#f5f5f5;border-radius:10px;
+  padding:12px}
+.ym-poster canvas{width:280px;max-width:100%;height:auto;border-radius:8px;
+  box-shadow:0 4px 16px -6px rgba(0,0,0,.25);background:#fff}
+.ym-poster .pt-load{position:absolute;inset:0;display:grid;place-items:center;
+  font-size:12.5px;color:#8a8f99}
+.ym-poster .pt-op{display:flex;gap:10px;margin-top:14px}
+.ym-poster .pt-op .btn{flex:1;justify-content:center}
+/* 有米下单页：沿用 C 端 bk-* 那套结构，补销售端独有的几处 */
+.ph-body.h5.ym .bk-sec{background:#fff;margin:10px 12px;border-radius:14px;padding:14px}
+.ph-body.h5.ym .bk-prod{background:#fff;margin:10px 12px;border-radius:14px;padding:14px}
+.ph-body.h5.ym .bk-trust{margin:0 12px}
+.ph-body.h5.ym .bk-pks{display:flex;flex-direction:column;gap:8px}
+.ph-body.h5.ym .bk-pk{border:1px solid #eee;border-radius:10px;padding:11px 12px;cursor:pointer}
+.ph-body.h5.ym .bk-pk.on{border-color:#FF6B3D;background:#FFF8F4}
+.ph-body.h5.ym .bk-pk .r1{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+.ph-body.h5.ym .bk-pk .r1 b{font-size:14px;font-weight:600;color:#333}
+.ph-body.h5.ym .bk-pk .amt{font-size:16px;font-weight:800;color:#FF6B3D;
+  font-variant-numeric:tabular-nums}
+.ph-body.h5.ym .bk-pk .r2{margin-top:5px;font-size:11.5px;color:#9aa0a6}
+/* 日期与成交价要长得像「可以点、可以改」的输入框。
+   原来只是把原生 input 塞进灰底容器里，高度被压成一条，看起来像只读文字
+   （唐美芳 2026-09-01：「预计出行日期怎么没有日期选择器选择呢」）。 */
+.ph-body.h5.ym .bk-date{padding:0}
+.ph-body.h5.ym .bk-date input[type=date]{width:100%;height:46px;border:1px solid #e5e7eb;
+  border-radius:10px;outline:none;background:#fff;font-size:15px;color:#333;
+  padding:0 12px;font-family:inherit}
+.ph-body.h5.ym .bk-date input[type=date]:focus{border-color:#FF6B3D}
+.ph-body.h5.ym .bk-date s{display:block;text-decoration:none;margin-top:8px;
+  font-size:11.5px;color:#9aa0a6;line-height:1.6}
+.ph-body.h5.ym .bk-fee input{width:110px;height:34px;border:1px solid #e5e7eb;border-radius:8px;
+  padding:0 10px;font-size:14px;text-align:right;font-variant-numeric:tabular-nums;
+  background:#fff;color:#333;font-family:inherit}
+.ph-body.h5.ym .bk-fee input:focus{border-color:#FF6B3D;outline:none}
+.ph-body.h5.ym .bk-fee b.mut{display:flex;align-items:center;gap:6px;justify-content:flex-end;
+  color:#333;font-weight:500}
+.ph-body.h5.ym .bk-fee input{width:88px;border:1px solid #e5e7eb;border-radius:6px;
+  padding:3px 8px;font-size:13px;text-align:right;font-variant-numeric:tabular-nums}
+.ph-body.h5.ym .bk-fee b.r{color:#d33}
+.ph-body.h5.ym .bk-fee b.g{color:#27AE60}
+.ph-body .oi-form{margin:11px 0 0;flex-direction:column;align-items:stretch}
+.ph-body .oi-form .r{width:100%}
+.ph-body .oi-form .r .btn{flex:1;justify-content:center}
+/* 有米订单详情：状态条 */
+.ym-od-hd{background:#fff;padding:14px 16px 12px;border-bottom:1px solid #f0f0f0}
+.ym-od-hd .l{display:flex;flex-wrap:wrap;gap:6px}
+.ym-od-hd s{display:block;text-decoration:none;margin-top:9px;font-size:11.5px;color:#9aa0a6;
+  font-variant-numeric:tabular-nums}
+/* 有米订单详情：办签人行下面的三个动作 */
+.ym-apx+.ym-apx{border-top:1px solid #f5f5f5}
+.ym-apop{display:flex;gap:18px;padding:0 16px 12px;flex-wrap:wrap}
+.ym-apop a{font-size:12px;color:#FF6B3D;cursor:pointer;white-space:nowrap}
+.ym-apop a:active{opacity:.6}
+
+/* C 端订单详情底栏：待付款时主按钮固定是「立即支付」，
+   「可先填签证资料」做成左侧可点的次级入口，不抢主按钮
+   （唐美芳 2026-09-02：「怎么卡都不能卡支付流程啊」）。 */
+.ph-foot.h5f .sum s{display:block;text-decoration:none;margin-top:1px;
+  font-size:11.5px;font-weight:400;color:var(--h5-sub);letter-spacing:0}
+.ph-foot.h5f .sum[data-k]{flex-direction:column;align-items:flex-start;gap:0;cursor:pointer}
+.ph-foot.h5f .sum[data-k] s{color:var(--o)}
+
+/* ---------- 滚轮式日期选择器（C 端 / 有米，见 js/dpicker.js） ----------
+   照唐美芳 2026-09-02 给的截图做：白色底板从下方升起，顶部标题 + 关闭，
+   中间三列滚轮（选中行整行浅蓝高亮），底部「重置 / 确认选择」两个按钮。 */
+.dpk-mask{position:fixed;inset:0;z-index:9000;background:rgba(15,23,42,.45);
+  display:flex;align-items:flex-end;justify-content:center;
+  animation:dpFade .16s ease}
+/* 挂在手机壳里时按壳定位，不要按浏览器视口——否则日期面板会铺到手机外面 */
+.dpk-mask.in-ph{position:absolute}
+@keyframes dpFade{from{opacity:0}to{opacity:1}}
+.dpk-sheet{width:100%;max-width:520px;background:#fff;border-radius:18px 18px 0 0;
+  padding:0 0 max(10px,env(safe-area-inset-bottom));overflow:hidden;
+  animation:dpUp .22s cubic-bezier(.32,.72,0,1)}
+@keyframes dpUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.dpk-hd{position:relative;padding:17px 18px 11px;text-align:center}
+.dpk-hd b{font-size:16px;font-weight:600;color:var(--h5-ink)}
+.dpk-x{position:absolute;right:14px;top:12px;width:28px;height:28px;line-height:26px;
+  text-align:center;border-radius:50%;background:#F1F3F6;color:#8A93A2;
+  font-size:19px;cursor:pointer}
+.dpk-cur{padding:0 18px 12px;border-bottom:1px solid #EEF0F3;text-align:center}
+.dpk-cur s{display:block;text-decoration:none;font-size:12px;color:var(--h5-sub);
+  margin-bottom:3px}
+.dpk-cur b{font-size:16px;font-weight:600;color:var(--o)}
+.dpk-cur b.ph{color:var(--h5-sub);font-weight:400}
+
+/* 三列滚轮。中间那条高亮带是绝对定位的底衬，列在它上面滚。 */
+.dpk-body{position:relative;padding:6px 12px 2px}
+/* 高亮带是 absolute、列是 static，同一层叠上下文里 positioned 元素会画在
+   非 positioned 元素之上——不显式给层级的话，浅蓝色底衬会把中间那行字整个盖掉。 */
+.dpk-sel{position:absolute;left:12px;right:12px;top:calc(50% - 21px);height:42px;
+  border-radius:9px;background:#F2F6FF;pointer-events:none;z-index:0}
+.dpk-cols{position:relative;z-index:1;display:flex;gap:4px;height:210px}
+.dpk-col{flex:1;overflow-y:auto;scroll-snap-type:y mandatory;
+  scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.dpk-col::-webkit-scrollbar{width:0}
+.dpk-pad{height:84px}                     /* 上下留白，让首尾项也能滚到中间 */
+.dpk-it{height:42px;line-height:42px;text-align:center;scroll-snap-align:center;
+  font-size:15px;color:#9AA2AF;cursor:pointer;transition:color .12s,font-weight .12s}
+.dpk-it.on{color:var(--o);font-weight:600;font-size:16px}
+
+.dpk-hint{min-height:17px;padding:2px 18px 0;text-align:center;
+  font-size:11.5px;color:var(--h5-sub)}
+.dpk-hint.bad{color:var(--o)}
+.dpk-ft{display:flex;gap:11px;padding:12px 16px 6px}
+.dpk-btn{flex:1;height:46px;border-radius:10px;font-size:15px;font-weight:600;
+  border:1px solid var(--o);background:#fff;color:var(--o);cursor:pointer}
+.dpk-btn.p{border-color:var(--o);background:var(--o);color:#fff}
+.dpk-btn.p:disabled{opacity:.45;cursor:not-allowed}
+
+/* ---------- 覆盖层的「整页形态」（modal/ask 传 page=true） ----------
+   选办签人、新增办签人原来是弹窗，在手机上又小又挤，卡片翻页和长表单都塞不下
+   （唐美芳 2026-09-02：「最好不要弹窗了，用单独页面吧，包括新增页也一样，
+   现在看起来有点丑，交互也不太友好」）。
+   这里把同一个覆盖层铺满手机壳、从右侧滑入、顶部返回栏、底部固定操作条，
+   观感就是小程序里跳了一页；实现上仍是覆盖层，所以下单页已填的内容不会丢。 */
+.mask.sheet{padding:0;background:#fff;align-items:stretch;justify-content:stretch}
+.mask.sheet .modal{width:100%;max-width:none;height:100%;max-height:none;
+  margin:0;border-radius:0;box-shadow:none;display:flex;flex-direction:column;
+  animation:shIn .24s cubic-bezier(.32,.72,0,1)}
+@keyframes shIn{from{transform:translateX(100%)}to{transform:translateX(0)}}
+
+.mask.sheet .modal>header{position:relative;flex:none;height:52px;padding:0 14px;
+  display:flex;align-items:center;justify-content:center;
+  border-bottom:1px solid #EEF0F3;background:#fff}
+/* 标题继承了 .modal>header b{flex:1}，会从最左开始排，
+   正好压在 absolute 的返回箭头上，两个深色字叠成一团。左右让出箭头的位置再居中。 */
+.mask.sheet .modal>header b{flex:1;text-align:center;padding:0 42px;
+  font-size:16px;font-weight:600;color:var(--h5-ink);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mask.sheet .modal>header .bk{position:absolute;left:6px;top:50%;transform:translateY(-50%);
+  width:38px;height:38px;border:0;background:none;cursor:pointer;
+  font-size:26px;line-height:1;color:var(--h5-ink);padding:0}
+
+.mask.sheet .modal>.c{flex:1;min-height:0;overflow-y:auto;padding:14px 14px 8px;
+  background:#F6F7F9;-webkit-overflow-scrolling:touch}
+
+.mask.sheet .modal>footer{flex:none;display:flex;gap:11px;
+  padding:10px 14px max(10px,env(safe-area-inset-bottom));
+  border-top:1px solid #EEF0F3;background:#fff}
+.mask.sheet .modal>footer .btn{flex:1;height:46px;border-radius:10px;
+  font-size:15px;font-weight:600}
+
+/* 整页里的选人卡片可以铺开：不再挤成 2×4 翻页，直接一列到底顺着滚 */
+.mask.sheet .ap-body{display:block}
+.mask.sheet .ap-body .ap-nav{display:none}
+.mask.sheet .ap-list{display:grid;grid-template-columns:1fr;gap:10px;
+  min-height:0;height:auto}
+.mask.sheet .ap-list.empty{display:block}
+/* 新增入口跟在列表末尾，不吸底——吸底会一直盖住最后一张卡片。
+   选择器要写到四级才压得过上面那条 `.mask.in-ph:has(.ap-wrap) .ap-foot{position:sticky}`。 */
+.mask.sheet.in-ph .ap-foot,
+.mask.sheet .ap-wrap .ap-foot{position:static;background:none;
+  padding:12px 0 2px;margin-top:2px}
+.mask.sheet .ap-foot .ap-pg{display:none}
+
+/* 整页里的卡片改成「左信息 / 右勾选」的一行，比居中竖排能放下更多信息。 */
+.mask.sheet .ap-c{min-height:0;padding:13px 44px 11px 14px;text-align:left;
+  align-items:stretch;justify-content:flex-start}
+.mask.sheet .ap-c b{font-size:15px}
+.mask.sheet .ap-c em{align-self:flex-start;margin-top:5px}
+.mask.sheet .ap-c s{margin-top:5px;font-size:12px}
+.mask.sheet .ap-ck{right:14px;top:50%;transform:translateY(-50%);width:20px;height:20px;
+  font-size:12px}
+
+/* 编辑 / 设为本人 / 删除原来是 hover 才浮出来的——手机上没有 hover，
+   等于这三个操作在小程序里根本点不到。整页形态下常显，做成卡片底部的一行。 */
+.mask.sheet .ap-op{position:static;opacity:1;background:none;justify-content:flex-start;
+  gap:16px;margin-top:9px;padding:8px 0 0;border-top:1px solid #F0F1F3}
+.mask.sheet .ap-op a{font-size:12.5px;color:var(--ro,#e5004f);padding:2px 0}
+.mask.sheet .ap-op .ap-ro{font-size:11.5px;color:#9ca3af}
+.mask.sheet .ap-add{display:block;width:100%;text-align:center;height:44px;
+  line-height:42px;border:1px dashed var(--o);border-radius:10px;
+  color:var(--o);font-size:14px;background:#fff}
+.mask.sheet .ap-tip{padding:10px 2px 4px;font-size:12px;line-height:1.7;color:var(--h5-sub)}
+
+/* 整页里的表单：一行一项，输入框放大到手指点得准 */
+.mask.sheet .modal>.c>label{display:block;margin:0 0 12px;background:#fff;
+  border-radius:10px;padding:11px 13px}
+.mask.sheet .modal>.c>label>span{display:block;font-size:12.5px;color:var(--h5-sub);
+  margin-bottom:5px}
+.mask.sheet .modal>.c input,
+.mask.sheet .modal>.c select{width:100%;height:42px;font-size:15px}
+
+/* ---------- 有米 · AI 签证助手（js/v-ymagent.js） ---------- */
+/* 精简态三个 Tab 平铺，没有中间的 YO 圆钮 */
+.ph-tab.ym-tab.slim{display:flex}
+.ph-tab.ym-tab.slim>a{flex:1}
+
+.yma-log{padding:12px 12px 4px;display:flex;flex-direction:column;gap:14px}
+.yma-row{display:flex;gap:8px;align-items:flex-start}
+.yma-row.u{justify-content:flex-end}
+.yma-av{flex:none;width:28px;height:28px;border-radius:50%;font-style:normal;
+  display:grid;place-items:center;font-size:11px;font-weight:700;color:#fff;
+  background:linear-gradient(135deg,#FF6B3D,#FF8A5C)}
+.yma-b{max-width:84%;background:#fff;border-radius:12px;padding:11px 13px;
+  font-size:13.5px;line-height:1.75;color:var(--h5-ink);
+  box-shadow:0 1px 3px rgba(16,24,40,.06)}
+.yma-b.u{background:#FF6B3D;color:#fff;max-width:80%}
+.yma-tx+.yma-tx{margin-top:8px}
+.yma-tx b{font-weight:600;color:#D9480F}
+.yma-b.u .yma-tx b{color:#fff}
+.yma-load{color:var(--h5-sub);font-size:13px}
+
+/* 快捷问题：按场景分组，一组一行标题 + 若干可点的问句 */
+.yma-qs{margin-top:10px;display:flex;flex-direction:column;gap:9px}
+.yma-qs .g{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.yma-qs .g s{width:100%;text-decoration:none;font-size:11.5px;color:var(--h5-sub)}
+.yma-qs a{display:inline-block;padding:6px 11px;border-radius:14px;
+  border:1px solid #FFD9C9;background:#FFF6F2;color:#D9480F;
+  font-size:12.5px;cursor:pointer}
+
+/* 结果卡片：产品 / 订单 / 进度 / 政策共用一套版式，点进去到对应详情 */
+.yma-cards{margin-top:10px;display:flex;flex-direction:column;gap:8px}
+.yma-card{display:block;border:1px solid #F0F1F3;border-radius:10px;
+  padding:10px 12px;background:#FCFCFD;cursor:pointer}
+.yma-card.pol{cursor:default}
+.yma-card .t{display:flex;align-items:center;gap:7px;font-size:13.5px;font-weight:600;
+  color:var(--h5-ink);line-height:1.45}
+.yma-card .t i{flex:none;font-style:normal;font-size:10.5px;font-weight:500;
+  padding:1px 7px;border-radius:4px;background:#EEF4FF;color:#2563EB}
+.yma-card .t i.kd{background:#ECFDF5;color:#047857}
+.yma-card .m{margin-top:4px;font-size:12px;line-height:1.65;color:var(--h5-sub)}
+.yma-card .p{margin-top:7px;display:flex;align-items:baseline;gap:7px;flex-wrap:wrap}
+.yma-card .p b{font-size:15px;font-weight:600;color:#D9480F}
+.yma-card .p b.rs{font-size:12.5px}
+.yma-card .p s{text-decoration:none;font-size:11.5px;color:var(--h5-sub)}
+.yma-card .p em{margin-left:auto;font-style:normal;font-size:12px;color:#FF6B3D}
+
+/* 底部输入条 */
+.yma-inp{display:flex;gap:9px;align-items:center;width:100%}
+.yma-inp input{flex:1;min-width:0;height:40px;padding:0 13px;border-radius:20px;
+  border:1px solid #E6E8EB;background:#F6F7F9;font-size:13.5px;outline:none}
+.yma-inp input:focus{border-color:#FF6B3D;background:#fff}
+.yma-inp .cta{flex:none;width:auto;padding:0 20px;height:40px;border-radius:20px;font-size:14px}
+
+/* 有米下单页 · 就地填写的表单块（联系人不再走弹窗，2026-09-02） */
+.bk-form{display:flex;flex-direction:column;gap:11px}
+.bk-form label{display:block}
+.bk-form label>span{display:block;margin-bottom:5px;font-size:12.5px;color:var(--h5-sub)}
+.bk-form label>span i{font-style:normal;color:var(--o)}
+.bk-form input{width:100%;height:42px;padding:0 12px;border-radius:9px;
+  border:1px solid #E6E8EB;background:#fff;font-size:14px;color:var(--h5-ink);outline:none}
+.bk-form input:focus{border-color:#FF6B3D}
+.bk-form input::placeholder{color:#B9C0CA}
+
+/* 选办签人 · 加载失败时的中文提示与重试（2026-09-02） */
+.ap-empty b{display:block;font-size:14px;font-weight:600;color:var(--h5-ink);margin-bottom:6px}
+.ap-empty s{display:block;text-decoration:none;font-size:12.5px;line-height:1.75;
+  color:var(--h5-sub)}
+.ap-retry{display:inline-block;margin-top:12px;padding:7px 18px;border-radius:8px;
+  border:1px solid var(--ro,#e5004f);color:var(--ro,#e5004f);font-size:13px;cursor:pointer}
+
+/* ---------- 有米订单详情：状态卡 + 子页签 + 按钮分级（2026-09-02） ---------- */
+/* 原来顶部只有一行小胶囊加一行灰字，状态不抢眼、基础信息也没地方放。
+   改成整块状态卡：大号状态 + 金额在同一行，次要标记与单号分两行挂下面。 */
+.ym-odcard{margin:12px;padding:15px 16px;border-radius:14px;color:#fff;
+  background:linear-gradient(135deg,#6B7280,#9CA3AF)}
+/* 2026-09-08 唐美芳：「订单详情页上面的卡片怎么变成蓝色了，看着有点怪异」。
+   原来五个状态各占一种高饱和色，蓝、绿、红大面积铺在卡片上，
+   跟有米整体的橙色主色打架——尤其「办理中」那块亮蓝，看着不像同一个 App。
+   改法：只有「待支付」保留品牌橙（这一步要促成动作，该抢眼），
+   其余状态一律用深色中性底，状态靠标题文字与下面那排标签表达，不靠大色块。 */
+.ym-odcard.wait{background:linear-gradient(135deg,#FF6B3D,#FF8A5C)}
+.ym-odcard.doing{background:linear-gradient(135deg,#2E3444,#454D62)}
+.ym-odcard.ok{background:linear-gradient(135deg,#25303A,#3B4C52)}
+.ym-odcard.bad{background:linear-gradient(135deg,#3A2B2E,#54383D)}
+.ym-odcard.off{background:linear-gradient(135deg,#3A3E48,#565B68)}
+/* 状态点：色块撤了之后，用标题前一颗小圆点保留「一眼看出什么状态」 */
+.ym-odcard .r1 b::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;
+  margin-right:7px;vertical-align:middle;background:rgba(255,255,255,.75)}
+.ym-odcard.doing .r1 b::before{background:#60A5FA}
+.ym-odcard.ok .r1 b::before{background:#34D399}
+.ym-odcard.bad .r1 b::before{background:#F87171}
+.ym-odcard.off .r1 b::before{background:#9AA0AC}
+.ym-odcard .r1{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.ym-odcard .r1 b{font-size:19px;font-weight:600;letter-spacing:.3px}
+.ym-odcard .r1 .amt{font-size:19px;font-weight:600;font-variant-numeric:tabular-nums}
+.ym-odcard .r2{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}
+.ym-odcard .r2 i{font-style:normal;font-size:11.5px;padding:2px 9px;border-radius:99px;
+  background:rgba(255,255,255,.22)}
+.ym-odcard .r2 i.wn{background:rgba(255,255,255,.34);font-weight:500}
+.ym-odcard .r2:empty{display:none}
+.ym-odcard .r3{display:flex;justify-content:space-between;gap:10px;margin-top:11px;
+  padding-top:10px;border-top:1px solid rgba(255,255,255,.25);
+  font-size:11.5px;opacity:.9;white-space:nowrap}
+
+/* 子页签：吸在内容区顶部，点击跳段、滚动高亮 */
+.ym-odtabs{position:sticky;top:0;z-index:20;display:flex;gap:4px;
+  padding:8px 12px;background:#f5f5f5;overflow-x:auto;scrollbar-width:none}
+.ym-odtabs::-webkit-scrollbar{height:0}
+.ym-odtabs a{flex:none;padding:7px 15px;border-radius:99px;font-size:13px;
+  color:#6B7280;background:#fff;border:1px solid #ECEEF1;cursor:pointer;white-space:nowrap}
+.ym-odtabs a.on{background:#FF6B3D;border-color:#FF6B3D;color:#fff;font-weight:500}
+
+/* 办签人行下面的动作：线框 + 主操作填色，不再是一排看不出来的小字 */
+.ym-apop{display:flex;flex-wrap:wrap;gap:8px;padding:10px 14px 12px}
+.ym-apop a{display:inline-flex;align-items:center;height:32px;padding:0 13px;
+  border-radius:8px;font-size:12.5px;font-weight:500;cursor:pointer;white-space:nowrap;
+  border:1px solid #E6E8EB;background:#fff;color:#4B5563}
+.ym-apop a.pr{border-color:#FF6B3D;background:#FF6B3D;color:#fff}
+.ym-apop a.pr:active{background:#E85A2C}
+.ym-apop a.gh:active{background:#F6F7F9}
+
+/* 订单详情里的键值行：产品名很长，允许换行，别截断成「…（B1/B…」 */
+.ph-body.ym .h5-sec .h5-row .vl{white-space:normal;text-align:right;line-height:1.55}
+
+/* 下单页的套餐区改成只读回显（2026-09-02：填单页不再改套餐） */
+.bk-pks.ro .bk-pk{cursor:default}
+.bk-pks.ro .bk-pk.on{border-color:#FFD9C9;background:#FFF8F5}
+
+/* ===== 2026-09-02 · 订单详情：按办签人挂动作 =====
+   四件事（补料 / 进度 / 申请表 / 结果签收）本来就是按人走的，
+   摆在人名下面而不是订单级一个入口。h5-apa 原本给订单卡片用、不换行，
+   这里四个按钮在 375px 上放不下，所以允许折行并单独给内边距。 */
+.od-apw + .od-apw::before{content:"";display:block;height:1px;margin:0 16px;background:var(--h5-line)}
+.od-apw .h5-row+.h5-row::before{display:none}
+.od-apa{flex-wrap:wrap;padding:0 16px 12px;gap:8px}
+
+/* 我的材料：按订单分组后，组头的订单号靠右、弱化，跟组名区分开 */
+.mt-grp .h5-h em.mut{font-style:normal;font-size:11px;color:#B6BDC8;font-weight:500}
+.h5-tip.warn{color:var(--ro2);font-weight:600;padding-top:0}
+
+/* ================================================================
+   有米 · 收客首页（2026-09-02 照唐美芳给的「优游有米」真机截图复刻）
+   截图结构：白底页头 + 红框搜索条 + AI 气泡 + 营销 banner 轮播
+   + 渐变色块品类瓷砖 + 「身边人都在卖」三档筛选 + 排名产品卡。
+   原来这一页是橙色渐变页头 + 圆形图标品类 + 简单产品行，和真机差得远。
+   类名统一用 uyq- 前缀（youmi acquire）—— 9/2 刚被 .dp-mask 撞名坑过一次，
+   新组件一律先 grep 再起名。
+   ================================================================ */
+.uyq-hd{background:#fff;padding:10px 14px 12px}
+.uyq-tt{text-align:center;font-size:16px;font-weight:700;color:#1B1F27;padding:2px 0 10px;
+  letter-spacing:.5px}
+.uyq-sr{display:flex;align-items:center;gap:10px}
+.uyq-box{flex:1;min-width:0;display:flex;align-items:center;gap:6px;height:38px;padding:0 4px 0 12px;
+  border:1.5px solid #FF5A3C;border-radius:99px;background:#fff}
+.uyq-box svg{width:16px;height:16px;flex:none;color:#B6BDC8}
+.uyq-box input{flex:1;min-width:0;border:0;outline:none;background:transparent;
+  font-size:13px;color:#1B1F27}
+.uyq-box input::placeholder{color:#B6BDC8}
+.uyq-box button{flex:none;border:0;height:30px;padding:0 16px;border-radius:99px;
+  background:linear-gradient(135deg,#FF7A45,#FF4D4F);color:#fff;font-size:13.5px;
+  font-weight:600;cursor:pointer}
+.uyq-ic{flex:none;display:flex;align-items:center;gap:12px}
+.uyq-ic a{display:flex;flex-direction:column;align-items:center;gap:1px;cursor:pointer;
+  font-size:9.5px;color:#8A93A0;line-height:1}
+.uyq-ic a b{font-size:17px;font-weight:800;line-height:1;
+  background:linear-gradient(135deg,#7B61FF,#FF4D4F);-webkit-background-clip:text;
+  background-clip:text;color:transparent}
+.uyq-ic a svg{width:20px;height:20px;color:#FF4D4F}
+.uyq-ic a:active{opacity:.6}
+
+/* 营销 banner + 浮在它上面的 AI 气泡 */
+.uyq-bn{position:relative;margin:0 0 10px}
+/* 文字靠下：AI 气泡浮在 banner 上半部分（截图就是这样），
+   标题居中的话会被气泡整个盖掉，什么都看不见。 */
+.uyq-bn .im{height:156px;background:linear-gradient(120deg,#BFE3FF 0%,#E9D8FF 46%,#FFD9C9 100%);
+  display:flex;align-items:flex-end;padding:0 18px 24px;position:relative;overflow:hidden}
+.uyq-bn .tx b{display:block;font-size:29px;font-weight:900;color:#111826;letter-spacing:-1px;
+  font-style:italic;line-height:1}
+.uyq-bn .tx s{display:inline-block;margin-top:8px;padding:3px 10px;border-radius:99px;
+  background:#111826;color:#FFD54A;font-size:11.5px;font-weight:700;text-decoration:none}
+.uyq-bn .rb{position:absolute;right:14px;bottom:14px;width:86px;height:74px;border-radius:12px;
+  background:linear-gradient(150deg,#4A4A5A,#22222E);display:grid;place-items:center;
+  color:#FFE066;font-size:26px;box-shadow:0 6px 16px rgba(0,0,0,.18)}
+.uyq-dots{position:absolute;left:0;right:0;bottom:8px;display:flex;justify-content:center;gap:5px}
+.uyq-dots i{width:5px;height:5px;border-radius:99px;background:rgba(255,255,255,.75)}
+.uyq-dots i.on{width:16px;background:#fff}
+.uyq-ai{position:absolute;left:22px;right:10px;top:10px;display:flex;align-items:flex-start;gap:8px;
+  padding:10px 12px;border-radius:14px;background:linear-gradient(135deg,#E7E4FF,#F3E7FF);
+  box-shadow:0 6px 18px rgba(90,70,180,.16);font-size:12.5px;line-height:1.6;color:#2A2340}
+.uyq-ai .bot{flex:none;width:34px;height:34px;border-radius:10px;
+  background:linear-gradient(150deg,#8EC5FF,#C7B8FF);display:grid;place-items:center;font-size:17px}
+.uyq-ai b{color:#6C3BFF}
+.uyq-ai .x{flex:none;color:#8B84A8;font-size:16px;line-height:1;cursor:pointer;padding:0 2px}
+.uyq-ai.low{top:auto;bottom:10px}
+
+/* 品类瓷砖：截图是渐变色块，不是圆形图标。
+   截图 10 个品类里没有签证——签证是本系统的主体，补在第一格
+   （唐美芳：「签证频道不要忘记增加了」），凑成 12 格 4×3。 */
+.uyq-cate{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;border-radius:14px;
+  overflow:hidden;background:#fff}
+.uyq-cate a{height:56px;display:grid;place-items:center;color:#fff;font-size:13px;
+  font-weight:700;cursor:pointer;text-shadow:0 1px 3px rgba(0,0,0,.14);position:relative}
+.uyq-cate a:active{filter:brightness(.94)}
+.uyq-cate a.vis::after{content:"本系统";position:absolute;right:4px;top:4px;font-size:8.5px;
+  font-weight:600;padding:1px 4px;border-radius:4px;background:rgba(255,255,255,.28);
+  text-shadow:none}
+
+/* 「身边人都在卖」 */
+.uyq-h{display:flex;align-items:center;gap:6px;padding:14px 2px 10px}
+.uyq-h b{font-size:19px;font-weight:800;color:#E8314B;letter-spacing:-.3px}
+.uyq-h i{font-size:17px;font-style:normal}
+.uyq-h a{margin-left:auto;font-size:12px;color:#8A93A0;cursor:pointer}
+.uyq-seg{display:flex;gap:10px;padding-bottom:12px}
+.uyq-seg a{flex:1;text-align:center;padding:9px 0;border-radius:8px;background:#F2F3F5;
+  color:#4A5160;font-size:14px;font-weight:600;cursor:pointer}
+.uyq-seg a.on{background:linear-gradient(135deg,#FF5A4E,#F0403C);color:#fff}
+
+.uyq-p{display:flex;gap:12px;padding:12px;background:#fff;border-radius:12px;margin-bottom:2px;
+  cursor:pointer}
+.uyq-p .im{flex:none;width:104px;height:104px;border-radius:8px;background:#EEF1F5 center/cover;
+  position:relative;overflow:hidden}
+.uyq-p .rk{position:absolute;left:0;top:0;width:22px;height:26px;background:#F0403C;color:#fff;
+  font-size:13px;font-weight:800;display:grid;place-items:center;
+  clip-path:polygon(0 0,100% 0,100% 100%,50% 84%,0 100%)}
+.uyq-p .kd{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);color:#fff;
+  font-size:13px;font-weight:700;text-shadow:0 2px 6px rgba(0,0,0,.5);
+  max-width:92px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center}
+.uyq-p .dep{position:absolute;left:0;right:0;bottom:0;background:#F0403C;color:#fff;
+  font-size:11px;font-weight:600;text-align:center;padding:3px 0}
+.uyq-p .m{flex:1;min-width:0}
+.uyq-p .m>b{display:block;font-size:15px;font-weight:700;color:#1B1F27;line-height:1.45;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.uyq-p .m>s{display:block;margin-top:3px;font-size:12.5px;color:#9AA2AE;text-decoration:none;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.uyq-p .sup{display:inline-block;margin-top:6px;padding:3px 8px;border-radius:6px;
+  background:#EFE6FF;color:#6C3BFF;font-size:12px;font-weight:600}
+.uyq-p .pr{margin-top:6px;text-align:right}
+.uyq-p .pr .rt{font-size:19px;font-weight:800;color:#F0403C}
+.uyq-p .pr .rt u{font-size:11.5px;font-weight:600;text-decoration:none}
+.uyq-p .pr .st{display:block;margin-top:2px;font-size:14px;font-weight:700;color:#00A870}
+.uyq-p .pr .st em{display:inline-block;font-style:normal;font-size:10.5px;padding:1px 4px;
+  border-radius:4px;background:#E3F7EE;color:#00A870;margin-right:3px;vertical-align:1px}
+.uyq-p .pr .way{display:block;margin-top:3px;font-size:12px;color:#9AA2AE}
+/* 截图这一行是有米的销售埋点（打开/分享/浏览/有效订单）。本系统没有这些埋点，
+   版式照抄、字段换成本系统真有的数据，不摆假数字。 */
+.uyq-st{display:flex;background:#fff;border-radius:0 0 12px 12px;padding:9px 6px 11px;
+  margin-bottom:10px;border-top:1px solid #F0F2F5}
+.uyq-st span{flex:1;text-align:center;font-size:12px;color:#8A93A0}
+.uyq-st span b{color:#F0403C;font-weight:700;margin-left:2px}
+
+/* 订单卡上的支付状态（2026-09-03，五端同步展示） */
+.h5-pst{font-weight:700}
+.h5-pst.unpaid{color:var(--ro2)}
+.h5-pst.part{color:#F59E0B}
+.h5-pst.paid{color:#00A870}
+.ympst{font-style:normal;font-weight:700}
+.ympst.unpaid{color:#F0403C}
+.ympst.part{color:#F59E0B}
+.ympst.paid{color:#00A870}
+.ym-odcard .r2 .pst{font-weight:700}
+
+/* ================================================================
+   C 端「办理进度」（2026-09-03 唐美芳：「签证进度查询这个页面的样式有问题，
+   你优化下，话术如果要展示的话，尽量专业友好的角度」）
+   原来的毛病：顶部说明用的是后台的 .od-note，H5 里没有内边距，文字顶出手机壳；
+   十几条记录每条都重复顶着同一个日期；节点名是内部工位名，客人看不懂。
+   ================================================================ */
+.tk-hd{padding:14px 16px 4px;font-size:13px;color:var(--h5-ink)}
+.tk-hd b{font-weight:600;font-family:var(--mono,inherit)}
+.tk-hd s{display:block;margin-top:5px;font-size:11.5px;color:var(--h5-sub);
+  text-decoration:none;line-height:1.65}
+
+/* 六步进度条：走过的实心、当前的高亮拉长、没到的留白 */
+.tk-steps{margin:12px 16px 4px;padding:14px 14px 13px;border-radius:12px;
+  background:linear-gradient(135deg,#FFF3F5,#FFF8F4);border:1px solid #FFE1E6}
+.tk-steps .bar{display:flex;gap:4px;margin-bottom:11px}
+.tk-steps .bar i{flex:1;height:5px;border-radius:99px;background:#F3D9DE}
+.tk-steps .bar i.done{background:var(--ro2)}
+.tk-steps .bar i.on{background:var(--ro2);flex:1.6;
+  box-shadow:0 0 0 3px rgba(232,49,75,.12)}
+.tk-steps .cur{display:flex;align-items:baseline;gap:8px}
+.tk-steps .cur b{font-size:11.5px;font-weight:600;color:var(--ro2);flex:none}
+.tk-steps .cur span{font-size:15px;font-weight:700;color:#1B1F27;line-height:1.35}
+.tk-steps .todo{margin-top:6px;font-size:12px;color:var(--h5-sub);line-height:1.65}
+
+/* 同一天后续记录只留时刻，时间列不再重复日期 */
+.h5-tl .it .d s.only{font-size:12px;opacity:1;color:var(--h5-sub)}
+/* 空态那几句话是完整句子，不能挤在时间列右边的窄格里 */
+.h5-tl .it.tk-none{display:block;padding-right:16px;line-height:1.7;color:var(--h5-sub)}
+
+
+/* 有米状态条右侧的展示模式开关（2026-09-07）。挂 .ph-bar 而不是 .ph-nav：
+   产品详情等沉浸式页面把 .ph-nav 整个隐藏了，只有 .ph-bar 一直在且压在最上层。
+   底色用半透明深灰：状态条在白底页是白的、在头图上是透明的，两种底都要看得清。 */
+/* 有米的「零售 / 结算」icon（2026-09-09 由两段式改成一枚 icon）。
+   两个落点共用一套外观：搜索条右侧（签证频道 / 产品列表 / 搜索结果）、
+   状态条右侧（其余没有搜索条的页面）。都在右上角，销售不用重新找。 */
+.pm-ic.pm-ymsch{height:32px;padding:0 11px;border:0;background:rgba(255,255,255,.22);
+  color:#fff;font-size:11.5px;backdrop-filter:blur(4px)}
+.pm-ic.pm-ymsch svg{width:14px;height:14px}
+.pm-ic.pm-ymsch.on{background:#fff;color:#FF6B3D;font-weight:700}
+.pm-ic.pm-ymbar{height:20px;padding:0 8px;gap:3px;border:0;font-size:10px;
+  background:rgba(0,0,0,.42);color:rgba(255,255,255,.92);backdrop-filter:blur(4px)}
+.pm-ic.pm-ymbar svg{width:11px;height:11px}
+.pm-ic.pm-ymbar.on{background:#fff;color:#FF6B3D;font-weight:700}
+/* 搜索条与 icon 同排：搜索框让出 icon 的宽度，不是压在它上面
+   （唐美芳 2026-09-09：「搜索框可以变窄点，腾出点位置」）。 */
+.uy-top{display:flex;align-items:center;gap:8px}
+.uy-top>.uy-search{flex:1;min-width:0}
+
+/* ============ 日历式日期选择器（2026-09-07） ============
+   预计出行日期专用。滚轮版（.dpk-）留给出生日期、证件有效期那类要翻很远的字段。
+   前缀 cal-，起名前已 grep 过现有 CSS，没有冲突。 */
+.cal-mask{position:fixed;inset:0;z-index:9200;background:rgba(0,0,0,.45);
+  opacity:0;transition:opacity .18s;display:flex;align-items:flex-end}
+/* 挂在手机壳里时按壳定位，跟 .dpk-mask.in-ph / .mask.in-ph 同一套约定 */
+.cal-mask.in-ph{position:absolute;z-index:90}
+.cal-mask.in-ph .cal-sheet{max-height:78%}
+.cal-mask.show{opacity:1}
+.cal-sheet{width:100%;max-height:82%;background:#fff;border-radius:16px 16px 0 0;
+  display:flex;flex-direction:column;transform:translateY(100%);transition:transform .2s}
+.cal-mask.show .cal-sheet{transform:none}
+.cal-hd{position:relative;height:50px;display:flex;align-items:center;justify-content:center;
+  font-size:16px;font-weight:600;color:#12151A;border-bottom:1px solid #F0F1F5}
+.cal-hd .x{position:absolute;left:14px;font-size:17px;color:#8B90A0;cursor:pointer;line-height:1}
+.cal-tip{display:flex;align-items:center;gap:6px;padding:9px 14px;background:#F2F7FF;
+  font-size:11.5px;color:#3C6EDB;line-height:1.5}
+.cal-tip i{flex:none;width:14px;height:14px;border-radius:50%;background:#3C6EDB;color:#fff;
+  font-style:normal;font-size:10px;text-align:center;line-height:14px;font-weight:700}
+.cal-wk{display:grid;grid-template-columns:repeat(7,1fr);padding:8px 6px;
+  border-bottom:1px solid #F0F1F5;background:#fff}
+.cal-wk span,.cal-wk s{text-align:center;font-size:12px;color:#8B90A0;text-decoration:none}
+.cal-wk s{color:#E8452F}
+.cal-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:18px}
+.cal-m h4{margin:0;padding:10px 14px;font-size:14px;font-weight:700;color:#12151A;
+  background:#F7F8FA;position:sticky;top:0;z-index:1}
+.cal-g{display:grid;grid-template-columns:repeat(7,1fr);padding:4px 6px 10px}
+.cal-e{height:56px}
+.cal-d{position:relative;height:56px;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;border-radius:8px;font-style:normal;cursor:pointer}
+.cal-d>s{height:13px;text-decoration:none;font-size:9.5px;color:#E8452F;line-height:13px;
+  max-width:100%;overflow:hidden;white-space:nowrap}
+.cal-d>b{font-size:15px;font-weight:600;color:#22252F;line-height:1.2}
+.cal-d>u{text-decoration:none;font-size:9.5px;color:#8B90A0;line-height:1.4}
+.cal-d>em{font-style:normal;font-size:9px;color:#8B90A0;line-height:1.2}
+.cal-d.off{cursor:default}
+.cal-d.off>s,.cal-d.off>b,.cal-d.off>u,.cal-d.off>em{color:#C7CAD3}
+.cal-d.on{background:#2F7CF6}
+.cal-d.on>s,.cal-d.on>b,.cal-d.on>u,.cal-d.on>em{color:#fff}
+
+/* 销售代填时字段上的来源角标（2026-09-08）。代填放开了全部字段，
+   系统带出的那几格要标明来源，销售改之前知道自己在覆盖什么。 */
+.cf-nm .sr{font-style:normal;margin-left:6px;padding:1px 6px;border-radius:4px;
+  background:#EEF1F6;color:#6B7280;font-size:10px;font-weight:500;vertical-align:middle}
+
+/* 有米「发给客人（扫码 / 链接）」弹层（2026-09-09）。
+   CSP 门店端那套是左右两栏，手机 390 宽会挤成两条窄柱，这里改竖排：
+   二维码在上（面对面让客人扫的主场景），链接在下（发微信用）。 */
+.ym-send .ys-top{background:#FFF6F2;border:1px solid #FFE3D6;border-radius:12px;padding:12px 14px}
+.ym-send .ys-top b{display:block;font-size:14px;font-weight:700;color:#333;line-height:1.45}
+.ym-send .ys-top s{display:block;margin-top:6px;text-decoration:none;font-size:11.5px;
+  color:#a1745c;line-height:1.6}
+.ym-send .ys-qr{display:flex;align-items:center;gap:14px;margin-top:14px;
+  border:1px solid var(--line,#EAECEF);border-radius:12px;padding:14px}
+.ym-send .ys-qz{width:112px;height:112px;flex:none;display:grid;place-items:center;
+  background:#fff;border-radius:8px}
+.ym-send .ys-qz img{width:112px;height:112px;display:block}
+.ym-send .ys-qf{font-size:11.5px;color:#9aa0a6;text-align:center;line-height:1.6}
+.ym-send .ys-qf s{display:block;text-decoration:none;margin-top:4px}
+.ym-send .ys-qop{min-width:0}
+.ym-send .ys-qop s{display:block;text-decoration:none;font-size:11.5px;color:#9aa0a6;
+  margin-bottom:10px;line-height:1.6}
+.ym-send .ys-lk{display:flex;align-items:flex-start;gap:8px;margin:14px 0 10px;
+  background:#F5F6F8;border-radius:10px;padding:10px 12px;font-size:11.5px;color:#555;
+  word-break:break-all;line-height:1.6}
+.ym-send .ys-lk i{font-style:normal;flex:none}

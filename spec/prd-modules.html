@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>VisaOps · 对照凯撒 PRD · 功能模块逐条清点</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#F2F4F7;color:#0F172A;
+  font:14px/1.7 -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",system-ui,sans-serif}
+.top{background:#fff;border-bottom:1px solid #E5E7EB;position:sticky;top:0;z-index:20}
+.in{width:1240px;max-width:calc(100% - 32px);margin:0 auto}
+.top .in{display:flex;align-items:center;gap:18px;height:60px}
+.top b{font-size:16px}.top s{text-decoration:none;color:#94A3B8;font-size:12.5px}
+.top nav{margin-left:auto;display:flex;gap:4px}
+.top nav a{font-size:13px;color:#475569;text-decoration:none;padding:6px 12px;border-radius:7px}
+.top nav a:hover{background:#F1F5F9;color:#0F172A}
+h1{font-size:28px;margin:34px 0 10px;letter-spacing:-.6px}
+.lead{color:#475569;margin:0 0 6px;max-width:960px}
+section{margin:42px 0}
+h2{font-size:19px;margin:0 0 8px;padding-bottom:10px;border-bottom:2px solid #0F172A;display:inline-block}
+h3{font-size:15px;margin:26px 0 8px}
+table{width:100%;border-collapse:collapse;background:#fff;border:1px solid #E5E7EB;
+  border-radius:10px;overflow:hidden;font-size:13px;margin:10px 0}
+th{background:#F8FAFC;text-align:left;padding:9px 11px;font-weight:600;color:#334155;
+  border-bottom:1px solid #E5E7EB;white-space:nowrap}
+td{padding:9px 11px;border-bottom:1px solid #F1F5F9;vertical-align:top}
+tr:last-child td{border-bottom:0}
+td.no{white-space:nowrap;font-family:ui-monospace,Menlo,monospace;font-size:12px;color:#64748B}
+td.k{font-weight:600}
+code{background:#F1F5F9;border-radius:4px;padding:1px 6px;font-size:12px;
+  font-family:ui-monospace,Menlo,monospace}
+.st{display:inline-block;border-radius:5px;padding:1px 8px;font-size:11.5px;font-weight:700;white-space:nowrap}
+.s1{background:#DCFCE7;color:#166534}   /* 已实现 */
+.s2{background:#FEF3C7;color:#92400E}   /* 有但入口/字段有出入 */
+.s3{background:#FEE2E2;color:#991B1B}   /* 未做 */
+.s4{background:#E0E7FF;color:#3730A3}   /* 业务变更主动撤销 */
+.s5{background:#F1F5F9;color:#475569}   /* 模式不同 */
+.sum{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin:16px 0}
+.sum>div{background:#fff;border:1px solid #E5E7EB;border-radius:11px;padding:14px 16px}
+.sum b{display:block;font-size:24px;font-weight:700;line-height:1.2}
+.sum span{font-size:12px;color:#64748B}
+.note{background:#fff;border:1px solid #E5E7EB;border-left:3px solid #EA580C;
+  border-radius:0 10px 10px 0;padding:13px 16px;margin:14px 0;font-size:13.5px;color:#334155}
+.note b{color:#C2410C}
+footer{margin:56px 0 40px;padding-top:20px;border-top:1px solid #E2E8F0;font-size:12.5px;color:#94A3B8}
+@media(max-width:1000px){.sum{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<div class="top"><div class="in">
+  <b>VisaOps</b><s>对照凯撒 PRD · 功能模块逐条清点</s>
+  <nav><a href="#sum">总览</a><a href="#tbl">49 项明细</a><a href="#miss">缺的四块</a>
+    <a href="prd-diff.html">← 流程差异</a></nav>
+</div></div>
+
+<div class="in">
+<h1>功能模块逐条清点</h1>
+<p class="lead">上一份只对了流程，这份把 PRD 第 4 章<b>全部 14 个功能模块、49 个三级小节</b>逐条清一遍，
+每条标明我们对应哪个页面、有没有做、入口在哪。
+起因是唐美芳 2026-08-31 指出「老版 PRD 供应商后台有地址管理，咱们现在这个没有」——
+那条实际上是<b>功能做了但菜单上没挂</b>，光对流程看不出来这类问题。</p>
+
+<section id="sum">
+<h2>一、总览</h2>
+<div class="sum">
+  <div><b>37</b><span><span class="st s1">已实现</span> 含 8/31 补的 6 个小节</span></div>
+  <div><b>2</b><span><span class="st s2">有出入</span> 功能在，字段或视角有差</span></div>
+  <div><b>1</b><span><span class="st s3">不补</span> 代理策略，与渠道统一价口径冲突</span></div>
+  <div><b>6</b><span><span class="st s4">已撤销</span> 按你的口径主动去掉</span></div>
+  <div><b>3</b><span><span class="st s5">模式不同</span> 业务链路变了</span></div>
+</div>
+<p style="font-size:12.5px;color:#64748B;margin:6px 0 0">
+按三级小节计：37 + 2 + 1 + 6 + 3 = 49。
+<b>2026-08-31 补齐 6 个小节</b>：C 端首页配置 4（4.12.1–4.12.4）、客户收货地址管理 1（4.11.1）、
+待退款订单汇总 1（4.13.2）。唯一不补的是<b>代理策略</b>（4.9.1）——它跟 8/26 定的「渠道统一售价」冲突。
+「已撤销 6」＝渠道组管理 4 + 渠道组投放 2。</p>
+<div class="note"><b>这次当场修掉的：</b>供应商「材料收件地址」原来藏在「签证产品」页面的一个页签里，
+接口（增删改查）和页面都写好了，就是菜单上没有入口——按 PRD 找必然找不到。
+已挂成 <code>产品管理 › 材料收件地址</code> 独立菜单项。</div>
+</section>
+
+<section id="tbl">
+<h2>二、49 个小节逐条对照</h2>
+
+<h3>4.1 运维平台 · 样例模版管理 → 我们的「材料样例库」</h3>
+<table>
+<tr><th style="width:78px">PRD</th><th style="width:190px">PRD 小节</th><th style="width:96px">状态</th>
+<th style="width:250px">我们对应的位置</th><th>说明</th></tr>
+<tr><td class="no">4.1.1</td><td class="k">样例模版管理列表</td><td><span class="st s1">已实现</span></td>
+<td>UOM › 签证管理 › 签证配置 › 材料样例库</td><td>—</td></tr>
+<tr><td class="no">4.1.2</td><td class="k">新增样例模版</td><td><span class="st s1">已实现</span></td>
+<td>同上，「新增样例」</td><td><code>/ops/sample/save</code></td></tr>
+<tr><td class="no">4.1.3</td><td class="k">修改样例模版</td><td><span class="st s1">已实现</span></td><td>行内「编辑」</td><td>—</td></tr>
+<tr><td class="no">4.1.4</td><td class="k">样例模版查看</td><td><span class="st s1">已实现</span></td><td>行内「查看」</td><td>另有「删除」，PRD 没有</td></tr>
+</table>
+
+<h3>4.2 运维平台 · 完整版管理 → 我们的「国家送签材料库」</h3>
+<table>
+<tr><th style="width:78px">PRD</th><th style="width:190px">PRD 小节</th><th style="width:96px">状态</th>
+<th style="width:250px">我们对应的位置</th><th>说明</th></tr>
+<tr><td class="no">4.2.1</td><td class="k">完整版管理列表</td><td><span class="st s1">已实现</span></td>
+<td>UOM › 签证配置 › 国家送签材料库</td><td>版本号、生效时间、发布状态都在</td></tr>
+<tr><td class="no">4.2.2</td><td class="k">新增完整版</td><td><span class="st s1">已实现</span></td><td>「新建清单版本」</td>
+<td>字段全对上：资料名称 / 属性 / 提供方式 / 份数 / 必要性 / 提交要求 / 样例 / 适用人群 / 生效日期</td></tr>
+<tr><td class="no">4.2.3</td><td class="k">编辑完整版</td><td><span class="st s1">已实现</span></td><td>行内「编辑」</td>
+<td>已发布版本改生效日期会生成新版本号，与 PRD 规则一致</td></tr>
+<tr><td class="no">4.2.4</td><td class="k">复制完整版</td><td><span class="st s1">已实现</span></td><td>行内「复制」</td>
+<td>「基于 xx 复制新版」</td></tr>
+<tr><td class="no">4.2.5</td><td class="k">查看完整版</td><td><span class="st s1">已实现</span></td><td>点版本号进详情</td><td>—</td></tr>
+</table>
+
+<h3>4.3 运维平台 · 产品管理</h3>
+<table>
+<tr><th style="width:78px">PRD</th><th style="width:190px">PRD 小节</th><th style="width:96px">状态</th>
+<th style="width:250px">我们对应的位置</th><th>说明</th></tr>
+<tr><td class="no">4.3.1</td><td class="k">产品管理列表</td><td><span class="st s1">已实现</span></td>
+<td>UOM › 签证产品管理</td><td>这次新建的平台侧产品目录</td></tr>
+<tr><td class="no">4.3.2</td><td class="k">新增产品</td><td><span class="st s5">模式不同</span></td>
+<td>—</td><td><b>PRD 是平台建产品骨架、供应商来认领报价；我们是供应商直接建、平台审核上架。</b>
+所以平台侧没有「新增产品」按钮。这是 2026-06 定的链路，不是遗漏</td></tr>
+<tr><td class="no">4.3.3</td><td class="k">编辑产品</td><td><span class="st s5">模式不同</span></td><td>—</td><td>同上</td></tr>
+<tr><td class="no">4.3.4</td><td class="k">查看产品</td><td><span class="st s1">已实现</span></td>
+<td>签证产品管理 › 查看详情</td><td>四页签：产品信息 / 材料清单 / 套餐报价 / 审核与日志</td></tr>
+</table>
+
+<h3>4.4 供应商平台 · 地址管理</h3>
+<table>
+<tr><th style="width:78px">PRD</th><th style="width:190px">PRD 小节</th><th style="width:96px">状态</th>
+<th style="width:250px">我们对应的位置</th><th>说明</th></tr>
+<tr><td class="no">4.4.1</td><td class="k">地址管理列表</td><td><span class="st s2">已修</span></td>
+<td>UBK › 产品管理 › <b>材料收件地址</b></td>
+<td><b>你指出的就是这条。</b>功能一直在，但藏在「签证产品」页面的页签里，菜单上没入口。已挂成独立菜单项</td></tr>
+<tr><td class="no">4.4.2</td><td class="k">新增地址</td><td><span class="st s1">已实现</span></td><td>「新增收件地址」</td>
+<td><code>/sup/addr/save</code>，含设为默认</td></tr>
+<tr><td class="no">4.4.3</td><td class="k">编辑地址</td><td><span class="st s1">已实现</span></td><td>行内「编辑」</td><td>—</td></tr>
+<tr><td class="no">4.4.4</td><td class="k">查看地址</td><td><span class="st s1">已实现</span></td><td>列表直接展开显示</td>
+<td>另有「删除」，PRD 没有</td></tr>
+</table>
+
+<h3>4.5 供应商平台 · 产品管理</h3>
+<table>
+<tr><th style="width:78px">PRD</th><th style="width:190px">PRD 小节</th><th style="width:96px">状态</th>
+<th style="width:250px">我们对应的位置</th><th>说明</th></tr>
+<tr><td class="no">4.5.1</td><td class="k">产品管理列表</td><td><span class="st s1">已实现</span></td>
+<td>UBK › 产品管理 › 签证产品</td><td>—</td></tr>
+<tr><td class="no">4.5.2</td><td class="k">新增产品（三步）</td><td><span class="st s2">有出入</span></td>
+<td>UBK › 新增产品</td>
+<td>三步走一致（选产品 → 基本信息+材料清单 → 套餐报价）。
+<b>缺一块</b>：PRD 允许供应商基于平台材料清单<b>派生自有版本</b>（选平台版后可【修改】，存成供应商自有完整版）。
+我们只能勾选平台已发布版本，不能改。<code>fullver</code> 表的 <code>owner_org</code> / <code>from_id</code>
+两个字段当初就照 PRD 留着，功能没做</td></tr>
+<tr><td class="no">4.5.3</td><td class="k">编辑产品</td><td><span class="st s1">已实现</span></td><td>行内「编辑」</td>
+<td>另加了在售不可改价的护栏，PRD 没有</td></tr>
+<tr><td class="no">4.5.4</td><td class="k">查看产品</td><td><span class="st s1">已实现</span></td><td>「查看详情」</td><td>—</td></tr>
+</table>
+
+<h3>4.6 / 4.7 供应商平台 · 投放管理（渠道组管理 + 渠道组投放）</h3>
+<table>
+<tr><th style="width:78px">PRD</th><th style="width:190px">PRD 小节</th><th style="width:96px">状态</th>
+<th style="width:250px">我们对应的位置</th><th>说明</th></tr>
+<tr><td class="no">4.6.1–4.6.4</td><td class="k">渠道组的增删改查</td><td><span class="st s4">已撤销</span></td>
+<td>—</td><td rowspan="2"><b>你 2026-08-26 定的：</b>「渠道统一按供应商定的售价卖，订单完成后按该订单结算价结算」。
+渠道差异化定价这一层整个去掉了，产品只有「上架 B 端 / 上架 C 端」两个开关。
+底层 <code>chan_group</code> / <code>chan_rule</code> 表还留着没删，但没有页面也没有入口</td></tr>
+<tr><td class="no">4.7.1–4.7.2</td><td class="k">渠道组投放与调价</td><td><span class="st s4">已撤销</span></td><td>—</td></tr>
+</table>
+
+<h3>4.8 供应商平台 · 订单管理</h3>
+<table>
+<tr><th style="width:78px">PRD</th><th style="width:190px">PRD 小节</th><th style="width:96px">状态</th>
+<th style="width:250px">我们对应的位置</th><th>说明</th></tr>
+<tr><td class="no">4.8.1</td><td class="k">订单管理列表页</td><td><span class="st s1">已实现</span></td>
+<td>UBK › 订单管理 › 订单列表</td><td>供应商只看派给自己、且已放行的单</td></tr>
+<tr><td class="no">4.8.2</td><td class="k">查看订单详情</td><td><span class="st s1">已实现</span></td>
+<td>行内「查看订单详情」</td><td>本次补了收货人信息、证件签发地、国籍</td></tr>
+<tr><td class="no">4.8.3</td><td class="k">客人办理进度维护</td><td><span class="st s1">已实现</span></td>
+<td>UBK 工单行「回传办理进度」</td>
+<td>跳跃勾选自动补齐中间环节（PRD 原规则）已实测；供应商只能推 P7/P8/P9 三个节点</td></tr>
+</table>
+
+<h3>4.9 运营 B 平台 · 产品管理（代理策略）</h3>
+<table>
+<tr><th style="width:78px">PRD</th><th style="width:190px">PRD 小节</th><th style="width:96px">状态</th>
+<th style="width:250px">我们对应的位置</th><th>说明</th></tr>
+<tr><td class="no">4.9.1</td><td class="k">代理策略</td><td><span class="st s3">不补</span></td>
+<td>—</td><td><b>PRD 里运营可以指定「哪些供应商的哪些国家」能代理销售</b>（供应商多选 + 国家范围多选，可增删）。
+我们没有这层，所有过审的产品对所有渠道一视同仁。详见下方「缺的四块」</td></tr>
+</table>
+
+<h3>4.10 运营 B 平台 · 产品管理（我的产品）</h3>
+<table>
+<tr><th style="width:78px">PRD</th><th style="width:190px">PRD 小节</th><th style="width:96px">状态</th>
+<th style="width:250px">我们对应的位置</th><th>说明</th></tr>
+<tr><td class="no">4.10.1</td><td class="k">产品管理列表</td><td><span class="st s1">已实现</span></td>
+<td>UOM › 签证产品管理</td><td>两端上架状态、价格区间、成交量</td></tr>
+<tr><td class="no">4.10.2</td><td class="k">套餐价格调整</td><td><span class="st s5">模式不同</span></td>
+<td>—</td><td>PRD 里运营可以调渠道售价。我们的口径是价格只由供应商定、平台不改价
+（同 4.6/4.7 撤销的理由），平台只能审核通过或驳回</td></tr>
+<tr><td class="no">4.10.3</td><td class="k">查看产品详情</td><td><span class="st s1">已实现</span></td><td>「查看详情」</td><td>—</td></tr>
+</table>
+
+<h3>4.11 运营 B 平台 · 用户管理（收货地址管理）</h3>
+<table>
+<tr><th style="width:78px">PRD</th><th style="width:190px">PRD 小节</th><th style="width:96px">状态</th>
+<th style="width:250px">我们对应的位置</th><th>说明</th></tr>
+<tr><td class="no">4.11.1</td><td class="k">用户收货地址管理</td><td><span class="st s1">已补</span></td>
+<td>UOM › 客户管理 › 客户档案 › <b>收货地址簿</b></td>
+<td><b>2026-08-31 补</b>。列出该客户名下所有收货地址、每条被几张订单引用、哪几张<b>在办</b>；
+改地址前弹窗提示会影响哪些在办单，有在办单的地址不允许删除</td></tr>
+</table>
+
+<h3>4.12 运营 B 平台 · 运营管理（手机客户端首页配置）</h3>
+<table>
+<tr><th style="width:78px">PRD</th><th style="width:190px">PRD 小节</th><th style="width:96px">状态</th>
+<th style="width:250px">我们对应的位置</th><th>说明</th></tr>
+<tr><td class="no">4.12.1</td><td class="k">签证配置页</td><td><span class="st s1">已补</span></td>
+<td>UOM › 签证管理 › 频道运营 › <b>C 端首页配置</b></td>
+<td rowspan="4"><b>2026-08-31 补。</b>原来这三块写死在 <code>v-cust.js</code> 的 <code>DEST</code> /
+<code>CONT</code> 数组里，运营换个热门国家要改代码发版。现在建了 <code>home_cfg</code> 表 +
+配置页（三个页签、增删改、↑↓ 排序、启停），C 端读 <code>/pub/home</code>，<b>保存即时生效</b>。
+配了但已下架或 C 端未过审的产品，前台自动跳过不出空卡片；一条都没配时退回代码里的默认值，首页不会开天窗</td></tr>
+<tr><td class="no">4.12.2</td><td class="k">首页轮播图维护</td><td><span class="st s1">已补</span></td>
+<td>同上 › 首页轮播图</td></tr>
+<tr><td class="no">4.12.3</td><td class="k">首页热门国家</td><td><span class="st s1">已补</span></td>
+<td>同上 › 热门国家</td></tr>
+<tr><td class="no">4.12.4</td><td class="k">首页热门产品</td><td><span class="st s1">已补</span></td>
+<td>同上 › 热门产品</td></tr>
+</table>
+
+<h3>4.13 运营 B 平台 · 订单管理</h3>
+<table>
+<tr><th style="width:78px">PRD</th><th style="width:190px">PRD 小节</th><th style="width:96px">状态</th>
+<th style="width:250px">我们对应的位置</th><th>说明</th></tr>
+<tr><td class="no">4.13.1</td><td class="k">我的全部订单</td><td><span class="st s1">已实现</span></td>
+<td>UOM › 订单管理 › 订单列表</td><td>本次改成众信七段结构</td></tr>
+<tr><td class="no">4.13.2</td><td class="k">待退款订单列表</td><td><span class="st s1">已补</span></td>
+<td>UOM › 财务管理 › 退款管理 › <b>按订单汇总</b></td>
+<td><b>2026-08-31 补</b>。原来只有单据视角（一张单退三人就是三行）。新增页签按订单聚合：
+退款人数 / 办签人 / 退款金额 / 已出账金额 / 整单状态（含<b>部分完成</b>，即一张单里有人已退有人在途）</td></tr>
+<tr><td class="no">4.13.3</td><td class="k">查看订单详情</td><td><span class="st s1">已实现</span></td>
+<td>订单列表 › 查看详情</td><td>四页签结构，交易信息含销售/结算双栏。
+<b>唯独「佣金信息」没做</b>——你 8/19 定过本期不涉及分销分润</td></tr>
+</table>
+
+<h3>4.14 H5 签证频道 → 我们的 C 端小程序</h3>
+<table>
+<tr><th style="width:78px">PRD</th><th style="width:190px">PRD 小节</th><th style="width:96px">状态</th>
+<th style="width:250px">我们对应的位置</th><th>说明</th></tr>
+<tr><td class="no">4.14.1</td><td class="k">首页</td><td><span class="st s2">有出入</span></td>
+<td>C 端 › 首页</td><td>页面在，但内容（轮播图/热门国家/热门产品）写死在前端，见 4.12</td></tr>
+<tr><td class="no">4.14.2</td><td class="k">列表页</td><td><span class="st s1">已实现</span></td>
+<td>C 端 › 全部目的地</td><td>按大洲筛选、按国家进列表</td></tr>
+<tr><td class="no">4.14.3</td><td class="k">详情页</td><td><span class="st s1">已实现</span></td>
+<td>C 端 › 产品详情</td><td>套餐展开、所需材料按人群切换 TAB、办理流程都在</td></tr>
+<tr><td class="no">4.14.4</td><td class="k">订单填写</td><td><span class="st s1">已实现</span></td>
+<td>C 端 › 下单</td><td>出发日期、办签人数、逐人信息、联系人、收货地址</td></tr>
+<tr><td class="no">4.14.5</td><td class="k">订单列表</td><td><span class="st s1">已实现</span></td>
+<td>C 端 › 我的订单</td><td>按状态分组 + 办理进度查询</td></tr>
+<tr><td class="no">4.14.6</td><td class="k">订单详情</td><td><span class="st s1">已实现</span></td>
+<td>C 端 › 订单详情</td><td>含资料邮寄地址</td></tr>
+<tr><td class="no">4.14.7</td><td class="k">订单退款</td><td><span class="st s1">已实现</span></td>
+<td>C 端 › 申请退款</td><td>选客人、退款原因、金额随人数变化，规则引擎自动试算</td></tr>
+</table>
+</section>
+
+<section id="miss">
+<h2>三、缺的四块，摊开说</h2>
+<table>
+<tr><th style="width:150px">缺什么</th><th style="width:110px">影响谁</th><th>不做会怎样 / 做了值多少</th><th style="width:110px">工作量</th></tr>
+<tr><td class="k">4.12 C 端首页配置<br><span style="color:#94A3B8;font-weight:400">轮播图 / 热门国家 / 热门产品</span></td>
+<td>运营</td>
+<td><b>这条我建议最优先补。</b>现在首页推哪几个国家是写死在代码里的，
+运营想在旺季把日本换成欧洲、想挂一张促销 banner，都得找开发改代码发版。
+签证是强季节性生意（寒暑假、春节、欧洲申根旺季），首页推荐位不能动等于运营手里没有抓手</td>
+<td>1 天</td></tr>
+<tr><td class="k">4.9 代理策略<br><span style="color:#94A3B8;font-weight:400">指定供应商 × 国家范围</span></td>
+<td>渠道运营</td>
+<td>现在产品过审后对所有渠道一视同仁。真实业务里会有「这家供应商的日本签只给直营门店卖、
+不给同业」这类约束。<b>但这跟你 8/26 撤掉渠道差异化定价是同一个话题</b>——
+如果确定渠道之间不做区分，这条就不该补，补了反而跟已定的口径打架</td>
+<td>0.5 天<br>（若要做）</td></tr>
+<tr><td class="k">4.11 客户收货地址管理<br><span style="color:#94A3B8;font-weight:400">运营侧集中维护</span></td>
+<td>客服</td>
+<td>客户能在 C 端自己维护地址，但客服替客户改地址只能进订单详情一单一单改。
+客户换了地址、有三张在办订单，就要改三次。量小的时候不痛，量起来是客服的日常</td>
+<td>0.5 天</td></tr>
+<tr><td class="k">4.13.2 待退款订单<br><span style="color:#94A3B8;font-weight:400">订单视角的汇总列表</span></td>
+<td>财务 / 主管</td>
+<td>我们有退款单台账（单据视角），缺的是「这张订单一共退了几个人、退了多少」的订单视角汇总。
+一张单退多人时要自己拼。<b>可以在现有退款管理上加一个「按订单汇总」页签解决</b>，不用新建页面</td>
+<td>2 小时</td></tr>
+</table>
+<div class="note">另有两块是<b>按你的口径主动撤掉的，不算缺</b>：4.6/4.7 渠道组投放与差异化定价（2026-08-26 定：
+渠道统一售价）、4.13.3 的佣金信息（2026-08-19 定：本期不涉及分销分润）。
+还有三条是<b>业务模式变了</b>：平台不再建产品骨架（改成供应商建、平台审）、平台不再调价。
+这些在上表里分别标了「已撤销」和「模式不同」，不是漏做。</div>
+</section>
+
+<footer>
+VisaOps · 对照《通通游-签证 需求规格说明书 V1.0》（2018-07-31）第 4 章全部 14 个模块 / 49 个三级小节 · 2026-08-31<br>
+每一条都到系统里核实过入口与接口，未凭印象填写。
+</footer>
+</div>
+</body>
+</html>

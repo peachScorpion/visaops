@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>VisaOps · 对照凯撒签证 PRD · 流程差异</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#F2F4F7;color:#0F172A;
+  font:14px/1.75 -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",system-ui,sans-serif}
+.top{background:#fff;border-bottom:1px solid #E5E7EB;position:sticky;top:0;z-index:20}
+.in{width:1180px;max-width:calc(100% - 32px);margin:0 auto}
+.top .in{display:flex;align-items:center;gap:18px;height:60px}
+.top b{font-size:16px}.top s{text-decoration:none;color:#94A3B8;font-size:12.5px}
+.top nav{margin-left:auto;display:flex;gap:4px}
+.top nav a{font-size:13px;color:#475569;text-decoration:none;padding:6px 12px;border-radius:7px}
+.top nav a:hover{background:#F1F5F9;color:#0F172A}
+h1{font-size:28px;margin:34px 0 10px;letter-spacing:-.6px}
+.lead{color:#475569;margin:0 0 6px;max-width:940px}
+section{margin:46px 0}
+h2{font-size:19px;margin:0 0 8px;padding-bottom:10px;border-bottom:2px solid #0F172A;display:inline-block}
+h3{font-size:15px;margin:28px 0 10px}
+table{width:100%;border-collapse:collapse;background:#fff;border:1px solid #E5E7EB;
+  border-radius:10px;overflow:hidden;font-size:13px;margin:10px 0}
+th{background:#F8FAFC;text-align:left;padding:10px 12px;font-weight:600;color:#334155;
+  border-bottom:1px solid #E5E7EB}
+td{padding:10px 12px;border-bottom:1px solid #F1F5F9;vertical-align:top}
+tr:last-child td{border-bottom:0}
+td.k{font-weight:600;white-space:nowrap}
+code{background:#F1F5F9;border-radius:4px;padding:1px 6px;font-size:12px;
+  font-family:ui-monospace,Menlo,monospace}
+.ok{color:#16A34A;font-weight:600}
+.bad{color:#DC2626;font-weight:600}
+.fix{color:#EA580C;font-weight:600}
+.n{color:#CBD5E1}
+.card{background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:18px 20px;margin:14px 0}
+.card h4{margin:0 0 4px;font-size:14.5px}
+.card h4 span{display:inline-block;border-radius:5px;padding:1px 8px;font-size:11px;
+  margin-right:9px;vertical-align:2px;font-weight:700}
+.s-ok{background:#DCFCE7;color:#166534}
+.s-fix{background:#FFEDD5;color:#9A3412}
+.s-ask{background:#FEE2E2;color:#991B1B}
+.card p{margin:8px 0 0;font-size:13.5px;color:#334155}
+.card .vs{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+.card .vs>div{background:#F8FAFC;border-radius:9px;padding:12px 14px;font-size:13px}
+.card .vs h5{margin:0 0 7px;font-size:11.5px;letter-spacing:.6px;color:#64748B}
+.card .vs.one{grid-template-columns:1fr}
+.flow{display:flex;flex-wrap:wrap;gap:0;align-items:center;margin:10px 0;font-size:12.5px}
+.flow i{font-style:normal;background:#F1F5F9;border-radius:7px;padding:6px 11px;color:#334155}
+.flow i.new{background:#FFEDD5;color:#9A3412;font-weight:600}
+.flow em{font-style:normal;color:#CBD5E1;padding:0 7px}
+.note{background:#fff;border:1px solid #E5E7EB;border-left:3px solid #EA580C;
+  border-radius:0 10px 10px 0;padding:13px 16px;margin:14px 0;font-size:13.5px;color:#334155}
+.note b{color:#C2410C}
+footer{margin:60px 0 40px;padding-top:20px;border-top:1px solid #E2E8F0;font-size:12.5px;color:#94A3B8}
+@media(max-width:900px){.card .vs{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="top"><div class="in">
+  <b>VisaOps</b><s>对照凯撒签证 PRD · 流程差异</s>
+  <nav><a href="#model">两套流程模型</a><a href="#ok">已符合</a><a href="#fixed">已修</a>
+    <a href="#ask">待拍板</a><a href="status-flow.html">← 状态流转</a></nav>
+</div></div>
+
+<div class="in">
+<h1>对照凯撒签证 PRD · 流程差异</h1>
+<p class="lead">对照件：<b>《通通游-签证 需求规格说明书 V1.0》</b>（张薇薇，2018-07-31，已在凯撒落地）。
+只对照流程部分：3.5 业务流程图、4.8 供应商订单管理与客人办理进度维护、4.13 运营 B 平台订单管理、
+4.14.4/4.14.7 H5 订单填写与退款。产品配置、渠道投放、首页运营那几章不在本次范围。</p>
+<p class="lead">口径：PRD 是 2018 年的，<b>DS-160 填表在那时是线下动作，没有进系统</b>；我们这版把它显性化成一个节点
+并加了 AI 代填，属于升级不算差异。凡是「我们比 PRD 多」且能说清业务理由的，按升级处理；
+凡是「PRD 有而我们没有」或「我们把 PRD 分开的东西合并了」，才算差异。</p>
+
+<!-- ================= 模型对照 ================= -->
+<section id="model">
+<h2>一、两套流程模型摆在一起</h2>
+
+<h3>PRD 的四条状态线</h3>
+<table>
+<tr><th style="width:170px">状态线</th><th style="width:90px">取值数</th><th>取值</th><th style="width:280px">联动规则（PRD 原文口径）</th></tr>
+<tr><td class="k">订单状态</td><td>5</td>
+<td>待付款 / 已付款 / 已完成 / 已取消 / 已退款</td>
+<td>订单办理状态为「已完成」时，订单状态变更为「已完成」</td></tr>
+<tr><td class="k">支付状态</td><td>2</td><td>待支付 / 支付完成</td><td>运营端独立筛选项</td></tr>
+<tr><td class="k"><b>订单办理状态</b></td><td>2</td><td>办理中 / 已完成</td>
+<td><b>派生字段</b>：全部办签人的签证办理状态为「资料返还」＝已完成，否则办理中</td></tr>
+<tr><td class="k">签证办理状态<br><em style="font-style:normal;color:#94A3B8;font-size:12px">按办签人各自独立</em></td><td>6</td>
+<td>未办理 / 已收到资料 / 资料审核完成 / 使馆受理中 / 签证结果（出签·拒签·撤签）/ 资料返还</td>
+<td>跳跃勾选时中间环节默认选中；取消勾选时其后环节一并取消</td></tr>
+<tr><td class="k">客人状态</td><td>2</td><td>正常 / 退单</td><td>—</td></tr>
+</table>
+
+<h3>我们系统现在的状态线</h3>
+<table>
+<tr><th style="width:170px">状态线</th><th style="width:90px">取值数</th><th>取值</th><th style="width:280px">与 PRD 的关系</th></tr>
+<tr><td class="k">订单状态</td><td>6</td>
+<td>待付款 / 已付款 / <b class="bad">办理中</b> / 已完成 / 已取消 / 已退款</td>
+<td class="bad">把 PRD 的「订单办理状态」揉进来了，见差异 1</td></tr>
+<tr><td class="k">资金闸门</td><td>2</td><td>未放行 / 已放行</td><td>PRD 没有，是我们新增的财务风控节点</td></tr>
+<tr><td class="k">办签进度</td><td>10</td>
+<td>P1 待收材料 … P10 已交付客户</td><td>PRD 6 个的细化，见下方映射</td></tr>
+<tr><td class="k">办签人状态</td><td>2</td><td>正常 / 已退款</td><td class="ok">与 PRD 一致</td></tr>
+</table>
+
+<h3>签证办理状态的映射：PRD 6 步 → 我们 10 步</h3>
+<div class="card">
+<div class="flow">
+  <i>未办理</i><em>→</em><i>已收到资料</i><em>→</em><i>资料审核完成</i><em>→</em>
+  <i>使馆受理中</i><em>→</em><i>签证结果</i><em>→</em><i>资料返还</i>
+</div>
+<div class="flow" style="margin-top:14px">
+  <i>P1 待收材料</i><em>→</em><i>P2 材料审核中</i><em>→</em><i>P3 材料已齐备</i><em>→</em>
+  <i class="new">P4 表单填写中</i><em>→</em><i class="new">P5 待预约面签</i><em>→</em><i class="new">P6 已预约待面签</i>
+</div>
+<div class="flow">
+  <i>P7 已递交/已面签</i><em>→</em><i>P8 行政审查中</i><em>→</em><i>P9 已出结果</i><em>→</em><i>P10 已交付客户</i>
+</div>
+<p><b>橙色三步是 PRD 没有、我们新增的</b>：P4 是 DS-160 填表（PRD 时代这一步在系统外，现在要 AI 代填所以必须显性化）；
+P5/P6 是使领馆预约（PRD 把预约做成一个可选的「预约信息」弹窗，没进主流程）。
+其余七步与 PRD 六步一一对得上，<b>没有丢环节</b>。</p>
+</div>
+</section>
+
+<!-- ================= 已符合 ================= -->
+<section id="ok">
+<h2>二、对上了的（已实测，不用改）</h2>
+
+<div class="card">
+<h4><span class="s-ok">已符合</span>跳跃推进时自动补齐中间环节</h4>
+<p>PRD 4.8.3 原文：「复选框跳跃进行钩选时，需将中间环节默认选中」。
+系统 <code>set_progress()</code> 已按这条实现。<b>实测</b>：把一位办签人从 P2 直接推到 P7，
+返回 <code>auto_filled: ["材料已齐备","表单填写中","待预约面签","已预约待面签"]</code>，
+操作日志里也留了「自动补齐」记录。</p>
+</div>
+
+<div class="card">
+<h4><span class="s-ok">已符合</span>全员到终点 → 订单自动转已完成</h4>
+<p>PRD：「全部办签人的签证办理状态为资料返还，订单办理状态为已完成」+「订单办理状态为已完成时，
+订单状态变更为已完成」。系统 <code>sync_order()</code> 同口径，且<b>只统计 state='normal' 的办签人</b>
+（已退单的不参与判定，这点 PRD 没写死，但业务上必须这样，否则一人退单整单永远完不成）。
+<b>实测</b>：把单人单的办签人推到 P10，订单状态即刻从「办理中」变「已完成」。</p>
+</div>
+
+<div class="card">
+<h4><span class="s-ok">已符合</span>签证结果三选一含撤签、资料返还带快递单号</h4>
+<p>PRD：「反馈签证结果，单选（必填）：出签、拒签、撤签」「资料返还，可维护快递公司和快递单号」。
+系统结果下拉是<b>四选一</b>（出签 / 拒签 / <b>撤签</b> / 行政审查）——多一个「行政审查」是美签的真实状态，
+PRD 时代按拒签处理，实际上它既不是出签也不是拒签，会挂几周到几个月，必须单列。
+资料返还的 <code>deliver</code> 表有快递公司与快递单号，另加了电子签收。</p>
+</div>
+
+<div class="card">
+<h4><span class="s-ok">已符合</span>办签人状态、退款流程</h4>
+<p>客人状态「正常 / 退单」＝我们的 <code>normal / refunded</code>。
+退款 PRD 只有「退款中 / 退款完成」两态，我们拆成<b>申请 → 主管审批 → 财务出账 → 已驳回</b>四态——
+PRD 那版退款审核是一步，我们按众信的实际审批链拆开了，属于细化不是缺失。</p>
+</div>
+</section>
+
+<!-- ================= 已修 ================= -->
+<section id="fixed">
+<h2>三、这次直接改掉的（已上线 v175）</h2>
+
+<div class="card">
+<h4><span class="s-fix">已修</span>订单详情缺「收货人信息」</h4>
+<p>PRD 4.8.2 与 4.13.3 都明确要求订单详情同时列<b>订单联系人</b>与<b>收货人</b>（收货人、联系电话、收货地址）。
+我们原来只有联系人。签证办完要把护照原件寄回客户，收货地址是履约必需信息，漏了这块专员没法安排返还。
+现在「联系人信息」页签下多了一块「收货人信息（资料返还）」，没填地址的显示「资料返还前需补充」。</p>
+</div>
+
+<div class="card">
+<h4><span class="s-fix">已修</span>办签人列表缺「证件签发地」与「国籍」</h4>
+<p>PRD 4.8.2 列的办签人字段是：中文姓名、手机号、英文姓/名、性别、出生日期、证件类型、证件号码、
+证件有效期、<b>证件签发地</b>、<b>国籍</b>。后两个我们库里有（<code>id_place</code> / <code>nation</code>）
+但订单详情页没展示。这两个字段在送签时要填进申请表，专员核对时看不到就得去点每个人的档案。已补进办签人表。</p>
+</div>
+
+<div class="card">
+<h4><span class="s-fix">已修</span>撤签没有说明文本框</h4>
+<p>PRD：「拒签和撤签显示文本框可维护说明」。我们原来只有「拒签说明」，撤签没地方写原因。
+已改成「拒签 / 撤签说明」，提示语写明撤签要填撤回原因与客户确认情况。</p>
+</div>
+</section>
+
+<!-- ================= 待拍板 ================= -->
+<section id="ask">
+<h2>四、要你拍板的（都是结构性的，我没擅自改）</h2>
+
+<div class="card">
+<h4><span class="s-ask">差异 1</span>订单状态里混进了「办理中」——这是我认为你说的「不对劲」的根源</h4>
+<div class="vs">
+<div><h5>PRD：两个字段并列</h5>
+订单状态＝<b>已付款</b>（钱走到哪了）<br>
+订单办理状态＝<b>办理中</b>（活干到哪了）<br>
+<span style="color:#64748B">两条线各管一件事，可以任意组合筛选</span></div>
+<div><h5>我们：压成一个字段</h5>
+订单状态＝<b>办理中</b><br>
+<span style="color:#64748B">「已付款」和「办理中」变成互斥的两个值，
+一张单不可能既是已付款又是办理中</span></div>
+</div>
+<p><b>后果很具体</b>：一张已付款、财务已放行、但三个办签人全都还停在「待收材料」的单，
+在我们系统里叫「办理中」——可它一步都没办。财务想筛「已付款的单」筛不出它，
+运营想筛「真正在办的单」也筛不掉它。现在只能靠「资金闸门」这个内部字段勉强区分，
+列表上要挂两个标签才说得清一件事。</p>
+<p><b>我的建议</b>：按 PRD 拆成两个字段。订单状态回到 5 个值（待付款/已付款/已完成/已取消/已退款），
+另加一个<b>派生的</b>「订单办理状态」（未开始/办理中/已完成），由办签人进度自动算，不用人维护。
+改动面：订单列表、订单详情、CSP/UBK 两端列表的状态列与页签，以及 <code>sync_order()</code> 的判定，
+估计半天。<b>要不要改，你定。</b></p>
+</div>
+
+<div class="card">
+<h4><span class="s-ask">差异 2</span>免面签的产品也会走「待预约面签 / 已预约待面签」两步</h4>
+<p>PRD 4.8.3：「产品属性中有面试/录指纹显示此按钮，否则隐藏」——预约是<b>按产品属性条件出现</b>的。
+我们的 P1–P10 是一条固定链路，日本、新加坡这类免面签产品也要经过 P5、P6，
+专员只能一路点过去，等于两个空转节点。</p>
+<p><b>我的建议</b>：进度链路按产品属性动态生成——<code>need_interview=0</code> 的产品跳过 P5/P6，
+P4 之后直接进 P7。这样免面签产品是 8 步，需面签的是 10 步。
+但这会让「进度百分比」在不同产品间不可比（8 步的第 5 步 vs 10 步的第 5 步不是一回事），
+报表口径要一起调。<b>改还是不改，你定。</b></p>
+</div>
+
+<div class="card">
+<h4><span class="s-ask">差异 3</span>缺独立的「支付状态」筛选</h4>
+<p>PRD 4.13.1 运营端订单列表有独立的「支付状态（待支付/支付完成）」筛选项，与订单状态并列。
+我们没有这个字段，要判断有没有付款得看订单状态是不是 created。
+如果差异 1 按 PRD 拆开了，支付状态可以顺带一起加；如果差异 1 不改，单加这个意义不大。
+<b>建议跟差异 1 一起定。</b></p>
+</div>
+
+<div class="card">
+<h4><span class="s-ask">差异 4</span>PRD 有「佣金信息」，我们没有</h4>
+<p>PRD 4.13.3 订单详情列了佣金块：供应商名称、供应商结算价、分销商名称、分销商收益、
+分销员名称、分销员收益。我们只有供应商结算价与平台毛利，没有分销商 / 分销员两层收益。</p>
+<p>你 8/19 定过「本期不涉及分销分润与返佣」，所以我按<b>不做</b>处理，在这里列出来只是让你知道
+PRD 里有这块、我不是漏看了。哪天要做分销体系，这是现成的字段清单。</p>
+</div>
+</section>
+
+<footer>
+VisaOps · 对照《通通游-签证 需求规格说明书 V1.0》（2018-07-31）· 2026-08-31<br>
+对照范围：仅流程相关章节（3.5 / 4.8 / 4.13 / 4.14.4 / 4.14.7）。已符合项均经系统实测验证，非纸面比对。
+</footer>
+</div>
+</body>
+</html>
