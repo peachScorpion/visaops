@@ -1192,10 +1192,11 @@ def sup_on(sp, track):
     这一端的运营审核通过（review_b/review_c）。B 端过审即在 CSP 展示，
     C 端过审即在客户小程序展示，两端互不影响（唐美芳 2026-08-27 定）。
     """
-    #  第四个条件（2026-09-09 加）：平台没有把它强制停售。
-    #  off_sale 是运营手里的开关，**不动审核结论**——出问题时先停售，
-    #  查清楚再启售，不用重走一遍审核。
-    if "off_sale" in sp.keys() and sp["off_sale"]:
+    #  第四个条件（2026-09-09 加，09-11 拆端）：平台没有把这一端强制停售。
+    #  off_b / off_c 是运营手里的开关，**不动审核结论**——出问题时先停售，
+    #  查清楚再启售，不用重走一遍审核。只停对应那一端，两端互不影响。
+    off_key = "off_" + track
+    if off_key in sp.keys() and sp[off_key]:
         return False
     return (sp["status"] == "published" and sp["to_" + track] == 1
             and sp["review_" + track] == "approved")
@@ -1689,7 +1690,8 @@ def api(path, q, body, user, c):
             sups = []
             # 只有「供应商已上架 + 这一端运营审核通过」的产品才对外可售
             for sp in rows(c, "select * from sup_product where product_id=? and status='published'"
-                              " and review_{0}='approved' and to_{0}=1".format(track), (p["id"],)):
+                              " and review_{0}='approved' and to_{0}=1"
+                              " and ifnull(off_{0},0)=0".format(track), (p["id"],)):
                 pks = rows(c, "select * from pkg where sup_product_id=?"
                               " and ifnull(status,'on')='on' order by settle_price",
                            (sp["id"],))
@@ -1834,16 +1836,16 @@ def api(path, q, body, user, c):
             # 在列表、对账单、合同上显示的就是新名字，跟客人手里的合同对不上。
             "insert into ord(no,channel,org_id,buyer_user,agent_user,product_id,sup_product_id,"
             "pkg_id,pax,amount,settle_amount,status,depart_date,contact_name,contact_phone,"
-            "contact_email,recv_addr_id,settle_entity,invoice_entity,created_at,info_deadline,"
+            "contact_email,recv_addr_id,settle_entity,invoice_entity,note,created_at,info_deadline,"
             "product_name)"
-            " values(?,?,?,?,?,?,?,?,?,?,?,'created',?,?,?,?,?,?,?,?,?,?)",
+            " values(?,?,?,?,?,?,?,?,?,?,?,'created',?,?,?,?,?,?,?,?,?,?,?)",
             (no, channel, oorg, user["id"],
              oagent, sp["product_id"], sp["id"], pk["id"],
              len(pax), retail * len(pax), pk["settle_price"] * len(pax),
              depart, body.get("contact_name") or user["name"],
              body.get("contact_phone") or user["phone"], body.get("contact_email"),
              body.get("recv_addr_id"), body.get("settle_entity") or "众信旅游集团",
-             body.get("invoice_entity") or "众信旅游集团", now(),
+             body.get("invoice_entity") or "众信旅游集团", (body.get("note") or "").strip(), now(),
              now(hours=INFO_HOURS), sp["name"]))
         oid = cur.lastrowid
         fvid = sp["fullver_id"] or p["fullver_id"]
@@ -5280,6 +5282,11 @@ def api(path, q, body, user, c):
         need("ops")
         out = []
         for sp in rows(c, "select * from sup_product order by id desc"):
+            # 草稿（供应商还没点提交送审）不进运营审核列表：还没进审核流程，运营无需介入；
+            # 否则「全部」页签计数会和「待审核 + 审核通过 + 审核驳回」对不上那条孤零零的草稿
+            # （唐美芳 2026-09-15）。B/C 两端共用本接口，一并过滤，两端口径一致。
+            if sp["status"] == "draft":
+                continue
             p = one(c, "select * from product where id=?", (sp["product_id"],))
             org = one(c, "select * from org where id=?", (sp["org_id"],))
             fvid = sp["fullver_id"] or p["fullver_id"]
@@ -5314,7 +5321,8 @@ def api(path, q, body, user, c):
                 "review_c_by": sp["review_c_by"], "review_c_at": sp["review_c_at"],
                 "review_c_imgs": jl(sp["review_c_imgs"], []),
                 "on_b": sup_on(sp, "b"), "on_c": sup_on(sp, "c"),
-                "off_sale": 1 if ("off_sale" in sp.keys() and sp["off_sale"]) else 0,
+                "off_b": 1 if ("off_b" in sp.keys() and sp["off_b"]) else 0,
+                "off_c": 1 if ("off_c" in sp.keys() and sp["off_c"]) else 0,
                 "submit_at": sp["submit_at"], "updated_at": sp["updated_at"],
                 "pkg_count": len(pks),
                 "pkgs": [{"name": k["name"], "settle_price": k["settle_price"],
@@ -5341,6 +5349,9 @@ def api(path, q, body, user, c):
                 # 「供应商计调」：签证这边没有计调岗，对应的是供应商侧建这条产品的人，
                 # 出问题时众信就是找他。取 sup_product 的创建人。
                 "sup_owner_name": sp["created_by_name"] or "",
+                # 「产品管理人员」：众信内部这条产品的责任人（2026-09-15 补）。
+                # 与「供应商计调」是两码事：计调在供应商侧，产品管理人员在众信侧。
+                "manager": sp.get("manager") or "",
                 "ord_count": ords,
             })
             aud(out[-1], sp)
@@ -5407,6 +5418,7 @@ def api(path, q, body, user, c):
             "svc_opts": SVC_OPTS,
             "hero_img": sp["hero_img"] or "",
             "sup_owner_name": sp["created_by_name"] or "",
+            "manager": sp.get("manager") or "",
             "events": [dict(e) for e in evs],
         }
         for t in ("b", "c"):
@@ -5418,20 +5430,27 @@ def api(path, q, body, user, c):
         return d
 
     if path == "/ops/product/onsale":
-        # 平台侧启售 / 停售（唐美芳 2026-09-09：「销售状态可以操作开关控制启停售状态」）。
+        # 平台侧分端启售 / 停售（唐美芳 2026-09-09：「销售状态可以操作开关控制启停售状态」；
+        # 09-11：「C 端下架仅 C 端小程序的产品不展示，不影响有米小程序的产品展示」）。
         # 与「撤销上架」不同：撤销会把审核结论清成待审，恢复要重走一遍审核；
-        # 这个开关只挂一个 off_sale 标记，审核结论原样保留。
+        # 这个开关只挂一个 off_b / off_c 标记，审核结论原样保留，两端互不影响。
         need("ops")
         sp = one(c, "select * from sup_product where id=?", (arg("id"),))
         if not sp:
             raise Err("产品不存在", 404)
+        track = body.get("track") or "b"
+        if track not in ("b", "c"):
+            raise Err("渠道参数错误", 400)
         off = 1 if body.get("off") else 0
-        c.execute("update sup_product set off_sale=?,updated_by=?,updated_by_name=?,updated_at=?"
-                  " where id=?", (off, user["id"], user["name"], now(), sp["id"]))
-        log(c, "sup_product", sp["id"], None, user, "停售" if off else "启售", sp["name"])
-        return {"ok": True, "off_sale": off,
-                "msg": "已停售，客户端与门店端立即不再展示" if off
-                else "已启售，按各端审核结论恢复展示"}
+        col = "off_" + track
+        c.execute("update sup_product set %s=?,updated_by=?,updated_by_name=?,updated_at=?"
+                  " where id=?" % col, (off, user["id"], user["name"], now(), sp["id"]))
+        tn = "B 端（门店 / 有米）" if track == "b" else "C 端（客户小程序）"
+        log(c, "sup_product", sp["id"], None, user,
+            (tn + "停售") if off else (tn + "启售"), sp["name"])
+        return {"ok": True, "track": track, "off": off,
+                "msg": ("已停售，" + tn + "立即不再展示本产品") if off
+                else ("已启售，" + tn + "按审核结论恢复展示")}
 
     if path == "/ops/product/market":
         # 产品审核页上运营可编辑的**对客文案**：产品名称 / 副标题 / 服务标签 /
@@ -5452,6 +5471,32 @@ def api(path, q, body, user, c):
         log(c, "sup_product", sp["id"], None, user, "审核页修改对客信息",
             "产品名称 / 副标题 / 标签 / 主图 / 推广语")
         return {"ok": True}
+
+    if path == "/ops/staff":
+        # 产品管理人员的候选池：众信内部员工（UOM_ROLES，同 need("ops") 的准入门槛）。
+        # 供应商（ubk）、门店（csp）、对客（customer）不是平台内部的产品责任人，不放进候选。
+        need("ops")
+        out = [{"name": r["name"], "role": r["role"]}
+               for r in rows(c, "select name,role from user where role in %s"
+                                " order by role,name" % str(UOM_ROLES))]
+        return {"list": out}
+
+    if path == "/ops/product/manager":
+        # 指派 / 改派产品管理人员（2026-09-15 补）。存姓名，可留空＝未指派。
+        # 只落一条操作日志，不触发下架、不重走审核——责任人是内部台账，不是对外销售状态。
+        need("ops")
+        sp = one(c, "select * from sup_product where id=?", (arg("id"),))
+        if not sp:
+            raise Err("产品不存在", 404)
+        mgr = (body.get("manager") or "").strip()
+        before = sp.get("manager") or ""
+        c.execute("update sup_product set manager=?,updated_by=?,updated_by_name=?,updated_at=?"
+                  " where id=?", (mgr, user["id"], user["name"], now(), sp["id"]))
+        log(c, "sup_product", sp["id"], None, user,
+            "指定产品管理人员" if mgr and not before else
+            ("改派产品管理人员" if mgr else "清除产品管理人员"),
+            (before or "未指派") + " → " + (mgr or "未指派"))
+        return {"ok": True, "manager": mgr, "msg": "已更新产品管理人员"}
 
     if path == "/ops/product/review":
         # 上架审核：通过 / 驳回 / 对已通过的产品撤销上架。
@@ -5955,6 +6000,7 @@ def api(path, q, body, user, c):
                      "created_by_name": o["created_by_name"],
                      "updated_by_name": o["updated_by_name"], "updated_at": o["updated_at"],
                      "settle_entity": o["settle_entity"], "invoice_entity": o["invoice_entity"],
+                     "note": o["note"] or "",
                      "third_no": o["no"].replace("VS-", "TP")},
              "product": {"name": sp["name"] if sp else "", "code": pk["sup_code"] if pk else "",
                          "country": pr["country"] if pr else "",
@@ -6026,7 +6072,7 @@ def api(path, q, body, user, c):
             d["flow"] = jl(r["flow"], []) if r["flow"] else []
             d["products"] = c.execute(
                 "select count(*) from product p join sup_product sp on sp.product_id=p.id"
-                " where p.country=? and sp.to_c=1 and sp.review_c='approved'",
+                " where p.country=? and sp.to_c=1 and sp.review_c='approved' and ifnull(sp.off_c,0)=0",
                 (r["country"],)).fetchone()[0]
             out.append(d)
         dft = one(c, "select * from country_cfg where country=''") or {}
@@ -6103,45 +6149,73 @@ def api(path, q, body, user, c):
         return {"ok": True}
 
     if path == "/ops/home":
-        # C 端签证频道首页配置（凯撒 PRD 4.12）。运营维护轮播图 / 热门国家 / 热门产品，
-        # C 端读 /pub/home 渲染。在此之前这三块写死在前端，改一次要发一次版。
+        # 首页配置（C 端 / 有米共用）。运营维护轮播图 / 热门国家 / 热门产品。
+        # channel='c' 表示 C 端，channel='youmi' 表示有米，默认查询 C 端。
         need("ops", "lead")
-        out = {"banner": [], "country": [], "product": []}
-        for r in rows(c, "select * from home_cfg order by kind, grp, sort, id"):
+        ch = q.get("channel", ["c"])[0]  # 默认 C 端
+        out = {"banner": [], "country": [], "product": [], "channel": ch}
+        for r in rows(c, "select * from home_cfg where channel=? order by kind, grp, sort, id", (ch,)):
             d = dict(r)
             if r["kind"] == "product" and r["link_val"]:
                 sp = one(c, "select * from sup_product where id=?", (int(r["link_val"]),))
                 d["product_name"] = sp["name"] if sp else "（产品已删除）"
-                d["on_c"] = bool(sp and sp["to_c"] and sp["review_c"] == "approved") if sp else False
+                # 有米产品看 B 端在售状态，C 端看 C 端在售状态
+                if ch == "youmi":
+                    d["on_b"] = bool(sp and sp["to_b"] and sp["review_b"] == "approved"
+                                     and not sp["off_b"]) if sp else False
+                else:
+                    d["on_c"] = bool(sp and sp["to_c"] and sp["review_c"] == "approved"
+                                     and not sp["off_c"]) if sp else False
             out.setdefault(r["kind"], []).append(d)
-        # 可选项：C 端在售的国家与产品，供配置时下拉选
-        out["opt_country"] = [r[0] for r in c.execute(
-            "select distinct p.country from product p join sup_product sp on sp.product_id=p.id"
-            " where sp.to_c=1 and sp.review_c='approved' order by 1")]
-        out["opt_product"] = [{"id": r["id"], "name": r["name"]} for r in rows(
-            c, "select id,name from sup_product where to_c=1 and review_c='approved' order by id")]
+        # 可选项：在售的国家与产品，供配置时下拉选
+        # 有米看 B 端在售，C 端看 C 端在售
+        if ch == "youmi":
+            out["opt_country"] = [r[0] for r in c.execute(
+                "select distinct p.country from product p join sup_product sp on sp.product_id=p.id"
+                " where sp.to_b=1 and sp.review_b='approved' and ifnull(sp.off_b,0)=0 order by 1")]
+            out["opt_product"] = [{"id": r["id"], "name": r["name"]} for r in rows(
+                c, "select id,name from sup_product where to_b=1 and review_b='approved'"
+                  " and ifnull(off_b,0)=0 order by id")]
+            # 有米低价优选：如果没有配置，自动展示价格最低的前6个产品
+            # 返回给前端，让运营看到当前实际展示的产品
+            if not out["product"]:
+                # 价格在套餐表里，取每个产品的最低套餐价格
+                out["auto_products"] = [{"id": r["id"], "name": r["name"],
+                    "settle_price": r["settle_price"]} for r in rows(
+                    c, "select sp.id,sp.name,min(p.settle_price) as settle_price from sup_product sp"
+                       " join pkg p on p.sup_product_id=sp.id"
+                       " where sp.to_b=1 and sp.review_b='approved' and ifnull(sp.off_b,0)=0"
+                       " group by sp.id order by settle_price limit 6")]
+        else:
+            out["opt_country"] = [r[0] for r in c.execute(
+                "select distinct p.country from product p join sup_product sp on sp.product_id=p.id"
+                " where sp.to_c=1 and sp.review_c='approved' and ifnull(sp.off_c,0)=0 order by 1")]
+            out["opt_product"] = [{"id": r["id"], "name": r["name"]} for r in rows(
+                c, "select id,name from sup_product where to_c=1 and review_c='approved'"
+                  " and ifnull(off_c,0)=0 order by id")]
         out["groups"] = ["热门", "亚洲", "欧洲", "美洲", "澳新非"]
         return out
 
     if path == "/ops/home/save":
         need("ops", "lead")
         f = body
+        ch = f.get("channel") or "c"  # 默认 C 端
         vals = (f.get("kind"), f.get("title"), f.get("subtitle"), f.get("img"),
                 f.get("link_kind") or "none", f.get("link_val"), f.get("grp"),
-                int(f.get("sort") or 0), 1 if f.get("active") in (1, "1", True, "true") else 0)
+                int(f.get("sort") or 0), 1 if f.get("active") in (1, "1", True, "true") else 0, ch)
         if f.get("id"):
             c.execute("update home_cfg set kind=?,title=?,subtitle=?,img=?,link_kind=?,link_val=?,"
-                      "grp=?,sort=?,active=?,updated_by_name=?,updated_at=? where id=?",
+                      "grp=?,sort=?,active=?,channel=?,updated_by_name=?,updated_at=? where id=?",
                       vals + (user["name"], now(), int(f["id"])))
             rid = int(f["id"])
         else:
             cur = c.execute("insert into home_cfg(kind,title,subtitle,img,link_kind,link_val,grp,"
-                            "sort,active,created_by_name,created_at,updated_by_name,updated_at)"
-                            " values(?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                            "sort,active,channel,created_by_name,created_at,updated_by_name,updated_at)"
+                            " values(?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                             vals + (user["name"], now(), user["name"], now()))
             rid = cur.lastrowid
         log(c, "home_cfg", rid, None, user, "维护首页配置",
-            "%s · %s" % (f.get("kind"), f.get("title") or ""))
+            "%s · %s · %s" % (ch, f.get("kind"), f.get("title") or ""))
         return {"ok": True, "id": rid}
 
     if path == "/ops/home/del":
@@ -6154,16 +6228,17 @@ def api(path, q, body, user, c):
         return {"ok": True}
 
     if path == "/ops/home/sort":
-        # 上移 / 下移：同 kind 同 grp 内跟相邻一条交换 sort
+        # 上移 / 下移：同 kind 同 grp 同 channel 内跟相邻一条交换 sort
         need("ops", "lead")
         r = one(c, "select * from home_cfg where id=?", (arg("id"),))
         if not r:
             raise Err("配置不存在")
         up = arg("dir") == "up"
-        sib = one(c, "select * from home_cfg where kind=? and COALESCE(grp,'')=COALESCE(?,'')"
+        ch = r.get("channel") or "c"
+        sib = one(c, "select * from home_cfg where channel=? and kind=? and COALESCE(grp,'')=COALESCE(?,'')"
                      " and sort " + ("<" if up else ">") + " ? order by sort " +
                      ("desc" if up else "asc") + " limit 1",
-                  (r["kind"], r["grp"], r["sort"]))
+                  (ch, r["kind"], r["grp"], r["sort"]))
         if not sib:
             return {"ok": True, "msg": "已在" + ("最前" if up else "最后")}
         c.execute("update home_cfg set sort=? where id=?", (sib["sort"], r["id"]))
@@ -6173,14 +6248,20 @@ def api(path, q, body, user, c):
     if path == "/pub/home":
         # C 端首页读这个。无需登录态之外的权限——它就是频道首页内容。
         need("customer", "csp", "ops", "lead", "uom", "fin", "ubk")
+        ch = q.get("channel", ["c"])[0]  # 默认 C 端
         out = {"banner": [], "country": [], "product": []}
-        for r in rows(c, "select * from home_cfg where active=1 order by kind, grp, sort, id"):
+        for r in rows(c, "select * from home_cfg where active=1 and channel=? order by kind, grp, sort, id", (ch,)):
             d = {"title": r["title"], "subtitle": r["subtitle"], "img": r["img"],
                  "link_kind": r["link_kind"], "link_val": r["link_val"], "grp": r["grp"]}
             if r["kind"] == "product" and r["link_val"]:
                 sp = one(c, "select * from sup_product where id=?", (int(r["link_val"]),))
-                if not sp or not sp["to_c"] or sp["review_c"] != "approved":
-                    continue          # 下架或未过审的产品不往 C 端推
+                # 有米产品看 B 端在售状态，C 端看 C 端在售状态
+                if ch == "youmi":
+                    if not sp or not sp["to_b"] or sp["review_b"] != "approved" or sp["off_b"]:
+                        continue  # 下架或未过审的产品不往有米推
+                else:
+                    if not sp or not sp["to_c"] or sp["review_c"] != "approved" or sp["off_c"]:
+                        continue  # 下架或未过审的产品不往 C 端推
                 d["sup_product_id"] = sp["id"]
                 d["title"] = r["title"] or sp["name"]
             out[r["kind"]].append(d)
@@ -6408,6 +6489,32 @@ def api(path, q, body, user, c):
         # 同一个人从小程序看和从分享链接看，进度不能是两套说法
         return dict(pub_track(c, a, o), name=a["name_cn"], ord_no=o["no"], siblings=sibs)
 
+    if path == "/my/order/sale":
+        # 改派销售：对齐酒店订单详情「修改销售」按钮（唐美芳 2026-09-16）。
+        # 门店销售把自己名下（本店）的订单改派给同门店另一位销售。
+        # act=list 返回同门店候选，其余走保存：落 agent_user + 记操作日志。
+        need("csp")
+        if arg("act", req=False) == "list":
+            return {"list": [{"id": r["id"], "name": r["name"]} for r in rows(
+                c, "select id,name from user where org_id=? and role='csp' order by id",
+                (user["org_id"],))]}
+        o = one(c, "select * from ord where no=?", (arg("no"),))
+        if not o:
+            raise Err("订单不存在", 404)
+        if o["org_id"] != user["org_id"]:
+            raise Err("无权修改非本门店订单", 403)
+        sid = int(arg("sale_id"))
+        u2 = one(c, "select * from user where id=? and org_id=? and role='csp'",
+                 (sid, user["org_id"]))
+        if not u2:
+            raise Err("该销售人员不在本门店", 400)
+        before = one(c, "select name from user where id=?", (o["agent_user"],)) or {}
+        c.execute("update ord set agent_user=?,updated_by=?,updated_by_name=?,updated_at=?"
+                  " where id=?", (sid, user["id"], user["name"], now(), o["id"]))
+        log(c, "ord", o["id"], o["id"], user, "改派销售",
+            (before.get("name") or "—") + " → " + (u2["name"] or "—"))
+        return {"ok": True, "sale_name": u2["name"] or "—"}
+
     if path == "/my/order/detail":
         # C 端订单详情。唐美芳 2026-08-31：「C端小程序页面补填资料的入口及办理进度
         # 从哪里查看，怎么没看到操作页面啊，这块是不完善的」——原来点订单卡片没反应，
@@ -6454,6 +6561,20 @@ def api(path, q, body, user, c):
                               " and fin_confirmed=0", (o["id"],)).fetchone()[0]
         refunded = c.execute("select ifnull(sum(amount),0) from refund where ord_id=?"
                              " and status='done'", (o["id"],)).fetchone()[0]
+        # 收退转：有米订单详情要跟 CSP / 酒店同一套口径，能看本单收退款流水
+        # （对齐酒店订单详情「收退转 + 合同」结构；签证没有转款，只列收款与退款）
+        pays = [{"no": p["no"], "cate": p["cate"], "method": p["method"], "item": p["item"],
+                 "amount": p["amount"], "arrive_amount": p["arrive_amount"],
+                 "audit_status": p["audit_status"], "confirmed": p["fin_confirmed"],
+                 "trade_no": p["trade_no"], "created_at": p["created_at"]}
+                for p in rows(c, "select * from pay where ord_id=? and kind='in' order by id",
+                              (o["id"],))]
+        refs = [{"no": r["no"], "amount": r["amount"], "status": r["status"],
+                 "status_text": {"applying": "待主管审批", "l1": "主管已批待出账",
+                                 "done": "已出账", "reject": "已驳回"}.get(r["status"], r["status"]),
+                 "reason": r["reason"], "liability_text": LIABILITY.get(r["liability"], ""),
+                 "l1_at": r["l1_at"], "fin_at": r["fin_at"], "created_at": r["created_at"]}
+                for r in rows(c, "select * from refund where ord_id=? order by id", (o["id"],))]
         ist, ist_text = info_state(o)
         return {
             "no": o["no"], "ord_id": o["id"], "status": o["status"],
@@ -6484,8 +6605,19 @@ def api(path, q, body, user, c):
             "recv_addr": dict(recv_addr) if recv_addr else None,
             "contact": {"name": o["contact_name"], "phone": o["contact_phone"],
                         "email": o["contact_email"]},
+            "note": o["note"] or "",
             # 系统本期只存开票抬头，没有发票申请流程，前端据此显示为只读
             "invoice": {"entity": o["invoice_entity"] or ""},
+            "settle_entity": o["settle_entity"] or "",
+            "contract_status": "未签约",
+            "pays": pays, "refunds": refs,
+            # 订单日志 + 政策段用到的产品口径：与 CSP 订单详情同源（2026-09-16）
+            "logs": [{"actor": e["actor_name"], "action": e["action"], "detail": e["detail"],
+                      "at": e["created_at"]}
+                     for e in rows(c, "select * from event where ord_id=? order by id desc",
+                                   (o["id"],))],
+            "lead_days": pk["lead_days"] if pk else None,
+            "submit_city": pr["submit_city"] if pr else "",
             "applicants": aps,
         }
 

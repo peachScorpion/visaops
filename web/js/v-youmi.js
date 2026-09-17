@@ -69,7 +69,7 @@ function ymPage(title, body, foot, tipTitle, tipHtml, back, tab, footCls, bodyCl
      ⚠️ 挂在**状态条 .ph-bar** 上而不是标题栏 .ph-nav：产品详情这类沉浸式页面
      `.ph-nav{display:none}`、`.ph-bar` 绝对定位盖在头图上，挂标题栏会整个消失或被盖住。 */
   html = html.replace('<span>众信旅游 · 签证</span>',
-    '<span>优游有米</span>' + (body.indexOf('data-pmic') < 0 ? pmIcon('pm-ymbar') : ''));
+    '<span>优游有米</span>' + (body.indexOf('pm-seg') < 0 ? pmIcon('pm-ymbar') : ''));
   if (tab) {
     html = html.replace(/<div class="ph-tab">[\s\S]*?<\/div>\s*<\/div><\/div>$/,
       ymTabbar(tab) + '</div></div>');
@@ -102,15 +102,17 @@ VIEWS['youmi:book'] = function (m, param) {
 };
 
 /* 签证频道：内容与 CSP 频道页同一套——横幅数据、服务承诺、按目的地找签证、
-   低价优选、政策速递、办理流程，只是排成了一列。 */
+   低价优选、政策速递、办理流程，只是排成了一列。
+   2026-09-15：增加首页配置读取，轮播图/热门国家/热门产品可运营配置。 */
 function ymVisa(m) {
-  return Promise.all([api('/shop/products'), api('/shop/policies'), ensureCcfg()])
+  return Promise.all([api('/shop/products'), api('/shop/policies'), api('/pub/home?channel=youmi'), ensureCcfg()])
     .then(function (rr) {
     var rows = [];
     (rr[0].list || []).forEach(function (p) {
       (p.suppliers || []).forEach(function (sp) { rows.push({ p: p, s: sp }); });
     });
     var pols = (rr[1].list || []).slice(0, 6);
+    var home = rr[2] || { banner: [], country: [], product: [] };
     var byC = {};
     rows.forEach(function (x) {
       var lo = x.s.price_min;
@@ -120,8 +122,17 @@ function ymVisa(m) {
     var fastest = rows.length
       ? Math.min.apply(null, rows.map(function (x) { return x.s.lead_min; })) : 0;
     var ct = S.cache.ymCt === undefined ? 0 : S.cache.ymCt;
-    var cheap = rows.slice().sort(function (a, b) { return a.s.price_min - b.s.price_min; })
-      .slice(0, 6);
+    // 有配置则用配置，无配置则用默认逻辑（价格最低的前6个）
+    var hotProducts = (home.product || []).length
+      ? home.product.map(function (h) {
+          var found = rows.filter(function (x) { return String(x.s.id) === String(h.sup_product_id); })[0];
+          return found || null;
+        }).filter(Boolean)
+      : rows.slice().sort(function (a, b) { return a.s.price_min - b.s.price_min; }).slice(0, 6);
+    // 头图：有配置用配置，无配置用默认
+    var banner = (home.banner || [])[0] || { img: (CCFG['英国'] || {}).hero || 'img/dest/uk2.jpg', title: '去哪儿，就办哪儿的签证' };
+    var heroImg = banner.img || ((CCFG['英国'] || {}).hero || 'img/dest/uk2.jpg');
+    var heroTitle = (banner.title || '去哪儿，就办哪儿的签证').replace(/\n/g, ' ');
 
     /* 签证频道页原来没有搜索框（唐美芳 2026-09-07 指出）。
        原因是移植时的遗漏：CSP 电脑端的搜索框挂在**通栏 header** 上，各层级都在；
@@ -133,8 +144,8 @@ function ymVisa(m) {
       '<input id="uy-kw3" placeholder="搜国家 / 签证类型 / 产品名">' +
       '<button data-search>搜索</button></div>' + pmIcon('pm-ymsch') + '</div>' +
       '<div class="uy-vhero" style="background-image:url(' +
-      esc((CCFG['英国'] || {}).hero || 'img/dest/uk2.jpg') + ')">' +
-      '<div class="tx"><s>ZHONGXIN VISA</s><b>去哪儿，就办哪儿的签证</b>' +
+      esc(heroImg) + ')">' +
+      '<div class="tx"><s>ZHONGXIN VISA</s><b>' + esc(heroTitle) + '</b>' +
       '<p>覆盖 ' + cs.length + ' 个国家 · ' + rows.length + ' 款在售 · 最快 ' +
       fastest + ' 个工作日出签</p></div></div>' +
       '<div class="uy-kpi">' + [['材料预审', '按人群逐项裁剪'], ['进度透明', '五个节点有时间戳'],
@@ -164,7 +175,7 @@ function ymVisa(m) {
       })() + '</div>' +
 
       '<div class="uy-h2"><b>低价优选</b><a data-all>全部产品 ›</a></div>' +
-      cheap.map(function (x) { return ymPCard(x, 'price'); }).join('') +
+      hotProducts.map(function (x) { return ymPCard(x, 'price'); }).join('') +
 
       (pols.length
         ? '<div class="uy-h2"><b>签证政策速递</b><a>与客户端同一份口径</a></div>' +
@@ -790,7 +801,9 @@ VIEWS['youmi:create'] = function (m, spid) {
       /* 办签人一律通过选择面板产生，初始为空 */
       pax: [],
       /* 「下单后再填写办签人资料」开关与人数 */
-      later: false, laterN: 1
+      later: false, laterN: 1,
+      /* 订单备注：选填，随单一并写入 ord.note，订单详情里展示 */
+      note: ''
     };
   }
   /* 上一单的联系人从<b>后端</b>取，不再靠浏览器内存——S.cache 刷新就没了、
@@ -929,6 +942,12 @@ VIEWS['youmi:create'] = function (m, spid) {
           true, (W.contact.name && W.contact.phone && W.contact.email)
             ? '' : '<u class="bk-bg">待填写</u>') +
 
+        sec('订单备注',
+          '<div class="bk-form">' +
+          '<label><span>备注（选填，随订单一并展示）</span>' +
+          '<textarea data-note rows="3" placeholder="如有加急说明、寄送要求、特殊开票等，可在此备注">' +
+          esc(W.note || '') + '</textarea></label></div>') +
+
         sec('资料提交方式',
           '<div class="bk-way"><div><b>电子材料</b><s>下单后在订单里逐项上传，' +
           '专员在线审核，不合格会退回并说明原因；销售可代客上传</s></div>' +
@@ -1029,7 +1048,8 @@ VIEWS['youmi:create'] = function (m, spid) {
           applicants: W.later ? [] : W.pax, pax_later: W.later ? W.laterN : 0,
           deal_price: price(), depart_date: W.depart,
           contact_name: W.contact.name, contact_phone: W.contact.phone,
-          contact_email: W.contact.email
+          contact_email: W.contact.email,
+          note: (W.note || '').trim()
         }).then(function (r) {
           toast('订单 ' + r.no + ' 已创建，' + PAX() + ' 人，¥' + money(r.amount));
           /* 记住这次的联系人，下一单默认带出来 */
@@ -1248,44 +1268,60 @@ VIEWS['youmi:odetail'] = function (m, no) {
         '<span class="vl' + (cls ? ' ' + cls : '') + '">' + v + '</span></div>';
     }
 
-    /* 页签：点一下滚到那一段，滚动时页签跟着高亮。段落顺序＝销售看单的顺序。 */
-    var OD_TABS = [['base', '订单信息'], ['aps', '办签人'], ['fee', '费用'], ['ct', '联系与收货']];
+    /* 订单详情结构 2026-09-16 对齐酒店订单详情：
+       订单信息卡（编号+状态 → 渠道/销售/时间/应收/实收）→ 产品信息 → 办签人 →
+       联系人信息 → 发票报销 → 财务三栏页签（交易信息 / 收退转 / 合同信息）。
+       原「金额、收退转、合同与发票」三段并排，改成酒店那套真正的页签切换。 */
+    function orow(k, v, cls) {
+      return '<div class="ym-odrow"><span class="lb">' + esc(k) + '</span>' +
+        '<span class="vl' + (cls ? ' ' + cls : '') + '">' + v + '</span></div>';
+    }
+    /* 收/退款明细里的键值行：与订单信息卡同一套布局，标签灰、值右对齐 */
+    function pv(k, v) {
+      return '<div class="ym-payrow"><span class="lb">' + esc(k) + '</span>' +
+        '<span class="vl">' + v + '</span></div>';
+    }
 
     var body =
-      /* 状态卡：原来只有一行小胶囊 + 一行灰字，状态不够抢眼、订单基础信息也没地方放
-         （唐美芳 2026-09-02：「订单详情页信息比较多，订单基础信息貌似没怎么展示，
-         状态也不够明显」）。改成整块彩色卡：大号状态 + 金额，下面挂基础信息。 */
-      '<div class="ym-odcard ' + (STG[d.status] || 'off') + '">' +
-      '<div class="r1"><b>' + esc(d.status_text) + '</b>' +
-      '<span class="amt">' + ymMoney(d.amount) + '</span></div>' +
-      '<div class="r2">' +
-      /* 支付状态（唐美芳 2026-09-03，五端同步）。销售端与 UOM / CSP 同一套内部口径。 */
-      '<i class="pst ' + (row.pay_state || 'unpaid') + '">' +
-      esc(PAY_ST_CN[row.pay_state || 'unpaid']) + '</i>' +
-      ((d.status === 'paid' || d.status === 'done')
-        ? '<i>办签 ' + esc(d.work_status || '未完成') + '</i>' : '') +
-      (d.info_state === 'wait'
-        ? '<i class="wn">待录资料' + (d.info_left ? ' · ' + esc(d.info_left) : '') + '</i>' : '') +
-      (row.owe > 0 && d.status !== 'cancelled' && d.status !== 'refunded'
-        ? '<i class="wn">欠款 ' + ymMoney(row.owe) + '</i>' : '') +
+      /* 订单信息卡：编号+状态同一行，下面渠道/销售/时间/应收/实收依次排，与酒店一致。
+         支付状态、待录资料、欠款这些销售要盯的提醒，交给状态色、欠款行和底栏主按钮承担。 */
+      '<div class="h5-sec ym-odinfo">' +
+        '<div class="ym-odno"><span class="lb">' +
+          '<i class="od-fico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+          'stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+          '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>' +
+          '<path d="M14 2v6h6"/></svg></i><em>订单编号</em><b>' + esc(d.no) + '</b>' +
+          '</span><span class="st ' + (STG[d.status] || 'off') + '">' +
+          esc(d.status_text) + '</span></div>' +
+        orow('渠道名称', esc(row.org || '门店')) +
+        orow('销售人员', esc(row.sale_name || '—')) +
+        orow('下单时间', d19(d.created_at)) +
+        orow('应收金额', '<b>' + ymMoney(d.amount) + '</b>') +
+        orow('实收金额', ymMoney((d.recv || 0) + (d.recv_wait || 0))) +
+        (row.owe > 0 && d.status !== 'cancelled' && d.status !== 'refunded'
+          ? orow('欠款', '<b style="color:#d33">' + ymMoney(row.owe) + '</b>') : '') +
+        '<div class="ym-odact"><a class="nt" data-odsale>修改销售</a><a class="gh" data-odlog>订单日志</a></div>' +
       '</div>' +
-      '<div class="r3"><span>' + esc(d.no) + '</span>' +
-      '<span>下单 ' + d19(d.created_at) + '</span></div></div>' +
 
-      /* 页签吸在内容区顶部 */
-      '<div class="ym-odtabs" id="odtabs">' + OD_TABS.map(function (x, i) {
-        return '<a data-odt="' + x[0] + '"' + (i === 0 ? ' class="on"' : '') + '>' +
-          esc(x[1]) + '</a>';
-      }).join('') + '</div>' +
-
-      sec('订单信息',
+      sec('产品信息',
         kv('产品', esc(d.product)) +
         kv('套餐', esc(d.pkg || '—')) +
         kv('目的地', esc(d.country || '') + (d.visa_type ? ' · ' + esc(d.visa_type) : '')) +
         kv('出行日期', d.depart_date ? d10(d.depart_date) : '待定') +
-        kv('人数', d.pax + ' 人') +
-        kv('下单渠道', esc(row.channel_text || '门店代客下单')) +
-        kv('下单时间', d19(d.created_at)), '', 'base') +
+        kv('办签人数', d.pax + ' 人') +
+        /* 政策不单独成卡，跟酒店一样直接并在产品信息下面，红字两行（取消/受理）。
+           发票已并入下方「发票报销」卡，这里不再重复。 */
+        '<div class="ym-odpol">' +
+          '<div class="p"><i>取消与退款</i><s>' +
+          (d.status === 'created'
+            ? '订单支付前可直接取消。'
+            : '订单已支付，取消需提交退款申请，按已产生的官费与服务成本核减后退还余款。') +
+          '签证费为使领馆收取的官方费用，按各国规定不予退还。</s></div>' +
+          '<div class="p"><i>受理与时效</i><s>' +
+          esc(d.submit_city || '—') + '领区受理，本套餐办理时长约 ' +
+          (d.lead_days ? d.lead_days + ' 个工作日' : '—') +
+          '（不含使领馆节假日与行政审查）。</s></div>' +
+        '</div>') +
 
 
       /* 每位办签人下面挂的动作要与 CSP 订单详情一一对应
@@ -1319,28 +1355,10 @@ VIEWS['youmi:odetail'] = function (m, no) {
                 '<a class="gh" data-apmat="' + a.id + '">材料清单</a></div>'
               : '') + '</div>';
         }).join(''), '共 ' + d.applicants.length + ' 人', 'aps') +
-      /* 金额：销售端要看到结算与毛利，客人端永远看不到这两个数 */
-      /* 金额口径（唐美芳 2026-09-02：「订单应收金额怎么都变成 0 了，订单应收=成交价啊」）：
-         「已收」＝客人实际付了多少，含财务还没核对到账的那笔；
-         财务确认与否是我们内部的闸门，不该让销售看成客人欠钱。 */
-      sec('金额',
-        kv('订单金额', '<b>' + ymMoney(d.amount) + '</b>') +
-        /* 「其中 X 待财务确认到账」撤了：那是总部财务的内部环节，
-           门店销售看了只会以为客人的钱有问题（唐美芳 2026-09-03）。
-           销售要知道的是收了多少、还差多少，下面欠款那行已经说了。 */
-        kv('已收', ymMoney((d.recv || 0) + (d.recv_wait || 0))) +
-        (row.owe > 0 && d.status !== 'cancelled' && d.status !== 'refunded'
-          ? kv('欠款', '<b style="color:#d33">' + ymMoney(row.owe) + '</b>') : '') +
-        (row.refunded ? kv('已退', ymMoney(row.refunded)) : '') +
-        kv('结算成本', ymMoney(row.settle_amount || 0)) +
-        kv('本单毛利', '<b style="color:#27AE60">' + ymMoney(row.gross || 0) + '</b>' +
-          (d.amount ? '<em class="od-mut">' +
-            Math.round((row.gross || 0) * 1000 / d.amount) / 10 + '%</em>' : '')) +
-        '<div class="h5-gn">结算价与毛利仅门店销售可见，不对客展示。</div>', '', 'fee') +
 
-      /* 「付款前需录齐」2026-09-02 起不成立了——收款不再被资料卡住。
-         销售端保留时限提示（未付款单超时会自动取消，这是他们要盯的），
-         但话要说准：卡的是自动取消和送签排批，不是收款。 */
+      /* 客人签证资料：订单级资料录入状态。与「办签人」同属资料录入，紧挨着摆，
+         销售不用在一页里上下翻着找（唐美芳 2026-09-16：两处资料都要录，别分开老远）。
+         「付款前需录齐」2026-09-02 起不成立——收款不再被资料卡住，这里只提示时限。 */
       sec('客人签证资料',
         '<div class="h5-row" data-k="ordinfo"><span class="lb">' +
         (d.info_state === 'done' ? '资料已录入' : '待录入签证资料') + '</span>' +
@@ -1351,12 +1369,108 @@ VIEWS['youmi:odetail'] = function (m, no) {
               : '资料齐备后方可编入送签批次')) +
         '</span><span class="ar">›</span></div>') +
 
-      sec('联系人与收货',
-        kv('联系人', esc(d.contact.name || '—') + '　' + esc(d.contact.phone || '')) +
-        kv('邮箱', esc(d.contact.email || '未填写')) +
-        kv('护照寄回', esc(d.recv_addr
-          ? d.recv_addr.contact + '　' + d.recv_addr.region + ' ' + d.recv_addr.detail
-          : '客人还没填')), '', 'ct') +
+      /* 联系人信息：对齐酒店——姓名/手机/邮箱单独一个卡，护照寄回地址随单附在这里。 */
+      sec('联系人信息',
+        kv('姓名', esc(d.contact.name || '—')) +
+        kv('手机号码', esc(d.contact.phone || '—')) +
+        kv('电子邮箱', esc(d.contact.email || '未填写')) +
+        (d.note
+          ? kv('订单备注', '<span style="white-space:pre-wrap">' + esc(d.note) + '</span>')
+          : '') +
+        (d.recv_addr
+          ? kv('护照寄回', esc(d.recv_addr.contact + '　' + d.recv_addr.region + ' ' + d.recv_addr.detail))
+          : '')) +
+
+      /* 发票报销：对齐酒店，单独一个卡，只登记开票抬头。 */
+      sec('发票报销',
+        kv('开票抬头', esc((d.invoice && d.invoice.entity) ? d.invoice.entity : '不提供发票'))) +
+
+      /* 财务三栏页签：交易信息 / 收退转 / 合同信息，点页签切内容（对齐酒店）。 */
+      '<div class="ym-odfin">' +
+        '<div class="ym-odseg">' +
+          '<a class="on" data-fin="tx">交易信息</a>' +
+          '<a data-fin="fund">收退转</a>' +
+          '<a data-fin="contract">合同信息</a>' +
+        '</div>' +
+
+        /* 交易信息：交易明细双列（报名项 | 销售金额 | 结算金额） */
+        '<div class="ym-odfx" data-fx="tx">' +
+          '<div class="ym-txh">交易明细</div>' +
+          '<div class="ym-txhd"><span>报名项</span><i>销售金额</i><i>结算金额</i></div>' +
+          '<div class="ym-txrow">' +
+            '<span class="nm">报名 · ' + esc(d.product) + '</span>' +
+            '<i>' + ymMoney(d.amount) + '</i>' +
+            '<i>' + ymMoney(row.settle_amount || 0) + '</i>' +
+          '</div>' +
+          '<div class="ym-txsum">' +
+            '<div class="h5-row" style="cursor:default"><span class="lb">已收</span>' +
+              '<span class="vl">' + ymMoney((d.recv || 0) + (d.recv_wait || 0)) + '</span></div>' +
+            (row.owe > 0 && d.status !== 'cancelled' && d.status !== 'refunded'
+              ? '<div class="h5-row" style="cursor:default"><span class="lb">欠款</span>' +
+                '<span class="vl"><b style="color:#d33">' + ymMoney(row.owe) + '</b></span></div>' : '') +
+            (row.refunded
+              ? '<div class="h5-row" style="cursor:default"><span class="lb">已退</span>' +
+                '<span class="vl">' + ymMoney(row.refunded) + '</span></div>' : '') +
+            '<div class="h5-row" style="cursor:default"><span class="lb">本单毛利</span>' +
+              '<span class="vl"><b style="color:#27AE60">' + ymMoney(row.gross || 0) + '</b>' +
+              (d.amount ? '<em class="od-mut">' +
+                Math.round((row.gross || 0) * 1000 / d.amount) / 10 + '%</em>' : '') + '</span></div>' +
+          '</div>' +
+          '<div class="h5-gn">结算价与毛利仅门店销售可见，不对客展示。</div>' +
+        '</div>' +
+
+        /* 收退转：二级页签 收款信息 / 退款信息（签证无转款，只列这两类） */
+        '<div class="ym-odfx" data-fx="fund" style="display:none">' +
+          '<div class="ym-subseg">' +
+            '<a class="on" data-sub="recv">收款信息</a>' +
+            '<a data-sub="refund">退款信息</a>' +
+          '</div>' +
+          '<div class="ym-subfx" data-subx="recv">' +
+            ((d.pays && d.pays.length)
+              ? d.pays.map(function (p) {
+                  var A = { wait: ['待审核', 'wait'], pass: ['已审核', 'ok'], error: ['有误', 'bad'] };
+                  var a = A[p.audit_status] || A.wait;
+                  return '<div class="ym-pay">' +
+                    pv('收款单号', esc(p.no || '—')) +
+                    pv('发起时间', d19(p.created_at)) +
+                    pv('收款类别', esc(p.cate || '—')) +
+                    pv('收款方式', esc(p.method || '—')) +
+                    pv('支付金额', '<b style="color:#27AE60">+' + ymMoney(p.amount) + '</b>') +
+                    pv('业务审核状态', '<span class="st-dot ' + a[1] + '">' + a[0] + '</span>') +
+                    pv('财务审核状态', p.confirmed ? '<span class="st-dot ok">已到账</span>'
+                                                 : '<span class="st-dot wait">待到账</span>') +
+                  '</div>';
+                }).join('')
+              : '<div class="h5-empty"><b>还没有收款流水</b>' +
+                '<s>客户付款后，此处展示本单收款明细</s></div>') +
+          '</div>' +
+          '<div class="ym-subfx" data-subx="refund" style="display:none">' +
+            ((d.refunds && d.refunds.length)
+              ? d.refunds.map(function (r) {
+                  return '<div class="ym-pay">' +
+                    pv('退款单号', esc(r.no || '—')) +
+                    pv('发起时间', d19(r.created_at)) +
+                    pv('退款原因', esc(r.reason || '—')) +
+                    pv('退款金额', '<b style="color:#d33">-' + ymMoney(r.amount) + '</b>') +
+                    pv('审批状态', esc(r.status_text || '—')) +
+                  '</div>';
+                }).join('')
+              : '<div class="h5-empty"><b>还没有退款流水</b>' +
+                '<s>发起退款后，此处展示本单退款进度</s></div>') +
+          '</div>' +
+          '<div class="h5-gn">收款与退款流水，与财务台账同一口径。</div>' +
+        '</div>' +
+
+        '<div class="ym-odfx" data-fx="contract" style="display:none">' +
+          kv('合同状态', esc(row.contract_status || '未签约')) +
+          kv('合同编号', '—') +
+          kv('签约主体', esc(row.org || '直客')) +
+          kv('结算主体', esc(d.settle_entity || '—')) +
+          kv('签约日期', '—') +
+          '<div class="h5-gn">合同在众信合同系统签署归档，本系统只登记状态与主体；' +
+          '开票在众信财务系统完成，可联系服务销售人员申请。</div>' +
+        '</div>' +
+      '</div>' +
 
       (d.status !== 'created' && d.status !== 'cancelled'
         ? sec('其他操作',
@@ -1395,47 +1509,47 @@ VIEWS['youmi:odetail'] = function (m, no) {
       ymPage('订单详情', body, foot, '这一步在做什么',
         '每位办签人各走各的节点，点进去看这个人的材料明细。' +
         '底部按钮随本单当前最紧要的事项变化——待付款时先录资料，有补料时先提醒客人。',
-        true, 'orders');
+        true, 'orders', '', 'ym odetail');
 
     $('[data-back]', m).onclick = function () { go('orders'); };
 
-    /* 页签 ↔ 段落：点页签平滑滚到那一段，反过来滚动时页签跟着高亮。
-       滚动容器是手机壳的 .ph-body，不是 window——挂错了两边都不动。 */
-    (function () {
-      var tabs = $('#odtabs', m);
-      if (!tabs) return;
-      var scroller = m.querySelector('.ph-body') || m;
-      var secs = OD_TABS.map(function (x) {
-        return { k: x[0], el: m.querySelector('#odsec-' + x[0]) };
-      }).filter(function (x) { return x.el; });
-      function mark(k) {
-        $$('[data-odt]', tabs).forEach(function (a) {
-          a.classList.toggle('on', a.dataset.odt === k);
-        });
-      }
-      $$('[data-odt]', tabs).forEach(function (a) {
-        a.onclick = function () {
-          var t = secs.filter(function (x) { return x.k === a.dataset.odt; })[0];
-          if (!t) return;
-          mark(a.dataset.odt);
-          scroller.scrollTo({ top: Math.max(0, t.el.offsetTop - tabs.offsetHeight - 8),
-                              behavior: 'smooth' });
-        };
-      });
-      scroller.addEventListener('scroll', function () {
-        /* 滚到底部时最后一段顶不到页签下面（下面没内容可滚了），
-           按 offsetTop 判定会一直停在倒数第二段——点最后一个页签会被自己弹回去。
-           所以先判到底没到底。 */
-        if (scroller.scrollTop + scroller.clientHeight >= scroller.scrollHeight - 4) {
-          mark(secs[secs.length - 1].k);
+    /* 改派销售：对齐酒店订单详情「修改销售」按钮（2026-09-16）。
+       拉同门店候选，弹下拉改派；保存成功重拉详情，销售人员与日志一起更新。 */
+    $('[data-odsale]', m).onclick = function () {
+      api('/my/order/sale', { act: 'list' }).then(function (r) {
+        var list = r.list || [];
+        if (list.length <= 1) {
+          toast('本门店暂无其他销售人员可改派', true);
           return;
         }
-        var y = scroller.scrollTop + tabs.offsetHeight + 20;
-        var cur = secs[0];
-        secs.forEach(function (x) { if (x.el.offsetTop <= y) cur = x; });
-        mark(cur.k);
-      }, { passive: true });
-    })();
+        ask('修改销售', [
+          { k: 'sale_id', label: '改派给', type: 'select', value: '',
+            options: list.map(function (x) { return { v: x.id, t: x.name }; }),
+            hint: '将本订单改派给同门店的另一位销售人员' }
+        ], '确认改派', function (vals) {
+          if (!vals.sale_id) { toast('请选择销售人员', true); return Promise.reject(); }
+          return api('/my/order/sale', { no: d.no, sale_id: vals.sale_id }).then(function (res) {
+            toast('已改派给 ' + res.sale_name);
+            return VIEWS['youmi:odetail'](m, d.no);
+          });
+        });
+      }).catch(function () { });
+    };
+
+    /* 订单日志：与 CSP 订单详情同一套弹窗口径（2026-09-16 对齐酒店「订单日志」按钮） */
+    $('[data-odlog]', m).onclick = function () {
+      var rows_ = d.logs || [];
+      confirmBox('订单日志 · ' + d.no,
+        (rows_.length
+          ? '<div class="od-log">' + rows_.map(function (e) {
+              return '<div class="od-le"><i>' + d19(e.at) + '</i>' +
+                '<b>' + esc(e.actor || '系统') + '</b>' +
+                '<s>' + esc(e.action) + '</s>' +
+                (e.detail ? '<em>' + esc(e.detail) + '</em>' : '') + '</div>';
+            }).join('') + '</div>'
+          : '<div class="empty">暂无日志</div>'), '关闭')
+        .catch(function () { });
+    };
 
     $$('[data-ap]', m).forEach(function (r) {
       r.onclick = function () { go('mats', r.dataset.ap); };
@@ -1485,6 +1599,28 @@ VIEWS['youmi:odetail'] = function (m, no) {
           .map(function (x) { return { id: x.id, name: x.name }; }) });
       }
     };
+    /* 财务主 Tab（交易信息/收退转/合同信息）与收退转二级 Tab（收款/退款）切换，
+       对齐酒店订单详情的页签交互。 */
+    $$('.ym-odseg a[data-fin]', m).forEach(function (a) {
+      a.onclick = function () {
+        $$('.ym-odseg a[data-fin]', m).forEach(function (x) {
+          x.classList.toggle('on', x === a);
+        });
+        $$('.ym-odfx', m).forEach(function (x) {
+          x.style.display = x.dataset.fx === a.dataset.fin ? '' : 'none';
+        });
+      };
+    });
+    $$('.ym-subseg a[data-sub]', m).forEach(function (a) {
+      a.onclick = function () {
+        $$('.ym-subseg a[data-sub]', m).forEach(function (x) {
+          x.classList.toggle('on', x === a);
+        });
+        $$('.ym-subfx', m).forEach(function (x) {
+          x.style.display = x.dataset.subx === a.dataset.sub ? '' : 'none';
+        });
+      };
+    });
     ymBind(m, 'orders');
   });
 };

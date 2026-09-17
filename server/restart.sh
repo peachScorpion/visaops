@@ -33,7 +33,7 @@ if [ -n "$OLD" ]; then
   [ -n "$(port_pid)" ] && kill -9 "$OLD" 2>/dev/null && sleep 0.5
 fi
 
-setsid nohup python3 "$APP" > /tmp/visaops.log 2>&1 < /dev/null &
+nohup python3 "$APP" > /tmp/visaops.log 2>&1 < /dev/null &
 for _ in $(seq 1 25); do [ -n "$(port_pid)" ] && break; sleep 0.2; done
 
 NEW=$(port_pid)

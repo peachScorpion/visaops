@@ -1025,16 +1025,8 @@ function ubkProdList(m) {
           var lead = ubkPkgMin(p, function (k) { return k.lead_days; });
           return '<td style="min-width:230px">' + zn([
             ['产品', '<span class="lnk" data-go="' + p.id + '">' + flag(p.country) + ' ' + esc(p.name) + '</span>', 'top'],
-            /* 原来露的是数据库自增主键，供应商跟平台对账、电话里报编号都用不了。
-               改成业务编码 Q+6 位，点一下可复制（唐美芳 2026-08-31）。 */
             ['产品编码', copyCode(p.code || ('Q' + String(100000 + p.id))), 'mut'],
-            /* 供应商自有编码是选填项。原来「填了才占一行」，结果同一张表里有的产品
-               三行、有的两行，看着像数据缺失（唐美芳 2026-09-08：
-               「产品列表怎么有的有自有编码，有的没有」）。
-               改成固定占位，没填的写「未填写」并说明它是选填的对码字段。 */
-            ['自有编码', p.vendor_code
-              ? copyCode(p.vendor_code)
-              : '<span class="hint">未填写（选填，用于与贵司自有系统对码）</span>', 'mut']
+            ['供应商产品编码', p.vendor_code ? copyCode(p.vendor_code) : '—', 'mut'],
           ]) + '</td>' +
             '<td style="min-width:150px">' + zn([
               ['目的地', esc(p.country), 'top'],
@@ -1139,7 +1131,7 @@ function ubkProdDraw(m, p, c, addr, fd) {
 
   /* 锚点只列当前页签里真实存在的区块，点进去落空最伤信任 */
   var ANCH = {
-    info: [['rv', '审核状态'], ['base', '基础信息'], ['attr', '签证属性'],
+    info: [['rv', '上架状态'], ['base', '基础信息'], ['attr', '签证属性'],
     ['req', '办理要求'], ['acc', '受理与收料'], ['svc', '服务保障']],
     mat: [['fv', '清单版本'], ['items', '材料明细']],
     pkg: [['pks', '套餐与价格'], ['rule', '售价与结算口径'], ['notice', '预订须知']],
@@ -1202,23 +1194,11 @@ function ubkProdDraw(m, p, c, addr, fd) {
   }
 
   function infoHtml() {
-    return upSec('rv', '审核状态', upKv([
+    return upSec('rv', '上架状态', upKv([
       ['配置完整度', pcDots(p), 'top'],
       ['上架申请状态', p.status === 'published' ? '已提交上架' : '未提交（草稿）'],
-      ['申请上架范围', ubkScope(p)],
-      ['B 端上架审核', rvTag(p.review_b) +
-        (p.on_b ? ' <span class="tag ok">已展示</span>' : '')],
-      ['C 端上架审核', rvTag(p.review_c) +
-        (p.on_c ? ' <span class="tag ok">已展示</span>' : '')],
-      ['累计成交', p.ord_cnt ? p.ord_cnt + ' 笔订单' : '暂无']
-    ]) +
-      /* 详情页原来只写「请回列表操作」——既然编辑已经是独立页面，直接给入口，
-         少一次来回（2026-08-31） */
-      '<div class="pad-s">' + ubkRowOps(p, true) +
-      '<button class="btn sm" data-ed="' + p.id + '">编辑产品信息</button> ' +
-      '<button class="btn sm" data-pm="' + p.id + '">套餐与报价</button>' +
-      '<div class="hint" style="margin-top:8px">上架、撤回、重新送审等操作亦可返回' +
-      '「签证产品管理」列表，在该产品行上执行。</div></div>') +
+      ['申请上架范围', ubkScope(p)]
+    ]) + '<div class="hint pad-s">B / C 端的审核结论、审核人、审核时间与驳回原因，请到「审核与日志」页签查看。</div>') +
       upSec('base', '基础信息', upKv([
         ['产品名称', esc(p.name)],
         ['名称后缀', esc(p.name_suffix || '')],
@@ -1377,7 +1357,12 @@ function ubkProdDraw(m, p, c, addr, fd) {
       (p.on_b ? '在售' : '未上架') + '</span>' : '') +
     (p.to_c ? '<span class="tag ' + (p.on_c ? 'ok' : 'plain') + '">C 端' +
       (p.on_c ? '在售' : '未上架') + '</span>' : '') +
-    '</div></div>' +
+    '</div>' +
+    /* 操作按钮从「审核状态」区块上移到标题条右侧：它们是整条产品的动作，
+       不该夹在审核表与基础信息之间，容易被当成审核内容的附属（2026-09-16）。 */
+    '<div class="up-ops">' + ubkRowOps(p, true) +
+      '<button class="btn sm" data-ed="' + p.id + '">编辑产品信息</button>' +
+      '<button class="btn sm" data-pm="' + p.id + '">套餐与报价</button></div></div>' +
     '<div class="up-meta">' + [
       ['产品编码', copyCode(p.code || ('Q' + String(100000 + p.id)))],
       ['供应商', esc((S.user && S.user.org) || '本公司')],
@@ -2066,10 +2051,10 @@ function bindChain(m) {
 }
 
 /* ================= UOM · 平台配置：材料样例库 ================= */
-/* 适用范围的展示口径（列表列、下拉项文案共用一套，避免两处写出不同说法）。
-   唐美芳 2026-09-07 加的字段：空国家＝各国通用，有国家无类型＝该国全部签证类型。 */
-function smpScope(t) {
-  var cs = t.countries || [], vs = t.visa_types || [];
+/* 适用国家列的口径：空国家＝各国通用。
+   唐美芳 2026-09-07 加的字段，2026-09-15 把「适用范围」拆成国家 / 签证类型两列。 */
+function smpCountry(t) {
+  var cs = t.countries || [];
   if (!cs.length) return '<span class="tag plain">通用</span>';
   /* 国家可能勾很多个（申根一片），全列会把列撑开：列出前 3 个，其余折成「等 N 个」，
      完整列表挂在 title 上，鼠标悬停可见。 */
@@ -2080,8 +2065,14 @@ function smpScope(t) {
     head += ' <span class="tag plain" title="' + esc(cs.join('、')) + '">等 ' +
       cs.length + ' 个</span>';
   }
-  return head + (vs.length
-    ? '<div class="ts">' + esc(vs.join('、')) + '</div>' : '');
+  return head;
+}
+
+/* 适用签证类型列：空＝不限（所选国家的全部类型）。 */
+function smpVisa(t) {
+  var vs = t.visa_types || [];
+  if (!vs.length) return '<span class="hint">不限</span>';
+  return '<span class="tag info">' + esc(vs.join('、')) + '</span>';
 }
 
 /* 挑出适用于某个清单版本（f: {country, visa_type}）的样例。
@@ -2128,6 +2119,14 @@ VIEWS['ops:samples'] = function (m) {
            通用件用 __all__ 这个哨兵值单列，否则按国家筛会把它们全过滤掉。 */
         get: function (t) { return (t.countries || []).length ? t.countries : ['__all__']; }
       },
+      /* 签证类型与国家同一个区分口径：不勾＝所选国家全部类型，通用件用哨兵值单列 */
+      {
+        k: 'visa_type', t: '适用签证类型', type: 'sel', multi: true,
+        opts: [['__all_vt__', '通用（不限签证类型）']].concat((j.visa_types || []).map(function (v) {
+          return [v, v];
+        })),
+        get: function (t) { return (t.visa_types || []).length ? t.visa_types : ['__all_vt__']; }
+      },
       {
         k: 'has', t: '样例附件', type: 'sel', opts: [['y', '已上传'], ['n', '未上传']],
         get: function (t) { return (t.files || []).length ? 'y' : 'n'; }
@@ -2150,10 +2149,10 @@ VIEWS['ops:samples'] = function (m) {
       '<button class="btn p" data-new>新建</button>') +
       q.html +
       '<div class="card"><div class="pad">' + table(
-        so.cols(['编码', '模版名称', '对应资料名称', '适用范围', '样例附件', '引用清单数']
+        so.cols(['编码', '模版名称', '对应资料名称', '适用国家', '适用签证类型', '样例附件', '引用清单数']
           .concat(AUD_COLS, ['操作'])), pg.rows, function (t) {
           return '<td class="mono">' + esc(t.code || '') + '</td><td><b>' + esc(t.name) + '</b></td><td>' +
-            esc(t.mat_name) + '</td><td class="nw">' + smpScope(t) + '</td><td>' + ((t.files || []).map(function (f) {
+            esc(t.mat_name) + '</td><td class="nw">' + smpCountry(t) + '</td><td class="nw">' + smpVisa(t) + '</td><td>' + ((t.files || []).map(function (f) {
               return f.url ? '<a class="tag plain" href="' + esc(f.url) + '" target="_blank">' +
                 esc(f.name) + '</a>' : '<span class="tag plain">' + esc(f.name || f) + '</span>';
             }).join(' ') || '<span class="hint">未上传</span>') +
@@ -2643,7 +2642,7 @@ VIEWS['ops:prod'] = function (m, id) {
 
     /* 锚点只列当前页签里真实存在的区块，点进去落空最伤信任 */
     var ANCH = {
-      info: [['rv', '审核状态'], ['base', '基础信息'], ['attr', '签证属性'],
+      info: [['rv', '上架状态'], ['base', '基础信息'], ['attr', '签证属性'],
       ['req', '办理要求'], ['acc', '受理与收料'], ['svc', '服务保障']],
       mat: [['fv', '清单版本'], ['items', '材料明细']],
       pkg: [['pks', '套餐与价格'], ['notice', '预订须知']],
@@ -2672,18 +2671,12 @@ VIEWS['ops:prod'] = function (m, id) {
     }
 
     function infoHtml() {
-      return upSec('rv', '审核状态', upKv([
+      return upSec('rv', '上架状态', upKv([
         ['上架申请状态', d.status === 'published' ? '已提交上架' : '未提交（草稿）'],
-        ['送审时间', d16(d.submit_at)],
-        ['累计订单', d.ord_count ? d.ord_count + ' 笔' : '暂无'],
-        ['B 端上架审核', rvTag(d.review_b) +
-          (d.on_b ? ' <span class="tag ok">已展示</span>' : '')],
-        ['C 端上架审核', rvTag(d.review_c) +
-          (d.on_c ? ' <span class="tag ok">已展示</span>' : '')],
         ['最低毛利', mgLo == null ? '<span class="tag bad">未配套餐</span>' :
           '<b style="color:' + (mgLo < 0 ? 'var(--bad)' : 'var(--ok)') + '">¥' +
           money(mgLo) + '</b>' + (mgLo < 0 ? '（报价倒挂，不能上架）' : '')]
-      ])) +
+      ]) + '<div class="hint pad-s">B / C 端的审核结论、审核人、审核时间与驳回原因，请到「审核与日志」页签查看。</div>') +
         upSec('base', '基础信息', upKv([
           ['产品名称', esc(d.name)],
           /* 两个编号不是一回事：Q 码是这家供应商这条产品的业务编码（对账、报单号用），
@@ -2693,6 +2686,10 @@ VIEWS['ops:prod'] = function (m, id) {
             '<span class="hint">未填 —— 供应商自己系统里的编码，用于双方对码</span>'],
           ['平台产品编号', '<span class="mono">' + esc(d.code) + '</span>'],
           ['供应商', esc(d.supplier_full)],
+          ['供应商计调', esc(d.sup_owner_name || '')],
+          ['产品管理人员', (d.manager
+            ? '<a class="lnk" data-mgr>' + esc(d.manager) + '</a>'
+            : '<span class="hint">未指派</span>') + ' <a class="lnk" data-mgr>设置</a>'],
           ['产品特色', esc(d.feature || '')],
           ['创建人', esc(d.created_by_name || '')],
           ['最近修改', d16(d.updated_at) + (d.updated_by_name ? ' · ' + esc(d.updated_by_name) : '')]
@@ -2828,7 +2825,9 @@ VIEWS['ops:prod'] = function (m, id) {
       '<div class="up-meta">' + [
         ['平台产品编号', '<span class="mono">' + esc(d.code) + '</span>'],
         ['供应商', esc(d.supplier_full)],
-        ['产品管理人员', esc(d.updated_by_name || d.created_by_name || '—')],
+        ['产品管理人员', d.manager
+          ? '<a class="lnk" data-mgr>' + esc(d.manager) + '</a>'
+          : '<span class="hint">未指派</span> <a class="lnk" data-mgr>设置</a>'],
         ['创建时间', d16(d.created_at)],
         ['送审时间', d16(d.submit_at)],
         ['累计订单', d.ord_count ? d.ord_count + ' 笔' : '暂无']
@@ -2862,6 +2861,26 @@ VIEWS['ops:prod'] = function (m, id) {
     });
     $('[data-ped2]', m) && ($('[data-ped2]', m).onclick = function () {
       S.cache.upBack = back; go('edit', id);
+    });
+    /* 产品管理人员指派（2026-09-15）：候选池是众信内部员工，空＝清除指派。
+       只写一条操作日志，不改审核结论、不触发下架——这是内部台账不是销售状态。 */
+    $$('[data-mgr]', m).forEach(function (b) {
+      b.onclick = function () {
+        api('/ops/staff').then(function (st) {
+          var opts = [{ v: '', t: '未指派（清除）' }].concat((st.list || []).map(function (u) {
+            return { v: u.name, t: u.name };
+          }));
+          return ask('产品管理人员 · ' + d.name, [{
+            k: 'manager', label: '产品管理人员', type: 'select',
+            value: d.manager || '', options: opts,
+            hint: '指派众信内部的责任人，出问题按这条产品就能找到对应同事。' +
+              '仅记内部台账，不影响对外展示与销售状态。'
+          }], '保存', function (v) {
+            return api('/ops/product/manager', { id: id, manager: v.manager });
+          });
+        }).then(function () { toast('已更新产品管理人员'); reload(); })
+          .catch(function () { });
+      };
     });
     /* 审核通过 / 驳回：与审核台上原来那两颗按钮走同一个接口，只是挪到了看完产品之后 */
     $('[data-apt]', m) && ($('[data-apt]', m).onclick = function () {
@@ -2927,7 +2946,7 @@ function copyMiniLink(p) {
    · C 端产品审核（tk='c'）＝内容运营的台子，末两列＝C 端审核状态 + C 端上架状态
 */
 var OPS_PROD_BASE = ['产品编号', '产品名称', '签证属性', '供应商', '供应商计调',
-  '套餐数量', '结算价', '零售价', '利润率'];
+  '产品管理人员', '套餐数量', '结算价', '零售价', '利润率', '创建信息', '最近操作'];
 
 function opsProdCols(tk) {
   return OPS_PROD_BASE.concat(
@@ -2959,8 +2978,7 @@ function twoLine2(a, b, la, lb, unit) {
 function opsProdCells(p, tk) {
   var RK = 'review_' + tk, TO = 'to_' + tk, ON = 'on_' + tk;
   return '<td class="nw"><b class="mono">' + copyCode(p.code || '—') + '</b>' +
-    '<div class="hint">供应商编码 ' +
-    (p.vendor_code ? copyCode(p.vendor_code) : '未填写') + '</div></td>' +
+    (p.vendor_code ? '<div class="hint">供应商编码 ' + copyCode(p.vendor_code) + '</div>' : '') + '</td>' +
     '<td style="min-width:210px"><b>' + esc(p.name) + '</b>' +
     (p.feature ? '<div class="hint">' + esc(p.feature) + '</div>' : '') + '</td>' +
     '<td style="min-width:180px">' + zn([
@@ -2975,11 +2993,21 @@ function opsProdCells(p, tk) {
     '<td class="nw">' + esc(p.supplier || '—') + '</td>' +
     '<td class="nw">' + (p.sup_owner_name
       ? esc(p.sup_owner_name) : '<span class="hint">—</span>') + '</td>' +
+    '<td class="nw">' + (p.manager
+      ? esc(p.manager) : '<span class="hint">未指派</span>') + '</td>' +
     '<td class="num nw"><b>' + (p.pkg_count || 0) + '</b>' +
     '<div class="hint">可售 ' + (p.pkg_on || 0) + '</div></td>' +
     '<td class="num nw">' + twoLine(p.settle_min, p.settle_max) + '</td>' +
     '<td class="num nw">' + twoLine(p.retail_min, p.retail_max) + '</td>' +
     '<td class="num nw">' + twoLine2(p.margin_max, p.margin_min, '最大', '最小', '%') + '</td>' +
+    /* 创建信息：创建人 + 创建时间，放操作列左侧（唐美芳 2026-09-15）。 */
+    '<td class="nw"><b>' + esc(p.created_by_name || '—') + '</b>' +
+      (p.created_at ? '<div class="hint">' + d10(p.created_at) + '</div>' : '') + '</td>' +
+    /* 最近操作：操作人 + 操作时间，放操作列左侧。创建后没改过则留空。 */
+    '<td class="nw">' + (p.updated_by_name && p.updated_by_name !== p.created_by_name
+      ? '<b>' + esc(p.updated_by_name) + '</b>' +
+        (p.updated_at ? '<div class="hint">' + d10(p.updated_at) + '</div>' : '')
+      : '<span class="hint">—</span>') + '</td>' +
     /* 本端审核状态：没申请这一端就写「未申请上架」，别让人以为是漏审。
        ⚠️ 这一格**不能用 nw**：驳回原因是整句话，nowrap 会把它铺成一行，
        实测把这一列撑到 557px（其余列 80–210px），看上去就成了「审核状态和销售状态
@@ -2993,28 +3021,56 @@ function opsProdCells(p, tk) {
             esc(p[RK + '_note']) + '">' + esc(p[RK + '_note']) + '</div>' : '')
       : '<span class="hint">未申请上架</span>') + '</td>' +
     (tk === 'c'
-      /* C 端台子：这一列回答「客户端现在能不能买到」 */
-      ? '<td class="nw">' + (p[ON]
-          ? '<span class="tag ok">已上架</span>'
-          : p.off_sale ? '<span class="tag warn">已停售</span>'
-            : p[RK] === 'approved' ? '<span class="tag warn">已过审未上架</span>'
-              : '<span class="tag plain">未上架</span>') + '</td>'
-      /* B 端台子：销售状态做成开关，关掉＝平台强制停售（不动审核结论），
+      /* C 端台子：这一列是「客户端现在能不能买到」的开关（2026-09-11 加）。
+         关掉只下架客户小程序，不影响门店 / 有米（B 端）的展示。 */
+      ? '<td class="nw">' +
+        '<a class="sw' + (p.off_c ? '' : ' on') + '" data-sale="' + p.id + '" data-track="c"></a>' +
+        '<div class="hint">' + (p.off_c ? '已下架'
+          : p[ON] ? '已上架'
+            : p[RK] === 'approved' ? '已过审未上架' : '未上架') + '</div></td>'
+      /* B 端台子：销售状态做成开关，关掉＝平台 B 端强制停售（不动审核结论，
+         只影响门店 / 有米，不碰客户小程序）——2026-09-11 从全局 off_sale 拆成 off_b。
          后面再跟一格**只读**的 C 端上架状态——只告知，不给操作。 */
       : '<td class="nw">' +
-        '<a class="sw' + (p.off_sale ? '' : ' on') + '" data-sale="' + p.id + '"></a>' +
-        '<div class="hint">' + (p.off_sale ? '已停售'
+        '<a class="sw' + (p.off_b ? '' : ' on') + '" data-sale="' + p.id + '" data-track="b"></a>' +
+        '<div class="hint">' + (p.off_b ? '已停售'
           : p[ON] ? '在售'
             : p.status === 'published' ? '待上架' : '草稿') + '</div></td>' +
         '<td class="nw">' + (p.to_c
           ? (p.on_c ? '<span class="tag ok">已上架</span>'
-            : p.off_sale ? '<span class="tag warn">已停售</span>'
+            : p.off_c ? '<span class="tag warn">已下架</span>'
               : p.review_c === 'approved' ? '<span class="tag warn">已过审未上架</span>'
                 : p.review_c === 'pending' ? '<span class="tag info">C 端待审核</span>'
                   : p.review_c === 'rejected' ? '<span class="tag bad">C 端已驳回</span>'
                     : '<span class="tag plain">未上架</span>')
           : '<span class="hint">未申请 C 端</span>') +
         '<div class="hint">C 端由内容运营处理</div></td>');
+}
+
+/* 分端启停售开关的绑定（2026-09-11）：B 端与 C 端列表都用，靠 data-track 区分，
+   调 /ops/product/onsale 时带上 track，只停对应那一端，两端互不影响。 */
+function opsBindSale(m, list) {
+  $$('[data-sale]', m).forEach(function (a2) {
+    a2.onclick = function () {
+      var p = (list || []).filter(function (x) { return x.id === +a2.dataset.sale; })[0] || {};
+      var track = a2.dataset.track || 'b';
+      var offKey = 'off_' + track;
+      var tn = track === 'c' ? 'C 端（客户小程序）' : 'B 端（门店 / 有米）';
+      var off = !p[offKey];   /* 当前在售 → 点一下变下架 */
+      confirmBox(off ? '下架' : '上架',
+        off
+          ? '下架后<b>' + tn + '立即不再展示</b>本产品，已下单的订单不受影响。<br><b>' +
+            (track === 'c' ? '不影响门店 / 有米小程序的展示。' : '不影响客户小程序的展示。') +
+            '</b><br>审核结论保留，重新上架不需要再走一遍审核。'
+          : '上架后按' + tn + '的<b>审核结论</b>恢复展示：审核通过的才会重新出现。',
+        off ? '确认下架' : '确认上架')
+        .then(function () {
+          return api('/ops/product/onsale', { id: p.id, track: track, off: off ? 1 : 0 });
+        })
+        .then(function (r) { toast(r.msg || '已更新'); reload(); })
+        .catch(function () { });
+    };
+  });
 }
 
 function opsProdList(m, tk, T, RK, OK) {
@@ -3032,27 +3088,30 @@ function opsProdList(m, tk, T, RK, OK) {
       { k: 'country', t: '目的地国家', type: 'sel', opts: uniq('country') },
       { k: 'visa_cat', t: '签证类型', type: 'sel', opts: VISA_CATS.map(function (v) { return [v, v]; }) },
       { k: 'submit_city', t: '送签地', type: 'sel', opts: uniq('submit_city') },
+      /* C 端筛选条件补齐（2026-09-15）：与 B 端对齐，但销售状态换成 C 端自己的。 */
+      { k: 'sup_owner', t: '供应商计调', type: 'sel', opts: uniq('sup_owner_name') },
+      { k: 'manager', t: '产品管理人员', type: 'sel', opts: uniq('manager') },
       {
-        /* 采购真正要挑出来看的两类问题件：报价倒挂、材料清单没绑。
-           它们不是审核状态（一个待审核的产品也可能倒挂），所以是筛选条件而不是页签。 */
-        k: 'risk', t: '问题件', type: 'sel',
-        opts: [['gross', '报价倒挂'], ['nover', '材料清单未绑'], ['ok', '无问题']],
+        k: 'c_sale', t: 'C 端上架状态', type: 'sel',
+        opts: [['on', '已上架'], ['off', '已下架'], ['none', '未上架']],
         get: function (p) {
-          if (p.gross_min < 0) return 'gross';
-          if (!p.fullver) return 'nover';
-          return 'ok';
+          if (p.on_c) return 'on';
+          if (p.off_c) return 'off';
+          return 'none';
         }
       }
     ]);
     var hit = q.filter(j.list);
 
-    /* 页签按唐美芳 2026-09-09 定的三个：待审核 / 已上架 / 已下架。
-       这张表**只讲 C 端**——B 端的审核结论与销售状态都不在这里露面。 */
+    /* 页签按审核状态分：全部 / 待审核 / 审核通过 / 审核驳回，与 B 端一致。
+       在售、停售是销售状态、不是审核状态，挪到上面的「销售状态」筛选里（2026-09-15）。
+       这张表**只讲这一端**——另一端的审核结论与销售状态都不在这里露面。 */
     var t = subTabs(T.key, [
+      { k: 'all', t: '全部', fn: function () { return true; } },
       { k: 'pending', t: '待审核', fn: function (p) { return p[RK] === 'pending'; } },
-      { k: 'on', t: '已上架', fn: function (p) { return p['on_' + tk]; } },
-      { k: 'off', t: '已下架', fn: function (p) { return !p['on_' + tk]; } }
-    ], hit, 'pending');                     /* 默认停在待审核 */
+      { k: 'pass', t: '审核通过', fn: function (p) { return p[RK] === 'approved'; } },
+      { k: 'reject', t: '审核驳回', fn: function (p) { return p[RK] === 'rejected'; } }
+    ], hit, 'all');                     /* 默认停在全部 */
     /* 这张表一格里是一组信息，所以只给能比大小的两组挂排序：
        「套餐与报价」按最低毛利排（倒挂的先冒出来），「审核状态」按送审时间排（先送先审）。 */
     var so = sorter(T.key, [
@@ -3076,21 +3135,27 @@ function opsProdList(m, tk, T, RK, OK) {
       T.ch + '里</b>；不合格的写明原因驳回，由供应商修改后重新提交。' +
       '<b>' + T.t + '与' + TRK[OK].t + '互不影响</b>——这里驳回不会把另一端已经在售的产品打下来。') +
       q.html +
-      '<div class="card">' + t.html + '<div class="pad">' + table(
+      '<div class="card">' + t.html + '<div class="pad scrollx">' + table(
         /* 与「签证产品管理」共用同一套列（2026-09-09 唐美芳：按截图结构来）。
            原来这里是六个信息块（产品信息 / 签证属性 / 办理要求 …），字段虽全但
            跟产品管理那张表长得不一样，同一条产品在两个页面对不上号。 */
         so.cols(opsProdCols(tk)),
         pg.rows, function (p) {
-          return opsProdCells(p, tk);
-        }, '没有符合条件的产品', function (p) {
-          /* C 端审核台：审核产品 + 复制小程序链接。审核动作在专门的审核页里做——
-             列表上直接点通过等于没看产品就签字。 */
-          return '<div class="btns">' +
-            '<button class="btn sm p" data-rv2="' + p.id + '">审核产品</button>' +
+          /* C 端审核台操作按钮按审核状态区分（2026-09-15 唐美芳）：
+             · pending（待审核）：审核产品、查看详情、编辑产品、复制小程序链接
+             · approved（审核通过）/ rejected（审核驳回）：查看详情、编辑产品、复制小程序链接
+             编辑产品与审核产品共用详情页，底部按钮不同：
+             · 审核模式：审核通过、审核驳回
+             · 编辑模式：保存 */
+          var rv = p[RK] === 'pending';
+          return opsProdCells(p, tk) +
+            '<td class="nw"><div class="btns">' +
+            (rv ? '<button class="btn sm p" data-rv2="' + p.id + '">审核产品</button>' : '') +
+            '<button class="btn sm p" data-pd="' + p.id + '">查看详情</button>' +
+            '<button class="btn sm" data-ped="' + p.id + '">编辑产品</button>' +
             '<button class="btn sm g" data-cp="' + p.id + '">复制小程序链接</button>' +
-            '</div>';
-        }) + '</div>' + pg.html + '</div>';
+            '</div></td>';
+        }, '没有符合条件的产品') + '</div>' + pg.html + '</div>';
 
     q.bind(m, function () { S.cache['pg:' + T.key] = 1; reload(); });
     t.bind(m, function () { S.cache['pg:' + T.key] = 1; reload(); });
@@ -3109,18 +3174,32 @@ function opsProdList(m, tk, T, RK, OK) {
       };
     });
     $$('[data-ped]', m).forEach(function (b) {
-      b.onclick = function () { S.cache.upBack = 'prod' + tk; go('edit', b.dataset.ped); };
+      /* C 端编辑产品：进入与审核页共用的页面（review），但设置编辑模式标记。
+         底部按钮只有"保存产品信息"，而不是审核按钮。
+         唐美芳 2026-09-15：「编辑产品的页面与审核页面共用的是同一个页面，但是底部按钮是保存产品信息」。 */
+      b.onclick = function () {
+        S.cache.upBack = 'prodc';
+        S.cache.upEdit = true;   /* 编辑模式标记 */
+        S.cache.upReview = null; /* 清除审核标记 */
+        go('review', b.dataset.ped);
+      };
     });
     $$('[data-rv2]', m).forEach(function (b) {
       b.onclick = function () {
-        S.cache.upBack = 'prod' + tk;
-        S.cache.upReview = tk;
+        /* C 端审核进**独立的审核页**（v-prodreview.js）：
+           上半是只读的产品信息，下半是可编辑的对客文案，
+           底部是审核通过 / 驳回按钮。与 B 端不同——B 端走产品详情页 + 底部按钮，
+           C 端要审的是对客文案，必须在审核时就能改。
+           （唐美芳 2026-09-10：「C 端审核的页面才需要二次编辑」）。 */
+        S.cache.upBack = 'prodc';
+        S.cache.upReview = 'c';
         go('review', b.dataset.rv2);
       };
     });
     $$('[data-cp]', m).forEach(function (b) {
       b.onclick = function () { copyMiniLink(byId(b.dataset.cp)); };
     });
+    opsBindSale(m, j.list);
     $$('[data-pk]', m).forEach(function (b) {
       b.onclick = function () {
         var p = byId(b.dataset.pk);
@@ -3196,29 +3275,58 @@ VIEWS['ops:prods'] = function (m) {
         get: function (p) { return p.name + ' ' + (p.code || ''); } },
       { k: 'country', t: '国家 / 地区', type: 'sel',
         opts: uniqOpts(j.list, function (p) { return p.country; }) },
-      { k: 'supplier', t: '供应商', type: 'sel',
-        opts: uniqOpts(j.list, function (p) { return p.supplier; }) },
+      { k: 'visa_cat', t: '签证类型', type: 'sel',
+        opts: VISA_CATS.map(function (v) { return [v, v]; }) },
       { k: 'submit_city', t: '送签地', type: 'sel',
         opts: uniqOpts(j.list, function (p) { return p.submit_city; }) },
+      { k: 'supplier', t: '供应商', type: 'sel',
+        opts: uniqOpts(j.list, function (p) { return p.supplier; }) },
+      /* 供应商计调／产品管理人员是两条线：计调在供应商侧（出报价、录产品的人），
+         产品管理人员在众信侧（这条产品的内部责任人）。旅游产品列表两者都有，
+         签证这边一并补齐（2026-09-15）。 */
+      { k: 'sup_owner', t: '供应商计调', type: 'sel',
+        opts: uniqOpts(j.list, function (p) { return p.sup_owner_name; }) },
+      { k: 'manager', t: '产品管理人员', type: 'sel',
+        opts: uniqOpts(j.list, function (p) { return p.manager; }) },
       /* 按清单版本筛产品：材料库列表里点「关联签证产品」跳过来时填的就是这一格
          （唐美芳 2026-09-09）。值是版本号（唯一键），显示的是名称。 */
-      { k: 'fullver', t: '送签材料清单', type: 'sel', opts: fvOpts(j.list) }
+      { k: 'fullver', t: '送签材料清单', type: 'sel', opts: fvOpts(j.list) },
+      /* 销售状态是筛选不是页签：在售 / 停售是运营随手要勾出来看的两类，
+         与审核流转（待审核 / 通过 / 驳回 / 未提交）是两个维度。 */
+      {
+        k: 'sale', t: '销售状态', type: 'sel',
+        opts: [['on', '在售'], ['off', '停售']],
+        get: function (p) { return p.on_b ? 'on' : (p.off_b ? 'off' : ''); }
+      },
+      /* C 端上架状态只读告知：这里不审 C 端，但渠道运营停售前得知道它是不是也在
+         客户小程序卖着（2026-09-15 参照旅游列表的「C 端上架状态」补）。 */
+      {
+        k: 'c_sale', t: 'C 端上架状态', type: 'sel',
+        opts: [['on', '已上架'], ['off', '已下架'], ['none', '未上架'], ['nop', '未申请 C 端']],
+        get: function (p) {
+          if (!p.to_c) return 'nop';
+          if (p.on_c) return 'on';
+          if (p.off_c) return 'off';
+          return 'none';
+        }
+      }
     ]);
     var hit = q.filter(j.list);
     /* 接口已经算好 on_b / on_c（勾了该端 + 该端审核通过），别在前端重算一遍口径。
        审核状态的取值是 none / pending / approved / rejected，不是 pass。 */
     var onB = function (p) { return !!p.on_b; };
     var onC = function (p) { return !!p.on_c; };
-    /* 2026-09-09 第三版：B 端审核并进本页，**本页从此就是渠道运营（B 端）的台子**，
-       页签按她定的四个：全部 / 待审核 / 在售 / 停售。
+    /* 2026-09-09 第三版 + 2026-09-15：本页是渠道运营（B 端）的台子，
+       页签按审核状态分：全部 / 待审核 / 审核通过 / 审核驳回。
+       在售、停售是销售状态、不是审核状态，挪到上面的「销售状态」筛选里。
        C 端不在这里露面——「B 只审核 B 的，C 只审核 C 的，2 拨人处理，
        所以千万不要混在一起」。 */
     var t = subTabs('opsprods', [
       { k: 'all', t: '全部', fn: function () { return true; } },
       { k: 'wait', t: '待审核', fn: function (p) { return p.review_b === 'pending'; } },
-      { k: 'on', t: '在售', fn: function (p) { return onB(p); } },
-      { k: 'offsale', t: '停售', fn: function (p) { return !!p.off_sale; } }
-    ], hit);
+      { k: 'pass', t: '审核通过', fn: function (p) { return p.review_b === 'approved'; } },
+      { k: 'reject', t: '审核驳回', fn: function (p) { return p.review_b === 'rejected'; } }
+    ], hit, 'all');  /* 默认停在全部 */
     var so = sorter('opsprods', [
       ['产品', function (p) { return p.name || ''; }],
       ['套餐 / 售价', function (p) { return p.retail_min || 0; }],
@@ -3280,21 +3388,7 @@ VIEWS['ops:prods'] = function (m) {
         go('prod', b.dataset.rvb);
       };
     });
-    $$('[data-sale]', m).forEach(function (a2) {
-      a2.onclick = function () {
-        var p = (j.list || []).filter(function (x) { return x.id === +a2.dataset.sale; })[0] || {};
-        var off = !p.off_sale;   /* 当前在售 → 点一下变停售 */
-        confirmBox(off ? '停售' : '启售',
-          off
-            ? '停售后<b>客户端与门店端立即不再展示</b>本产品，已下单的订单不受影响。<br>' +
-              '审核结论保留，重新启售不需要再走一遍审核。'
-            : '启售后按各端<b>审核结论</b>恢复展示：审核通过的端才会重新出现。',
-          off ? '确认停售' : '确认启售')
-          .then(function () { return api('/ops/product/onsale', { id: p.id, off: off ? 1 : 0 }); })
-          .then(function (r) { toast(r.msg || '已更新'); reload(); })
-          .catch(function () { });
-      };
-    });
+    opsBindSale(m, j.list);
     $$('[data-ppk]', m).forEach(function (b) {
       b.onclick = function () { S.cache.upBack = 'prods'; go('pkgs', b.dataset.ppk); };
     });

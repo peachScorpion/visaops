@@ -38,6 +38,9 @@ VIEWS['ops:review'] = function (m, id) {
   var tk = 'c';
   var T = TRK[tk], RK = 'review_' + tk;
   var back = S.cache.upBack || 'prodc';
+  /* 编辑模式：与审核页共用页面结构，但底部按钮只有"保存"。
+     唐美芳 2026-09-15：「编辑产品的页面与审核页面共用的是同一个页面，但是底部按钮是保存产品信息」。 */
+  var editMode = S.cache.upEdit && !S.cache.upReview;
 
   return api('/ops/product?id=' + id).then(function (d) {
     var p = d.product;
@@ -45,7 +48,7 @@ VIEWS['ops:review'] = function (m, id) {
     var svcAll = (d.svc_opts && d.svc_opts.length) ? d.svc_opts : SVC_OPTS_FALLBACK;
     var picked = d.svc_tags || [];
 
-    m.innerHTML = pageH('C 端产品审核 · 对客信息', '',
+    m.innerHTML = pageH(editMode ? '编辑产品信息' : 'C 端产品审核 · 对客信息', '',
       '<div class="btns">' +
       '<button class="btn" data-prev>C 端页面预览</button>' +
       '<button class="btn" data-more>查看更多详情</button>' +
@@ -125,12 +128,14 @@ VIEWS['ops:review'] = function (m, id) {
       /* ── 底部动作条 ── */
       '<div class="pr-foot">' +
       '<button class="btn" data-cancel>取消</button>' +
-      (pend
-        ? '<button class="btn bad" data-rj>审核驳回</button>' +
-          '<button class="btn p" data-ap>审核通过</button>'
-        : '<button class="btn p" data-save>保存对客信息</button>' +
-          '<span class="hint">本产品' + T.t + '当前为「' + rvText(d[RK]) +
-          '」，不在待审队列中；如需变更结论请回列表操作。</span>') +
+      (editMode
+        ? '<button class="btn p" data-save>保存产品信息</button>'
+        : pend
+          ? '<button class="btn bad" data-rj>审核驳回</button>' +
+            '<button class="btn p" data-ap>审核通过</button>'
+          : '<button class="btn p" data-save>保存对客信息</button>' +
+            '<span class="hint">本产品' + T.t + '当前为「' + rvText(d[RK]) +
+            '」，不在待审队列中；如需变更结论请回列表操作。</span>') +
       '</div>';
 
     /* ---------- 绑定 ---------- */
@@ -155,8 +160,8 @@ VIEWS['ops:review'] = function (m, id) {
       });
     }
 
-    $('[data-back]', m).onclick = function () { S.cache.upReview = null; go(back); };
-    $('[data-cancel]', m).onclick = function () { S.cache.upReview = null; go(back); };
+    $('[data-back]', m).onclick = function () { S.cache.upReview = null; S.cache.upEdit = null; go(back); };
+    $('[data-cancel]', m).onclick = function () { S.cache.upReview = null; S.cache.upEdit = null; go(back); };
     $('[data-prev]', m).onclick = function () {
       window.open(location.pathname + '#customer/shop/p-' + id, '_blank');
     };
@@ -165,7 +170,11 @@ VIEWS['ops:review'] = function (m, id) {
     };
     var sv = $('[data-save]', m);
     if (sv) sv.onclick = function () {
-      saveMarket().then(function () { toast('已保存'); reload(); }).catch(function () { });
+      saveMarket().then(function () {
+        toast('已保存');
+        S.cache.upEdit = null;
+        reload();
+      }).catch(function () { });
     };
     var ap = $('[data-ap]', m);
     if (ap) ap.onclick = function () {

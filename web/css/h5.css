@@ -2677,6 +2677,11 @@ textarea.cf-ipt{line-height:1.7;resize:vertical}
   border:1px solid #E6E8EB;background:#fff;font-size:14px;color:var(--h5-ink);outline:none}
 .bk-form input:focus{border-color:#FF6B3D}
 .bk-form input::placeholder{color:#B9C0CA}
+.bk-form textarea{width:100%;min-height:86px;padding:10px 12px;border-radius:9px;
+  border:1px solid #E6E8EB;background:#fff;font-size:14px;color:var(--h5-ink);outline:none;
+  resize:vertical;line-height:1.65}
+.bk-form textarea:focus{border-color:#FF6B3D}
+.bk-form textarea::placeholder{color:#B9C0CA}
 
 /* 选办签人 · 加载失败时的中文提示与重试（2026-09-02） */
 .ap-empty b{display:block;font-size:14px;font-weight:600;color:var(--h5-ink);margin-bottom:6px}
@@ -2735,6 +2740,142 @@ textarea.cf-ipt{line-height:1.7;resize:vertical}
 .ym-apop a.pr{border-color:#FF6B3D;background:#FF6B3D;color:#fff}
 .ym-apop a.pr:active{background:#E85A2C}
 .ym-apop a.gh:active{background:#F6F7F9}
+
+/* ---------- 有米订单详情：对齐酒店订单详情结构（2026-09-16） ----------
+   订单信息卡 → 产品/办签人/联系人/发票 各卡 → 财务三栏页签（下划线式主 Tab）
+   → 收退转二级页签（收款/退款）。替代旧的 .ym-odcard 大色块状态卡与 .ym-odtabs。 */
+.ym-odinfo{background:#fff;margin:12px 14px;border-radius:var(--h5-r);
+  border:1px solid var(--h5-line);box-shadow:var(--h5-sd);overflow:hidden}
+.ym-odno{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 16px}
+.ym-odno .lb{display:flex;align-items:center;gap:7px;min-width:0}
+.ym-odno .lb .od-fico{display:inline-flex;align-items:center;justify-content:center;
+  width:18px;height:18px;flex:none;color:var(--h5-sub)}
+.ym-odno .lb .od-fico svg{width:16px;height:16px}
+.ym-odno .lb em{font-style:normal;flex:none;font-size:12px;color:var(--h5-sub)}
+.ym-odno .lb b{font-size:14px;font-weight:600;color:var(--h5-ink);
+  font-variant-numeric:tabular-nums;letter-spacing:.2px;overflow:hidden;
+  text-overflow:ellipsis;white-space:nowrap}
+.ym-odno .st{flex:none;font-size:12px;line-height:1;padding:5px 11px;border-radius:99px;font-weight:600}
+.ym-odno .st.wait{background:#FFF1EC;color:#FF6B3D}
+.ym-odno .st.doing{background:#EEF4FF;color:#3B79E0}
+.ym-odno .st.ok{background:#E9F9F0;color:#27AE60}
+.ym-odno .st.bad{background:#FDEEEE;color:#D3362E}
+.ym-odno .st.off{background:#F0F1F3;color:#8A8F98}
+
+/* 订单信息卡内的键值行：标签灰、值深，不可点，分隔线淡 */
+.ym-odrow{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;
+  padding:13px 16px;font-size:13px;position:relative}
+.ym-odrow+.ym-odrow::before{content:"";position:absolute;left:16px;right:16px;top:0;
+  height:1px;background:var(--h5-line)}
+.ym-odrow .lb{color:var(--h5-sub);flex:none}
+.ym-odrow .vl{color:var(--h5-ink);text-align:right;flex:1;word-break:break-word}
+.ym-odrow .vl b{font-weight:600;font-variant-numeric:tabular-nums}
+
+/* 财务三栏页签容器 */
+.ym-odfin{background:#fff;margin:12px 14px;border-radius:var(--h5-r);
+  border:1px solid var(--h5-line);box-shadow:var(--h5-sd);overflow:hidden}
+/* 主 Tab：下划线式，选中橙色字 + 底部短横线（对齐酒店） */
+.ym-odseg{display:flex;border-bottom:1px solid var(--h5-line)}
+.ym-odseg a{flex:1;text-align:center;padding:14px 0 11px;font-size:14px;color:var(--h5-sub);
+  font-weight:500;position:relative;cursor:pointer;white-space:nowrap;transition:color .15s}
+.ym-odseg a.on{color:#FF6B3D;font-weight:600}
+.ym-odseg a.on::after{content:"";position:absolute;left:50%;bottom:0;transform:translateX(-50%);
+  width:22px;height:3px;border-radius:3px;background:#FF6B3D}
+.ym-odfx{padding:4px 0 2px}
+
+/* 交易信息：交易明细双列（报名项 | 销售金额 | 结算金额） */
+.ym-txh{padding:14px 16px 4px;font-size:12px;color:var(--h5-sub);letter-spacing:.5px}
+.ym-txhd{display:flex;align-items:center;gap:10px;padding:10px 16px 6px;font-size:11px;
+  color:var(--h5-sub)}
+.ym-txhd span{flex:1;min-width:0}
+.ym-txhd i{flex:none;width:78px;text-align:right;font-style:normal}
+.ym-txrow{display:flex;align-items:center;gap:10px;padding:11px 16px;font-size:13px;
+  border-top:1px solid var(--h5-line)}
+.ym-txrow .nm{flex:1;min-width:0;color:var(--h5-ink)}
+.ym-txrow i{flex:none;width:78px;text-align:right;font-style:normal;color:var(--h5-ink);
+  font-variant-numeric:tabular-nums;font-weight:600}
+.ym-txsum{border-top:1px solid var(--h5-line);margin-top:6px}
+.ym-txsum .h5-row:hover{background:var(--h5-hov)}
+
+/* 收退转二级页签：胶囊式（对齐酒店「收款信息/退款信息」） */
+.ym-subseg{display:flex;gap:8px;padding:12px 16px 4px;overflow-x:auto;scrollbar-width:none}
+.ym-subseg::-webkit-scrollbar{display:none}
+.ym-subseg a{flex:none;padding:6px 14px;border-radius:99px;font-size:12.5px;color:var(--h5-sub);
+  background:var(--h5-fill);cursor:pointer;white-space:nowrap;transition:.15s}
+.ym-subseg a.on{background:#FFF1EC;color:#FF6B3D;font-weight:600}
+.ym-subfx{padding:2px 0}
+
+/* 收/退款明细卡：字段键值行 */
+.ym-pay{margin:10px 16px;border:1px solid var(--h5-line);border-radius:12px;overflow:hidden}
+.ym-payrow{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;
+  padding:11px 13px;font-size:12.5px;position:relative}
+.ym-payrow+.ym-payrow::before{content:"";position:absolute;left:13px;right:13px;top:0;
+  height:1px;background:var(--h5-line)}
+.ym-payrow .lb{color:var(--h5-sub);flex:none}
+.ym-payrow .vl{color:var(--h5-ink);text-align:right;flex:1;word-break:break-word;
+  font-variant-numeric:tabular-nums}
+.ym-payrow .vl b{font-weight:600}
+/* 业务/财务审核状态小圆点 */
+.st-dot{display:inline-flex;align-items:center;gap:5px;font-style:normal;font-weight:500}
+.st-dot::before{content:"";width:6px;height:6px;border-radius:50%}
+.st-dot.wait{color:#E8912C}.st-dot.wait::before{background:#E8912C}
+.st-dot.ok{color:#27AE60}.st-dot.ok::before{background:#27AE60}
+.st-dot.bad{color:#D3362E}.st-dot.bad::before{background:#D3362E}
+
+/* 订单信息卡底部的操作按钮行：对齐酒店「订单日志」按钮 */
+.ym-odact{display:flex;justify-content:flex-end;gap:10px;padding:11px 16px 14px;
+  border-top:1px solid var(--h5-line)}
+.ym-odact a{display:inline-flex;align-items:center;height:32px;padding:0 16px;
+  border-radius:8px;font-size:12.5px;font-weight:500;cursor:pointer;white-space:nowrap}
+.ym-odact a.gh{border:1px solid #FF6B3D;background:#fff;color:#FF6B3D}
+.ym-odact a.gh:active{background:#FFF1EC}
+/* 「修改销售」＝中性次级按钮（酒店那张是灰色描边），订单日志才用橘色强调 */
+.ym-odact a.nt{border:1px solid #D9D9D9;background:#fff;color:#666}
+.ym-odact a.nt:active{background:#F5F5F5}
+
+/* 政策段：对齐酒店「取消政策 / 确认政策」红字整行政策。现并进产品信息卡内，
+   上面加一条发丝线与键值行分隔。 */
+.ym-odpol{padding:4px 16px 12px;margin-top:2px;border-top:1px solid var(--h5-line)}
+.ym-odpol .p{padding:7px 0;font-size:12.5px;line-height:1.8}
+.ym-odpol .p+.p{border-top:1px dashed var(--h5-line)}
+.ym-odpol .p i{display:block;font-style:normal;font-size:13px;font-weight:600;
+  color:var(--h5-ink);margin-bottom:1px}
+.ym-odpol .p s{text-decoration:none;color:#E8402E}
+
+/* 订单详情紧凑化：ym 事务页 .h5-sec 默认 margin:16px、padding:16px，
+   再叠 .h5-h / .h5-row 自己的内边距，垂直留白翻倍；这里压到单层内边距。
+   只在订单详情页打标 .odetail，不干扰签证频道/列表/填单等其它 ym 页。 */
+.ph-body.h5.ym.odetail .h5-sec{margin:8px 14px;padding:0 0 4px;border-radius:12px;overflow:hidden}
+.ph-body.h5.ym.odetail .h5-sec+.h5-sec{margin-top:0}
+.ph-body.h5.ym.odetail .h5-h{padding:12px 16px 8px;margin-bottom:0}
+.ph-body.h5.ym.odetail .ym-odfin{margin:8px 14px 12px}
+
+/* 字段行紧凑 + 去掉行间分隔线：三种字段行都通过 ::before 画分隔线（不是 border），
+   默认 11~14px 上下内边距让字段之间空出一大段；这里压到 7px 并隐藏伪元素线。 */
+.ph-body.h5.ym.odetail .h5-row{padding:7px 16px}
+.ph-body.h5.ym.odetail .h5-row.two{padding:8px 16px}
+.ph-body.h5.ym.odetail .h5-row+.h5-row::before{display:none}
+.ph-body.h5.ym.odetail .ym-odrow{padding:7px 16px}
+.ph-body.h5.ym.odetail .ym-odrow+.ym-odrow::before{display:none}
+.ph-body.h5.ym.odetail .ym-payrow{padding:7px 13px}
+.ph-body.h5.ym.odetail .ym-payrow+.ym-payrow::before{display:none}
+
+/* 订单详情配色对齐酒店订单详情：有米全站是橙色页头 + 橙色强调，
+   订单详情这一页改成白底黑字页头 + 红字强调（唐美芳 2026-09-16：
+   「右侧是我想要的设计效果」）。只打 .odetail 标，不影响其它有米页。 */
+.phone:has(.ph-body.h5.ym.odetail) .ph-bar{background:#fff;color:#111827}
+.phone:has(.ph-body.h5.ym.odetail) .ph-nav{background:#fff;color:#111827}
+.phone:has(.ph-body.h5.ym.odetail) .ph-nav .back{color:#111827}
+.ph-body.h5.ym.odetail .ym-odseg a.on{color:#E8402E}
+.ph-body.h5.ym.odetail .ym-odseg a.on::after{background:#E8402E}
+.ph-body.h5.ym.odetail .ym-subseg a.on{background:#FEF1EF;color:#E8402E}
+.ph-body.h5.ym.odetail .ym-odact a.gh{border-color:#E8402E;color:#E8402E}
+.ph-body.h5.ym.odetail .ym-odact a.gh:active{background:#FEF1EF}
+/* 底部主按钮（代客收款）与页头价格切换跟在白页头上，一起转红、转浅底 */
+.phone:has(.ph-body.h5.ym.odetail) .ph-foot .cta{background:#E8402E;border-color:#E8402E}
+.phone:has(.ph-body.h5.ym.odetail) .pm-seg.pm-ymbar{background:#F1F2F4}
+.phone:has(.ph-body.h5.ym.odetail) .pm-seg.pm-ymbar .pm-sg{color:#666}
+.phone:has(.ph-body.h5.ym.odetail) .pm-seg.pm-ymbar .pm-sg.on{background:#E8402E;color:#fff}
 
 /* 订单详情里的键值行：产品名很长，允许换行，别截断成「…（B1/B…」 */
 .ph-body.ym .h5-sec .h5-row .vl{white-space:normal;text-align:right;line-height:1.55}
@@ -2909,17 +3050,25 @@ textarea.cf-ipt{line-height:1.7;resize:vertical}
 /* 有米状态条右侧的展示模式开关（2026-09-07）。挂 .ph-bar 而不是 .ph-nav：
    产品详情等沉浸式页面把 .ph-nav 整个隐藏了，只有 .ph-bar 一直在且压在最上层。
    底色用半透明深灰：状态条在白底页是白的、在头图上是透明的，两种底都要看得清。 */
-/* 有米的「零售 / 结算」icon（2026-09-09 由两段式改成一枚 icon）。
+/* 有米的「零售价 / 结算价」分段控件（2026-09-16 由单枚 icon 改成分段控件）。
    两个落点共用一套外观：搜索条右侧（签证频道 / 产品列表 / 搜索结果）、
-   状态条右侧（其余没有搜索条的页面）。都在右上角，销售不用重新找。 */
-.pm-ic.pm-ymsch{height:32px;padding:0 11px;border:0;background:rgba(255,255,255,.22);
-  color:#fff;font-size:11.5px;backdrop-filter:blur(4px)}
-.pm-ic.pm-ymsch svg{width:14px;height:14px}
-.pm-ic.pm-ymsch.on{background:#fff;color:#FF6B3D;font-weight:700}
-.pm-ic.pm-ymbar{height:20px;padding:0 8px;gap:3px;border:0;font-size:10px;
-  background:rgba(0,0,0,.42);color:rgba(255,255,255,.92);backdrop-filter:blur(4px)}
-.pm-ic.pm-ymbar svg{width:11px;height:11px}
-.pm-ic.pm-ymbar.on{background:#fff;color:#FF6B3D;font-weight:700}
+   状态条右侧（其余没有搜索条的页面）。都在右上角，销售不用重新找。
+   分段控件两段并排，亮段=当前档，一眼就懂是「二选一的价格开关」。 */
+.pm-seg{display:inline-flex;align-items:center;flex:none;padding:2px;gap:2px;
+  border-radius:99px;background:#fff}
+.pm-sg{display:inline-flex;align-items:center;justify-content:center;border-radius:99px;
+  color:var(--h5-ink2);font-weight:500;white-space:nowrap;cursor:pointer;transition:.15s;
+  text-decoration:none}
+.pm-sg.on{color:#FF6B3D;font-weight:700}
+.pm-seg.pm-ymsch{height:32px;border:0;background:rgba(255,255,255,.22);
+  backdrop-filter:blur(4px)}
+.pm-seg.pm-ymsch .pm-sg{height:26px;padding:0 10px;font-size:11.5px;color:#fff}
+.pm-seg.pm-ymsch .pm-sg.on{background:#fff;color:#FF6B3D;font-weight:700;
+  box-shadow:0 1px 3px rgba(0,0,0,.16)}
+.pm-seg.pm-ymbar{height:20px;border:0;background:rgba(0,0,0,.42);backdrop-filter:blur(4px)}
+.pm-seg.pm-ymbar .pm-sg{height:16px;padding:0 7px;font-size:10px;line-height:16px;
+  color:rgba(255,255,255,.88)}
+.pm-seg.pm-ymbar .pm-sg.on{background:#fff;color:#FF6B3D;font-weight:700}
 /* 搜索条与 icon 同排：搜索框让出 icon 的宽度，不是压在它上面
    （唐美芳 2026-09-09：「搜索框可以变窄点，腾出点位置」）。 */
 .uy-top{display:flex;align-items:center;gap:8px}

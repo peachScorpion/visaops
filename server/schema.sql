@@ -208,6 +208,7 @@ CREATE TABLE IF NOT EXISTS ord (
   recv_addr_id INTEGER,            -- 客户收货地址（资料返还）
   settle_entity TEXT,
   invoice_entity TEXT,
+  note TEXT,                        -- 订单备注：下单时（C 端 / 有米 / CSP）随订单一并提交
   created_at TEXT
 );
 

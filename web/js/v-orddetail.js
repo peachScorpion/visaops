@@ -136,10 +136,11 @@ VIEWS['ops:odetail'] = VIEWS['lead:odetail'] = VIEWS['fin:odetail'] = function (
         odKV('建单人', esc(o.created_by_name)) +
         odKV('最近操作', (o.updated_by_name ? esc(o.updated_by_name) + ' · ' + d16(o.updated_at) : null))) +
       '</div>' +
-      /* 订单备注：整行一格，跟众信那张最后一行一样。系统本期没有备注字段，
-         写明它由销售在订单日志里补记，不做一个存不进去的输入框。 */
+      /* 订单备注：下单时随单提交，这里直接展示；没填就显示「—」。 */
       '<div class="od-grid bd one">' +
-      odKV('订单备注', '<span class="od-na">—　销售备注请在「订单日志」中补记</span>') + '</div>' +
+      odKV('订单备注', o.note
+        ? '<div class="od-note">' + esc(o.note).replace(/\n/g, '<br>') + '</div>'
+        : '<span class="od-na">—</span>') + '</div>' +
       (p.book_notice ? '<div class="od-notice"><i>预订须知</i><div>' +
         richView(p.book_notice) + '</div></div>' : ''));
 
