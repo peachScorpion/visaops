@@ -897,6 +897,10 @@ VIEWS['customer:odetail'] = function (m, no) {
         : odRow('护照寄回', '还没填收货地址', { k: 'addrs', mut: true })) +
       /* 发票：系统本期只存开票抬头，没有在线申请流程。不做点了没反应的假入口。 */
       odRow('开票抬头', esc(d.invoice.entity || '未指定'), { mut: !d.invoice.entity }) +
+      /* 订单备注：下单时随单填的，这里回显给客人确认（没填就不占一行） */
+      (d.note
+        ? odRow('订单备注', '<span style="white-space:pre-wrap">' + esc(d.note) + '</span>')
+        : '') +
       '<div class="h5-tip">发票本期由客服代开，在「联系客服」提供抬头与税号即可。</div></div>' +
 
       /* 资料录入入口常驻，但在 C 端不是付款的前置条件，也不显示倒计时——

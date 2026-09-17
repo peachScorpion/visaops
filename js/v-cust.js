@@ -1045,6 +1045,12 @@ function orderPage(m, d, pkgId) {
         '<em class="bk-pen">' + svgIcon('M4 20h4L19 9l-4-4L4 16z') + '</em></div>',
         true, (contact.name && contact.phone) ? '' : '<u class="bk-bg">待填写</u>') +
 
+      sec('订单备注',
+        '<div class="bk-form">' +
+        '<label><span>备注（选填，随订单一并展示）</span>' +
+        '<textarea data-note rows="3" placeholder="如有加急说明、寄送要求、特殊开票等，可在此备注">' +
+        esc(note) + '</textarea></label></div>') +
+
       sec('资料提交方式',
         '<div class="bk-way"><div><b>电子材料</b><s>下单后在「我的订单」逐项上传，' +
         '专员在线审核，不合格会退回并说明原因</s></div>' +
@@ -1108,6 +1114,7 @@ function orderPage(m, d, pkgId) {
         sup_product_id: d.sup_product_id, pkg_id: pkgId, depart_date: depart,
         contact_name: contact.name, contact_phone: contact.phone,
         contact_email: contact.email,
+        note: note.trim(),
         applicants: A, pax_later: 0
       }).then(function (r) {
         toast('订单 ' + r.no + ' 已创建，应付 ¥' + money(r.amount));

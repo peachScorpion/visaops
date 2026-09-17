@@ -735,17 +735,14 @@ function bkList(m, q) {
    销售自己才看的（结算价、毛利、供应商比价）收在右栏和比价页签里，不混在一起讲。 */
 VIEWS['csp:pdetail'] = function (m, spid) {
   if (!spid) return VIEWS['csp:book'](m);
-  return Promise.all([api('/shop/product?id=' + spid), api('/shop/products'),
+  return Promise.all([api('/shop/product?id=' + spid),
   api('/shop/policies')]).then(function (rr) {
-    var d = rr[0], p = d.product, all = rr[1].list;
-    var pols = rr[2].list.filter(function (x) {
+    var d = rr[0], p = d.product;
+    var pols = rr[1].list.filter(function (x) {
       return x.country === p.country || x.country === '*';
     }).slice(0, 4);
     var crowd = S.cache.pdCrowd || 'job';
     var pkgId = (d.packages[0] || {}).id, pax = 1;
-    /* 同一条平台产品下挂着的其他供应商产品，销售当场比价用 */
-    var plat = all.filter(function (x) { return x.product_id === p.id; })[0] || { suppliers: [] };
-    var sibs = plat.suppliers || [];
     var lo = Math.min.apply(null, d.packages.map(function (k) { return k.suggest_retail; }));
     var fast = Math.min.apply(null, d.packages.map(function (k) { return k.lead_days; }));
 
@@ -767,14 +764,14 @@ VIEWS['csp:pdetail'] = function (m, spid) {
               (i.sample ? sampleBtn(i, 'btn sm lite') : '<span class="hint">—</span>') + '</td>';
           }, '无') + '</div>';
       }
-      return '<div class="pd-mact"><span>按适用人群裁剪，切换人群看对应清单</span>' +
+      return '<div class="pd-mact"><span>材料清单随适用人群切换展示</span>' +
         '<button class="btn sm" data-send>发送至客户（扫码 / 链接）</button></div>' +
         '<div class="pd-crowd">' + [['job', '在职人员'], ['free', '自由职业'],
       ['student', '在校学生'], ['retire', '退休人员'], ['child', '学龄前儿童']].map(function (c) {
         return '<a data-cw="' + c[0] + '"' + (c[0] === crowd ? ' class="on"' : '') + '>' + c[1] + '</a>';
       }).join('') + '</div>' +
-        '<div class="note">材料清单取自运营端「国家送签材料库」当前生效版本 <b>' + esc(d.fullver.ver_no) +
-        '</b>，按适用人群实时裁剪。<b>下单时按人群快照进订单</b>，材料后续改版不影响已下单客户。</div>' +
+        '<div class="note">材料清单来源为国家送签材料库当前生效版本 <b>' + esc(d.fullver.ver_no) +
+        '</b>，按适用人群实时生成。<b>下单时以适用人群快照写入订单</b>，材料清单后续调整不影响已下单客户。</div>' +
         grp('must', '必须材料') + grp('suggest', '建议材料');
     }
 
@@ -877,66 +874,27 @@ VIEWS['csp:pdetail'] = function (m, spid) {
     /* ---- 分段内容：购买须知 ---- */
     function buyHtml() {
       var k = pk();
-      return '<div class="note">「预订须知」是各套餐自己维护的，切换套餐这一段会跟着变；' +
-        '下面的「通用条款」对所有签证订单一致，由平台维护。</div>' +
-        '<div class="pdx-two">' +
+      return '<div class="pdx-col">' +
         '<div class="pdx-blk"><h5>预订须知 · ' + esc(k.name) + '</h5>' +
         /* 预订须知是富文本，服务端已按白名单过滤 */
-        '<div class="pd-nb rich-view">' + (k.book_notice || '该套餐暂未填写预订须知') +
+        '<div class="pd-nb rich-view">' + (k.book_notice || '暂无该套餐的预订须知内容') +
         '</div>' +
         '<h5 style="margin-top:16px">套餐说明</h5>' +
         '<div class="pd-nb">' + esc(pkgDesc(k)) + '</div></div>' +
         '<div class="pdx-blk"><h5>通用条款</h5>' + [
-          ['取消与退款', '订单支付前可直接取消；已支付的订单需提交退款申请，' +
+          ['取消与退款', '订单支付前可直接取消；已支付的订单需申请退款，' +
             '按已产生的官费与服务成本核减后退还余款。'],
-          ['成交价区间', pmSales()
-            ? '门店可在区间内让利：低于结算价 ¥' + money(k.settle_price) +
-              ' 或高于建议零售价 150% 会被系统拦截。'
-            : '门店可在系统允许的区间内让利，超出区间会被系统拦截。'],
           ['材料版本', '下单时按适用人群将材料清单快照写入订单，清单后续改版不影响已下单客户。'],
-          ['人工环节', '提交、缴费、抢号、递交、采指纹五项官方渠道无公开接口，' +
-            '由签证专员人工操作后回填凭证，不承诺自动化。'],
-          ['结果口径', '是否获签由使领馆 / 移民局决定，本产品不构成出签或入境承诺。']
+          ['人工环节', '提交、缴费、预约、递交、采集指纹等环节由签证专员人工办理，' +
+            '凭证将在订单中回填。'],
+          ['出签说明', '是否获签由使领馆或移民局决定，本产品不构成出签或入境承诺。']
         ].map(function (x) {
           return '<div class="kv2"><i>' + x[0] + '</i><b>' + x[1] + '</b></div>';
         }).join('') + '</div></div>';
     }
 
-    /* ---- 分段内容：套餐明细（价格构成，与右栏的选择器互补） ---- */
-    function pkgHtml() {
-      /* 客人模式下整张表只留对客口径：签证费 / 服务费 / 结算价 / 毛利四列一并撤掉，
-         不是把数字换成「—」——留着空列等于告诉客人这里藏了东西（2026-09-07）。 */
-      var sale = pmSales();
-      return '<div class="note">同一个供应商产品下按「普通 / 加急 / 代办面签陪同」等服务档位拆套餐，' +
-        '各自独立维护价格、时效与预订须知。' +
-        (sale ? '<b>毛利 = 建议零售价 − 结算价</b>，销售让利时不能低于结算价。'
-          : '当前为客户模式，结算价与毛利不予展示，可在顶部切换。') + '</div>' +
-        table(['套餐', '套餐说明'].concat(sale ? ['签证费', '服务费', '结算价'] : [])
-          .concat(['建议零售价']).concat(sale ? ['毛利'] : []).concat(['时效', '操作']),
-          d.packages, function (x) {
-            var gp = x.suggest_retail - x.settle_price;
-            return '<td><b>' + esc(x.name) + '</b><div class="hint mono">' + esc(x.sup_code || '') + '</div></td>' +
-              '<td class="wrap">' + esc(pkgDesc(x)) + '</td>' +
-              (sale ? '<td class="num">¥' + money(x.visa_fee) + '</td><td class="num">¥' +
-                money(x.service_fee) + '</td><td class="num"><b>¥' + money(x.settle_price) +
-                '</b></td>' : '') +
-              '<td class="num">' + money(x.suggest_retail) + '</td>' +
-              (sale ? '<td class="num"><b style="color:#0F7B4F">¥' + money(gp) +
-                '</b><div class="hint">' +
-                (x.suggest_retail ? Math.round(gp / x.suggest_retail * 100) : 0) +
-                '%</div></td>' : '') +
-              '<td class="num">' + x.lead_days + ' 工作日</td>' +
-              '<td>' + (x.id === pkgId ? '<span class="tag info">已选</span>' :
-                '<button class="btn sm" data-pks="' + x.id + '">选它</button>') + '</td>';
-          }) +
-        '<div class="hint" style="margin-top:10px">预订须知与套餐说明在「购买须知」页签里，' +
-        '跟着当前选中的套餐走。</div>';
-    }
-
     function flowHtml() {
-      return '<div class="note">下单后系统按该链路推进，每一步都有责任人与时间戳，' +
-        '销售在「订单管理」里能看到客户当前卡在哪一步。' +
-        '<b>提交、缴费、抢号、递交、采指纹五项官方渠道无公开接口，由专员人工操作后回填凭证。</b></div>' +
+      return '<div class="note">订单创建后按以下流程办理，各环节进度将在订单详情中更新。</div>' +
         '<div class="pd-flow">' + [
           ['下单与收款', '销售代客录单 → 客户付款 → 财务确认收款后才派发工单'],
           ['收料与审核', '客户上传材料，签证专员逐项审核，不合格的发补料通知（7 天倒计时）'],
@@ -950,32 +908,9 @@ VIEWS['csp:pdetail'] = function (m, spid) {
         }).join('') + '</div>';
     }
 
-    /* ---- 分段内容：供应商横向比价（只有门店销售看得到） ---- */
-    function sibHtml() {
-      return '<div class="note">同一条平台产品可以挂多家供应商，价格与时效各不相同。' +
-        '这一屏只在 B 端出现，<b>客户小程序看不到结算价与毛利</b>。</div>' +
-        (sibs.length > 1 ? '' : '<div class="hint" style="margin:10px 0">' +
-          '该平台产品目前只有 1 家供应商在售，多家在售时这里会并排列出，销售择优开单。</div>') +
-        '<div class="pdx-sibs">' + sibs.map(function (s) {
-          var on = s.sup_product_id === d.sup_product_id;
-          return '<div class="pdx-sib' + (on ? ' on' : '') + '" data-sw="' + s.sup_product_id + '">' +
-            '<div class="hd"><b>' + esc(s.supplier) + '</b>' +
-            (on ? '<span class="tag info">当前查看</span>' : '<span class="tag plain">切换过去 ›</span>') +
-            '</div><div class="nm">' + esc(s.name) + '</div>' +
-            '<div class="kv"><span>起价</span><b class="pr">¥' + money(s.price_min) + '</b></div>' +
-            '<div class="kv"><span>最快出签</span><b>' + s.lead_min + ' 个工作日</b></div>' +
-            '<div class="kv"><span>套餐数</span><b>' + s.pkg_count + ' 个</b></div>' +
-            (pmSales() ? '<div class="kv"><span>单人毛利最高</span><b class="gp">¥' +
-              money(s.margin || 0) + '</b></div>' : '') +
-            '<div class="tg">' +
-            (s.svc || []).slice(0, 3).map(function (v) { return '<span>' + esc(v) + '</span>'; }).join('') +
-            '</div></div>';
-        }).join('') + '</div>';
-    }
-
     /* ---- 分段内容：受理范围与政策 ---- */
     function acceptHtml() {
-      return '<div class="pdx-two">' +
+      return '<div class="pdx-col">' +
         '<div class="pdx-blk"><h5>受理范围</h5>' +
         '<div class="hint rich-view">' + (richView(p.accept_note) || '—') + '</div>' +
         (d.accept_provinces && d.accept_provinces.length ?
@@ -990,17 +925,15 @@ VIEWS['csp:pdetail'] = function (m, spid) {
         '<div class="kv"><i>生效时间</i><b>' + esc(d10(d.fullver.effective_at)) + '</b></div>' +
         '</div>' +
         '<div class="pdx-blk"><h5>' + esc(p.country) + '签证政策</h5>' +
-        '<div class="hint" style="margin-bottom:9px">总部运营维护，与客户端小程序同一份口径，' +
-        '每条均注明来源，销售可直接向客户转述。</div>' +
         (pols.length ? polStrip(pols) : '<div class="hint">该目的地暂无已发布的政策内容</div>') +
         '</div></div>';
     }
 
-    var TABS = [['mat', '所需材料'], ['pkg', '套餐与价格'], ['buy', '购买须知'],
-    ['flow', '办理流程'], ['sib', '供应商比价'], ['acc', '受理范围与政策']];
+    var TABS = [['mat', '所需材料'], ['buy', '购买须知'],
+    ['flow', '办理流程'], ['acc', '受理范围与政策']];
     var SECF = {
-      mat: matsHtml, pkg: pkgHtml, buy: buyHtml,
-      flow: flowHtml, sib: sibHtml, acc: acceptHtml
+      mat: matsHtml, buy: buyHtml,
+      flow: flowHtml, acc: acceptHtml
     };
 
     /* 选择套餐回到「产品特色」这一档位置（唐美芳 2026-08-27）：
@@ -1065,7 +998,8 @@ VIEWS['csp:pdetail'] = function (m, spid) {
         '<span class="fg">' + flag(p.country) + ' ' + esc(p.country) + '</span></div>' +
         '<div class="pdx-inf">' +
         '<div class="tt"><em>' + esc(d.supplier) + '</em>' +
-        '<h1>' + esc(d.name) + '</h1></div>' +
+        '<h1>' + esc(d.name).replace(/([A-Za-z0-9]+(?:[-/][A-Za-z0-9]+)+)/g,
+          '<span class="nw">$1</span>') + '</h1></div>' +
         '<div class="tg">' +
         '<span class="k">' + esc(ent) + '</span><span class="k">' + esc(valid) + '</span>' +
         '<span class="k">停留 ' + stayTx(p) + '</span>' +
@@ -1116,18 +1050,15 @@ VIEWS['csp:pdetail'] = function (m, spid) {
         '<div class="kv"><i>建议零售价</i><b>¥' + money(k.suggest_retail) + '</b></div>' +
         (pmSales() ? '<div class="kv gp"><i>单人毛利</i><b>¥' + money(gp) + '（' +
           (k.suggest_retail ? Math.round(gp / k.suggest_retail * 100) : 0) + '%）</b></div>' : '') +
-        '<div class="kv step"><i>办签人数</i><span class="sp">' +
+        '<div class="kv pax"><i>办签人数</i><span class="sp">' +
         '<a data-px="-1">−</a><b>' + pax + '</b><a data-px="1">+</a></span></div>' +
         '<div class="tot"><i>按建议零售价预估</i><b>¥' + money(k.suggest_retail * pax) + '</b></div>' +
         '<button class="uz-buy" data-buy0>代客下单</button>' +
         '<button class="uz-send" data-send>将材料清单发送至客户（扫码 / 链接）</button>' +
-        /* 这里只按建议零售价预估，真正的成交价在下单页填，低于结算价会被系统拦截。
-           写清楚，免得销售以为这一页的数字就是最终报给客人的价。 */
-        '<div class="tip">成交价在下单页填写，可在区间内让利：' +
+        '<div class="tip">' +
         (pmSales()
-          ? '<b>低于结算价 ¥' + money(k.settle_price) + ' 或高于建议零售价 150% 会被系统拦截</b>。' +
-            '当前为销售模式，向客户展示前请切回顶部的「零售价」。'
-          : '超出系统允许区间会被拦截。当前为客户模式，结算价与毛利不予展示。') + '</div>' +
+          ? '当前为销售模式，向客户展示前请切换至「零售价」。'
+          : '当前为客户模式，结算价与毛利不予展示。') + '</div>' +
         '</div></aside></div>', true);
 
       bkBind(m);
@@ -1138,9 +1069,6 @@ VIEWS['csp:pdetail'] = function (m, spid) {
       $$('[data-send]', m).forEach(function (b) { b.onclick = sendModal; });
       $$('[data-pkc]', m).forEach(function (el) {
         el.onclick = function () { pkgId = +el.dataset.pkc; draw(); };
-      });
-      $$('[data-pks]', m).forEach(function (b) {
-        b.onclick = function () { pkgId = +b.dataset.pks; draw(); };
       });
       $$('[data-px]', m).forEach(function (a) {
         a.onclick = function () {
@@ -1196,12 +1124,6 @@ VIEWS['csp:pdetail'] = function (m, spid) {
       spy();
       $$('[data-cw]', m).forEach(function (a) {
         a.onclick = function () { crowd = S.cache.pdCrowd = a.dataset.cw; draw(); };
-      });
-      $$('[data-sw]', m).forEach(function (el) {
-        el.onclick = function () {
-          if (+el.dataset.sw === d.sup_product_id) return;
-          go('pdetail', el.dataset.sw);
-        };
       });
       bindSample(m);
       if (keep) { SC.scrollTop = keep; spy(); }
@@ -1280,14 +1202,14 @@ VIEWS['csp:create'] = function (m, spid) {
       ? { name: lastCt.name || '', phone: lastCt.phone || '', email: lastCt.email || '' }
       : { name: '', phone: '', email: '' };
     var ctFrom = lastCt ? lastCt.at : '';
-    var depart = '', dealPrice = null;
+    var depart = '';
+    var note = '';      /* 订单备注：选填，展示在订单详情里 */
     var custKey = '';   /* 当前客户档案，由办签人面板选定并回传 */
 
     function pk() { return d.packages.filter(function (x) { return x.id === pkgId; })[0]; }
     var full = apFull;   /* 姓名 + 证件号 + 人群齐了就能提交（ap-picker.js） */
     function badCount() { return A.filter(function (a) { return !full(a); }).length; }
     function paxCount() { return later ? laterN : A.length; }
-    function price() { var v = parseFloat(dealPrice); return isNaN(v) ? pk().suggest_retail : v; }
 
     /* 出行日期离今天还有几个自然日。签证时效按工作日算，这里粗算成 工作日 ≈ 自然日 × 5/7，
        只用来提醒不用来卡提交——和 C 端同一套口径，两端不能一个拦一个不拦。 */
@@ -1345,54 +1267,29 @@ VIEWS['csp:create'] = function (m, spid) {
           : '') + '</div></div>' +
         (t ? '<div class="ck-warn">本套餐约需 <b>' + pk().lead_days +
           ' 个工作日</b>出签，客户的出行日期只剩 <b>' + t.gap +
-          ' 天</b>，时间可能不够。建议改期，或改选加急套餐后再报价。</div>' : '');
+          ' 天</b>，时间可能不足。建议改期，或返回产品详情选择加急套餐。</div>' : '');
     }
 
     function sumHtml() {
-      var k = pk(), pr = price(), gp = pr - k.settle_price;
+      var k = pk(), pr = k.suggest_retail, gp = pr - k.settle_price;
+      var n = paxCount();
       return '<div class="bx">' +
-        '<div class="hd"><b>' + esc(k.name) + '</b>' +
-        '</div>' +
-        '<label class="f ck-deal"><span>成交价（元 / 人） <i>*</i></span>' +
-        '<input id="ck_deal" type="number" value="' + (dealPrice == null ? k.suggest_retail : esc(dealPrice)) + '"></label>' +
-        '<div class="ck-band">' +
-        (pmSales() ? '结算价 ¥' + money(k.settle_price) + ' · ' : '') +
-        '建议零售 ¥' + money(k.suggest_retail) +
-        ' · 上限 ¥' + money(k.suggest_retail * 1.5) + '</div>' +
-        '<div class="kv"><i>' + esc(k.name) + ' × ' + paxCount() + ' 人</i><b>¥' +
-        money(pr * paxCount()) + '</b></div>' +
+        '<div class="hd"><b>' + esc(k.name) + '</b></div>' +
+        '<div class="kv"><i>建议零售价</i><b>¥' + money(pr) + ' / 人</b></div>' +
+        (pmSales() ? '<div class="kv"><i>结算价</i><b>¥' + money(k.settle_price) + ' / 人</b></div>' : '') +
+        '<div class="kv"><i>办理时效</i><b>' + k.lead_days + ' 个工作日</b></div>' +
+        '<div class="kv"><i>办签人数</i><b>' + n + ' 人</b></div>' +
         (pmSales()
-          ? '<div class="kv"><i>结算成本</i><b>¥' + money(k.settle_price * paxCount()) + '</b></div>' +
-            '<div class="kv gp"><i>本单毛利</i><b>¥' + money(gp * paxCount()) + '（' +
+          ? '<div class="kv"><i>结算成本</i><b>¥' + money(k.settle_price * n) + '</b></div>' +
+            '<div class="kv gp"><i>本单毛利</i><b>¥' + money(gp * n) + '（' +
             (pr ? Math.round(gp / pr * 100) : 0) + '%）</b></div>'
           : '') +
-        '<div class="tot"><i>订单总额</i><b>¥' + money(pr * paxCount()) + '</b></div>' +
+        '<div class="tot"><i>订单总额</i><b>¥' + money(pr * n) + '</b></div>' +
         '<button class="uz-buy" data-submit>提交订单</button>' +
-        /* 「试一下低于结算价（看拦截）」是演示时用来展示价格护栏的按钮，
-           不是业务动作，正式页面上不该出现（唐美芳 2026-09-08）。
-           护栏本身没动，成交价越界时提交仍会被拦。 */
-        '<div class="tip">成交价可在区间内让利，' +
-        (pmSales()
-          ? '低于结算价或高于建议零售价 150% 将被系统拦截。'
-          : '超出系统允许区间将被拦截。') + '</div>' +
         '</div>';
     }
 
-    /* 套餐只有一个时不摆成「一张小卡 + 右边一片白」——唐美芳 v144 已经就详情页说过一次同样的事。
-       单套餐横排铺满，也不给选中描边（没得选，描边只是噪音）；多套餐才是并排的可选卡。 */
-    function pkgHtml() {
-      var one = d.packages.length === 1;
-      return '<div class="ck-pkgs' + (one ? ' one' : '') + '">' + d.packages.map(function (x) {
-        var gp = x.suggest_retail - x.settle_price;
-        return '<div class="ck-pkg' + (x.id === pkgId ? ' on' : '') + '" data-pk="' + x.id + '">' +
-          '<b>' + esc(x.name) + '</b>' +
-          '<div class="pr">¥' + money(x.suggest_retail) + '<s> 建议零售 / 人</s></div>' +
-          '<div class="mt">' +
-          (pmSales() ? '结算 ¥' + money(x.settle_price) + ' · 毛利 ¥' + money(gp) + ' · ' : '') +
-          x.lead_days + ' 工作日</div>' +
-          '</div>';
-      }).join('') + '</div>';
-    }
+    /* 套餐已随产品详情页「代客下单」带入，本页不再提供套餐重选。 */
 
     /* 产品信息弹窗：和 C 端订单填写页那颗「查看」按钮同一份内容、同一份数据（d.checklist），
        销售不用退回详情页就能给客人念材料清单。人群 tab 切换只重画内容，不重建弹窗。 */
@@ -1480,26 +1377,14 @@ VIEWS['csp:create'] = function (m, spid) {
       if (dp) dp.onclick = openCal;
     }
     function bindSum() {
-      var dl = $('#ck_deal', m);
-      if (dl) {
-        dl.oninput = function () { dealPrice = dl.value; };
-        dl.onchange = function () { dealPrice = dl.value; drawSum(); };
-      }
-      $('#ck_sum [data-submit]', m).onclick = function () { submit(price()); };
-    }
-    function bindPkg() {
-      $$('[data-pk]', m).forEach(function (el) {
-        el.onclick = function () {
-          pkgId = +el.dataset.pk; dealPrice = null;
-          $$('[data-pk]', m).forEach(function (x) { x.classList.toggle('on', x === el); });
-          drawSum(); drawDate();   /* 换套餐会换时效，时效预警要跟着重算 */
-        };
-      });
+      $('#ck_sum [data-submit]', m).onclick = function () { submit(pk().suggest_retail); };
     }
     function bindContact() {
       $$('#ck_ct [data-cf]', m).forEach(function (el) {
         el.oninput = function () { contact[el.dataset.cf] = el.value.trim(); };
       });
+      var noteEl = $('#ck_note [data-note]', m);
+      if (noteEl) noteEl.oninput = function () { note = noteEl.value; };
       $$('#ck_ct [data-q]', m).forEach(function (el) {
         el.onclick = function () {
           if (el.dataset.q === 'clr') {
@@ -1545,7 +1430,8 @@ VIEWS['csp:create'] = function (m, spid) {
         esc(contact.phone) + '" placeholder="用于接收补料与进度通知"></label>' +
         '<label class="f"><span>电子邮箱</span><input data-cf="email" type="email" value="' +
         esc(contact.email) + '" placeholder="用于接收出签结果通知"></label>' +
-        '</div><div class="ck-tip">一单多人时，联系人不等同于第一位办签人：' +
+        '</div>' +
+        '<div class="ck-tip">一单多人时，联系人不等同于第一位办签人：' +
         '如需客户本人接收通知，请填写客户信息；如由销售跟进，请填写销售本人信息。' +
         '不建议直接沿用上一单的默认值。</div>';
     }
@@ -1594,13 +1480,6 @@ VIEWS['csp:create'] = function (m, spid) {
       '<div class="ck-trust">订单支付前可直接取消；已支付的订单请提交退款申请，按已产生的官费与服务成本核减后退还余款。' +
       '</div>' +
 
-      '<section class="uz-sec"><div class="uz-h"><h3>' +
-      (d.packages.length === 1 ? '套餐' : '选择套餐') + '</h3>' +
-      /* 客人模式下页面上根本没有结算价与毛利，这句提示就成了多余的一行
-         （唐美芳 2026-09-08：「没必要露出的文案不需要展示」） */
-      (pmSales() ? '<s>结算价与毛利仅门店销售可见</s>' : '') +
-      '</div><div class="ck-pad">' + pkgHtml() + '</div></section>' +
-
       '<section class="uz-sec"><div class="uz-h"><h3>预计出行日期</h3>' +
       '<s>系统据此倒排办理进度并提示时效风险</s></div>' +
       '<div class="ck-pad" id="ck_date">' + dateHtml() + '</div></section>' +
@@ -1617,6 +1496,13 @@ VIEWS['csp:create'] = function (m, spid) {
       '<s>补料通知与出签结果发送至此</s></div>' +
       '<div class="ck-pad" id="ck_ct">' + contactHtml() + '</div></section>' +
 
+      '<section class="uz-sec"><div class="uz-h"><h3>订单备注</h3>' +
+      '<s>选填，随订单一并展示</s></div>' +
+      '<div class="ck-pad" id="ck_note">' +
+      '<label class="f" style="margin-bottom:0"><textarea data-note rows="3" ' +
+      'placeholder="如有加急说明、寄送要求、特殊开票等，可在此备注">' + esc(note) + '</textarea></label>' +
+      '</div></section>' +
+
       /* 资料提交方式：C 端下单页有这一块，这一页原来没有，销售不知道该让客人怎么交材料。
          内容和 C 端一字不差，两端对客口径不能有第二个版本。 */
       '<section class="uz-sec"><div class="uz-h"><h3>资料提交方式</h3></div>' +
@@ -1631,7 +1517,7 @@ VIEWS['csp:create'] = function (m, spid) {
     bkBind(m);
     $('[data-pdx]', m).onclick = function () { go('pdetail', d.sup_product_id); };
     $('[data-info]', m).onclick = infoModal;
-    bindPkg(); bindDate(); bindPax(); bindContact(); bindSum();
+    bindDate(); bindPax(); bindContact(); bindSum();
     /* 电脑端不自动弹日历（唐美芳 2026-09-08：「csp 的不用先弹出预计出发日期控件，
        点击预计出行日期的日历控件再弹出」）。
        手机上一屏只放得下一件事，进页先弹日历是顺的；电脑端整张表一屏看得见，
