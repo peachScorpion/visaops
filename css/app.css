@@ -1686,9 +1686,9 @@ body.imm2 .main>.uz{margin-left:0;margin-right:0}
 .uz-row .mt b{font-weight:600;color:var(--ink-1)}
 .uz-row .mt span.ac{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .uz-row .rt{display:flex;flex-direction:column;align-items:flex-end;text-align:right;
-  padding-left:16px;border-left:1px dashed var(--line)}
-.uz-row .ld{font-size:11.5px;color:var(--ink-3)}
-.uz-row .ld b{font-size:17px;font-weight:800;color:var(--ink-0);letter-spacing:-.5px;margin-right:3px}
+  padding:12px 14px 12px 16px;border-left:1px dashed var(--line)}
+.uz-row .ld{display:flex;align-items:baseline;gap:3px;font-size:11.5px;color:var(--ink-3)}
+.uz-row .ld b{font-size:17px;font-weight:800;color:var(--ink-0);letter-spacing:-.5px}
 .uz-row .ld s{text-decoration:none}
 .uz-row .rt .pr{display:flex;align-items:baseline;gap:3px;margin-top:8px}
 .uz-row .rt .pr i{font-style:normal;font-size:11px;color:var(--ink-3);margin-right:2px}
