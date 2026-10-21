@@ -53,6 +53,14 @@ function api(path, body, opts) {
         throw e;
       }
       return j;
+    }, function () {
+      /* 返回的不是 JSON：GitHub Pages 等静态托管上没有 Python 后端，
+         /api/* 落到 404 HTML 页，r.json() 抛 SyntaxError("Unexpected token '<'")
+         直接裸给用户。换成能看懂的提示。唐美芳 2026-10-21 */
+      var e = new Error('当前是静态预览页（无后端服务），请启动本地服务后访问');
+      e.shown = true;
+      if (!silent) toast(e.message, true);
+      throw e;
     });
   }, function (netErr) {
     // 断网 / 服务没起来：fetch 本身 reject，这时连 r.json() 都没有
